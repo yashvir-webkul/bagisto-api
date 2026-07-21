@@ -46,6 +46,7 @@ use Webkul\BagistoApi\Admin\State\AdminCategoryTreeProvider;
 use Webkul\BagistoApi\Admin\State\AdminCustomerAddressProvider;
 use Webkul\BagistoApi\Admin\State\AdminCustomerCartItemProvider;
 use Webkul\BagistoApi\Admin\State\AdminCustomerCompareItemProvider;
+use Webkul\BagistoApi\Metadata\SourceDocblockPropertyMetadataFactory;
 use Webkul\BagistoApi\Admin\State\AdminCustomerNoteCollectionProvider;
 use Webkul\BagistoApi\Admin\State\AdminCustomerRecentOrderItemProvider;
 use Webkul\BagistoApi\Admin\State\AdminCustomerWishlistItemProvider;
@@ -191,11 +192,19 @@ class BagistoApiServiceProvider extends ServiceProvider
         });
 
         $this->app->extend(
-            \ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface::class,
-            function ($decorated) {
-                return new \Webkul\BagistoApi\Admin\Metadata\NullableToOnePropertyMetadataFactory($decorated);
-            }
-        );
+	    \ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface::class,
+	    function ($decorated) {
+		return new \Webkul\BagistoApi\Admin\Metadata\NullableToOnePropertyMetadataFactory($decorated);
+	    }
+	);
+
+	$this->app->extend(
+	    \ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface::class,
+	    function ($decorated) {
+		return new SourceDocblockPropertyMetadataFactory($decorated);
+	    }
+	);
+
 
         $this->app->singleton(TokenHeaderDenormalizer::class);
 
