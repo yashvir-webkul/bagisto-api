@@ -18,13 +18,12 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Webkul\BagistoApi\Exception\InvalidInputException;
 use Webkul\BagistoApi\Exception\ValidationException;
-use Webkul\BagistoApi\Serializer\OutputOnlySnakeToCamelNameConverter;
 
 return [
     'title' => '',
     'description' => '',
-    'version' => '1.0.4',
-    'show_webby' => true,
+    'version'     => '1.0.4',
+    'show_webby'  => true,
 
     'routes' => [
         'domain' => null,
@@ -152,11 +151,11 @@ return [
         'datetime_format' => 'Y-m-d\TH:i:sP',
     ],
 
-    'cache' => 'redis',
+    'cache' => env('CACHE_STORE', 'file'),
 
     'schema_cache' => [
         'enabled' => true,
-        'store' => 'redis',
+        'store'   => 'redis',
     ],
 
     'security' => [
@@ -165,12 +164,12 @@ return [
 
     'rate_limit' => [
         'skip_localhost' => env('RATE_LIMIT_SKIP_LOCALHOST', true),
-        'auth' => env('RATE_LIMIT_AUTH', 5),
-        'admin' => env('RATE_LIMIT_ADMIN', 60),
-        'shop' => env('RATE_LIMIT_SHOP', 100),
-        'graphql' => env('RATE_LIMIT_GRAPHQL', 100),
-        'cache_driver' => env('RATE_LIMIT_CACHE', 'redis'),
-        'cache_prefix' => 'api:rate-limit:',
+        'auth'           => env('RATE_LIMIT_AUTH', 5),
+        'admin'          => env('RATE_LIMIT_ADMIN', 60),
+        'shop'           => env('RATE_LIMIT_SHOP', 100),
+        'graphql'        => env('RATE_LIMIT_GRAPHQL', 100),
+        'cache_driver'   => env('RATE_LIMIT_CACHE', 'redis'),
+        'cache_prefix'   => 'api:rate-limit:',
     ],
 
     'security_headers' => [
