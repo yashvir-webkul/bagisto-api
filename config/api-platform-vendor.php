@@ -18,24 +18,18 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Webkul\BagistoApi\Exception\InvalidInputException;
 use Webkul\BagistoApi\Exception\ValidationException;
+use Webkul\BagistoApi\Providers\BagistoApiServiceProvider;
+use Webkul\BagistoApi\Serializer\OutputOnlySnakeToCamelNameConverter;
 
 return [
     'title' => '',
     'description' => '',
-    'version'     => '1.0.4',
-    'show_webby'  => true,
+    'version' => BagistoApiServiceProvider::BAGISTO_API_VERSION,
+    'show_webby' => true,
 
     'routes' => [
         'domain' => null,
-        // Global middleware applied to every API Platform routes
-        // HandleInvalidInputException: Catches validation errors and returns RFC 7807 format
-        // VerifyStorefrontKey: Validates X-STOREFRONT-KEY header and rate limiting for shop APIs
-        // BagistoApiDocumentationMiddleware: Handles custom /api index and documentation pages
-        // ForceApiJson: Ensures API responses have JSON content-type
-        // CacheResponse: Using custom ApiAwareResponseCache profile that:
-        // - Excludes API routes from caching (APIs need fresh data)
-        // - Caches shop pages for performance
-        // - Only caches HTML, not JSON responses
+
         'middleware' => [
             'Webkul\BagistoApi\Http\Middleware\NormalizeEmptyJsonBody',
             'Webkul\BagistoApi\Http\Middleware\HandleInvalidInputException',
@@ -153,7 +147,7 @@ return [
 
     'schema_cache' => [
         'enabled' => true,
-        'store'   => 'redis',
+        'store' => env('CACHE_STORE', 'file'),
     ],
 
     'security' => [
@@ -162,12 +156,12 @@ return [
 
     'rate_limit' => [
         'skip_localhost' => env('RATE_LIMIT_SKIP_LOCALHOST', true),
-        'auth'           => env('RATE_LIMIT_AUTH', 5),
-        'admin'          => env('RATE_LIMIT_ADMIN', 60),
-        'shop'           => env('RATE_LIMIT_SHOP', 100),
-        'graphql'        => env('RATE_LIMIT_GRAPHQL', 100),
-        'cache_driver'   => env('RATE_LIMIT_CACHE', 'redis'),
-        'cache_prefix'   => 'api:rate-limit:',
+        'auth' => env('RATE_LIMIT_AUTH', 5),
+        'admin' => env('RATE_LIMIT_ADMIN', 60),
+        'shop' => env('RATE_LIMIT_SHOP', 100),
+        'graphql' => env('RATE_LIMIT_GRAPHQL', 100),
+        'cache_driver' => env('RATE_LIMIT_CACHE', env('CACHE_STORE', 'file')),
+        'cache_prefix' => 'api:rate-limit:',
     ],
 
     'security_headers' => [
