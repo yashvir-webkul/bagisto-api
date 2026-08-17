@@ -14,7 +14,7 @@ class OutputOnlySnakeToCamelNameConverter implements NameConverterInterface
     /** @var array<string, string> */
     private static array $denormalized = [];
 
-    public function normalize(string $propertyName): string
+    public function normalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
     {
         if (isset(self::$normalized[$propertyName])) {
             return self::$normalized[$propertyName];
@@ -30,7 +30,7 @@ class OutputOnlySnakeToCamelNameConverter implements NameConverterInterface
         return self::$normalized[$propertyName] = $prefix.lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $name))));
     }
 
-    public function denormalize(string $propertyName): string
+    public function denormalize(string $propertyName, ?string $class = null, ?string $format = null, array $context = []): string
     {
         if (isset(self::$denormalized[$propertyName])) {
             return self::$denormalized[$propertyName];
