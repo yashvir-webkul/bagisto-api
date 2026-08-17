@@ -5,6 +5,41 @@ All notable changes to `bagisto/bagisto-api` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2026-08-17
+
+### Added
+
+- Add `POST /api/admin/marketing/search-terms` (and `createAdminMarketingSearchTerm`) to create a search term.
+- Add `bagisto-api-platform:export-schema`, which writes the REST (OpenAPI JSON) and GraphQL (SDL) schemas to files for Postman and code generators. Defaults to the package's `schema/` folder; override with `--path`.
+
+### Changed
+
+- Update the bundled translations across all supported locales.
+- Group the admin draft-cart and place-order endpoints under `Admin: Customer Order creation` in the Swagger docs.
+- Speed up every request by splitting the service provider and deferring state bindings, so a request only loads what it uses.
+
+### Fixed
+
+- Fix newsletter subscription rejecting guests with `Unauthenticated`; a visitor can subscribe with the storefront key alone, as on the storefront.
+- Fix deleting a customer account (`POST /api/shop/customer-profile-deletes/{id}`) doing nothing over REST, and drop the `password` field the docs wrongly marked required.
+- Fix product 404s returning the raw text `bagistoapi::app.graphql.product.not-found` instead of "Product not found", on both transports.
+- Fix `adminProfile` returning `roleId` and `roleName` as null over GraphQL.
+- Fix the admin product copy mutation returning `sourceId` as null over GraphQL.
+- Fix `adminCatalogProduct`'s `superAttributes { options }` returning null, and its `relatedProducts` / `upSells` / `crossSells` returning storefront-shaped nodes.
+- Fix `createAdminCatalogProduct` / `updateAdminCatalogProduct` returning an unusable `id` and connections listing unrelated products.
+- Fix the invoice PDF endpoint (`GET /api/admin/invoices/{id}/print`) returning a 500 (`View [sales.invoices.pdf] not found`) on Bagisto 2.4.
+- Fix `PUT /api/admin/settings/data-transfer/imports/{id}` as `multipart/form-data` failing with "The type field is required"; multipart fields are now read on PUT/PATCH as on POST, and the file stays optional.
+- Fix `POST /api/admin/eu-withdrawals/{id}/resend-confirmation` returning 422 when a body was sent; it is now a true empty-body action.
+- Fix `DELETE /api/admin/rma/custom-fields/{id}` returning 204 with no confirmation; it now returns 200 with a message and the deleted record.
+- Fix customer registration not setting the channel and default customer group, which left `channelId` and `customerGroupId` null and blocked storefront sign-in.
+- Fix the order-comments endpoints documenting a required `id` path parameter that the URL does not contain.
+- Fix malformed JSON returning a terse "Syntax error" (and a 500 with debug on); it is now a `400` with "The request body contains invalid JSON."
+- Fix a duplicate attribute-group name returning a 500 that leaked a database error; it is now a `422`.
+- Fix cursor-paginated GraphQL collections erroring on `first: 0`; they now return an empty connection.
+- Fix `PUT /api/admin/carts/{id}/items` returning `200` without applying a rejected quantity; it now returns `422` with the reason.
+- Fix REST error responses that returned no message on customer profile and address endpoints.
+- Fix admin and shop pages hanging (sometimes a 500) for 30+ seconds right after caches are cleared.
+
 ## [2.4.1] - 2026-07-22
 
 ### Added
@@ -414,6 +449,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swagger / OpenAPI documentation at `/api/docs` and GraphQL playground at `/graphiql`.
 - Initial documentation and demo links in the README.
 
+[2.4.2]: https://github.com/bagisto/bagisto-api/compare/v2.4.1...v2.4.2
 [2.4.1]: https://github.com/bagisto/bagisto-api/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/bagisto/bagisto-api/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/bagisto/bagisto-api/compare/v2.3.0...v2.3.1

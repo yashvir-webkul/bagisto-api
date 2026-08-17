@@ -50,8 +50,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: curl, fileinfo, gd, intl, mbstring, openssl, pdo, pdo_mysql, tokenizer, zip
-          ini-values: error_reporting=E_ALL
+          extensions: curl, fileinfo, gd, intl, mbstring, openssl, pdo, pdo_mysql, tokenizer, zip, opcache
+          ini-values: error_reporting=E_ALL, opcache.enable=1, opcache.enable_cli=1, opcache.validate_timestamps=0, opcache.max_accelerated_files=20000, opcache.memory_consumption=256
+          coverage: none
           tools: composer:v2
 
       - name: Install Bagisto composer dependencies
@@ -59,7 +60,6 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Wire plugin into Bagisto via composer path repository
-        # AFTER composer install: otherwise composer.lock replay drops the require.
         working-directory: bagisto
         run: |
           composer config repositories.bagisto-api path ../plugin
@@ -76,10 +76,10 @@ jobs:
           sed -i "s|^\(DB_DATABASE=\s*\).*$|\1bagisto|" .env
           sed -i "s|^\(DB_USERNAME=\s*\).*$|\1root|" .env
           sed -i "s|^\(DB_PASSWORD=\s*\).*$|\1root|" .env
-          # No Redis service in CI; tests bypass rate-limit middleware anyway.
           grep -q '^CACHE_DRIVER=' .env && sed -i "s|^CACHE_DRIVER=.*|CACHE_DRIVER=array|" .env || echo "CACHE_DRIVER=array" >> .env
           grep -q '^SESSION_DRIVER=' .env && sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=array|" .env || echo "SESSION_DRIVER=array" >> .env
           grep -q '^QUEUE_CONNECTION=' .env && sed -i "s|^QUEUE_CONNECTION=.*|QUEUE_CONNECTION=sync|" .env || echo "QUEUE_CONNECTION=sync" >> .env
+          grep -q '^API_PLATFORM_CACHE=' .env && sed -i "s|^API_PLATFORM_CACHE=.*|API_PLATFORM_CACHE=file|" .env || echo "API_PLATFORM_CACHE=file" >> .env
           cat .env
 
       - name: Run Bagisto installer
@@ -100,6 +100,13 @@ jobs:
             file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
           '
           composer dump-autoload --no-interaction
+
+      - name: Suppress api-platform auto-discovery and clear caches
+        working-directory: bagisto
+        run: |
+          php -r '$f="composer.json";$j=json_decode(file_get_contents($f),true);$d=$j["extra"]["laravel"]["dont-discover"]??[];if(!in_array("api-platform/laravel",$d,true))$d[]="api-platform/laravel";$j["extra"]["laravel"]["dont-discover"]=$d;file_put_contents($f,json_encode($j,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)."\n");'
+          composer dump-autoload --no-interaction
+          php artisan optimize:clear
 
       - name: Run GraphQL APIs Pest (plugin suite)
         id: graphql_tests

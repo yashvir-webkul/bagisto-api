@@ -68,7 +68,7 @@ Edit `composer.json` and update the `autoload` section:
 #### Step 4: Install Dependencies
 
 ```bash
-# The Laravel bridge and the GraphQL package pull every other API Platform component in at a matching version
+
 composer require \
   api-platform/laravel:~4.3.8 \
   api-platform/graphql:~4.3.8
@@ -98,6 +98,28 @@ Once verified, access the APIs at:
 - **REST API Docs (Admin)**: [https://your-domain.com/api/admin/docs](https://api-demo.bagisto.com/api/admin/docs)
 - **GraphQL Playground (Shop)**: [https://your-domain.com/api/graphiql](https://api-demo.bagisto.com/api/graphiql)
 - **GraphQL Playground (Admin)**: [https://your-domain.com/api/admin/graphiql](https://api-demo.bagisto.com/api/admin/graphiql)
+
+## Exporting the API Schema
+
+Generate schema files for the shop and admin APIs — OpenAPI JSON (REST) and GraphQL SDL — to import into Postman, a client/code generator, or a mock server without calling a live server:
+
+```bash
+php artisan bagisto-api-platform:export-schema
+```
+
+By default the files are written to the package's `schema/` folder:
+
+- `openapi-shop.json` — OpenAPI for the shop REST API
+- `openapi-admin.json` — OpenAPI for the admin REST API
+- `shop.graphql` — GraphQL SDL for the shop API
+- `admin.graphql` — GraphQL SDL for the admin API
+
+Options:
+
+- `--path=<dir>` — write to a different directory
+- `--transport=all|rest|graphql` — limit to one transport (default `all`)
+
+Re-running overwrites the existing files.
 
 ## Admin API Authentication
 

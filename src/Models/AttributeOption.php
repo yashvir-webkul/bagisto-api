@@ -6,8 +6,13 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\OpenApi\Model;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Webkul\BagistoApi\Resolver\BaseQueryItemResolver;
+use Webkul\BagistoApi\State\CursorAwareCollectionProvider;
+use Webkul\BagistoApi\Traits\ServesLoadedTranslation;
 
 #[ApiResource(
     shortName: 'AttributeOption',
@@ -105,9 +110,20 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
             ),
         ),
     ],
+    graphQlOperations: [
+        new QueryCollection(provider: CursorAwareCollectionProvider::class),
+        new Query(resolver: BaseQueryItemResolver::class),
+    ],
 )]
 class AttributeOption extends \Webkul\Attribute\Models\AttributeOption
 {
+    use ServesLoadedTranslation;
+
+    /**
+     * @var list<string>
+     */
+    protected $with = ['translations'];
+
     #[ApiProperty(identifier: true, writable: false)]
     public function getId(): ?int
     {
