@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Nieprawidłowy adres e-mail lub hasło',
             'account-suspended' => 'Twoje konto zostało zawieszone',
+            'account-inactive' => 'Twoja aktywacja oczekuje na zatwierdzenie administratora',
+            'email-not-verified' => 'Najpierw zweryfikuj swoje konto e-mail.',
             'successful' => 'Zalogowano pomyślnie',
             'invalid-request' => 'Nieprawidłowe żądanie logowania',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Zalogowano pomyślnie.',
+            'token-required' => 'Wymagany jest token logowania społecznościowego.',
+            'invalid-token' => 'Token logowania społecznościowego jest nieprawidłowy lub wygasł. Spróbuj ponownie.',
+            'wrong-audience' => 'Ten token został wydany dla innej aplikacji.',
+            'email-required' => 'Dostawca nie udostępnił adresu e-mail. Zarejestruj się za pomocą adresu e-mail.',
+            'account-inactive' => 'Twoja aktywacja oczekuje na zatwierdzenie administratora',
+            'provider-not-supported' => 'Ten dostawca logowania społecznościowego nie jest obsługiwany.',
+            'provider-disabled' => 'Ten dostawca logowania społecznościowego nie jest włączony.',
         ],
 
         'checkout' => [

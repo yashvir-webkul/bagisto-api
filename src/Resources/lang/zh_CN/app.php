@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => '电子邮箱或密码无效',
             'account-suspended' => '您的账户已被暂停',
+            'account-inactive' => '您的帐户请求已提交，等待管理员批准。',
+            'email-not-verified' => '请先验证您的电子邮件。',
             'successful' => '您已成功登录',
             'invalid-request' => '无效的登录请求',
+        ],
+
+        'social-login' => [
+            'signed-in' => '登录成功。',
+            'token-required' => '需要社交登录令牌。',
+            'invalid-token' => '社交登录令牌无效或已过期。请重试。',
+            'wrong-audience' => '此令牌是为其他应用签发的。',
+            'email-required' => '提供商未共享电子邮件地址。请改用电子邮件注册。',
+            'account-inactive' => '您的帐户请求已提交，等待管理员批准。',
+            'provider-not-supported' => '不支持此社交登录提供商。',
+            'provider-disabled' => '此社交登录提供商未启用。',
         ],
 
         'checkout' => [

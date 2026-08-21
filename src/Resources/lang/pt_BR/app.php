@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'E-mail ou senha inválidos',
             'account-suspended' => 'Sua conta foi suspensa',
+            'account-inactive' => 'Sua ativação aguarda aprovação do administrador',
+            'email-not-verified' => 'Verifique primeiro sua conta de e-mail.',
             'successful' => 'Você fez login com sucesso',
             'invalid-request' => 'Solicitação de login inválida',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Login efetuado com sucesso.',
+            'token-required' => 'É necessário um token de login social.',
+            'invalid-token' => 'O token de login social é inválido ou expirou. Tente novamente.',
+            'wrong-audience' => 'Este token foi emitido para outro aplicativo.',
+            'email-required' => 'O provedor não compartilhou um endereço de e-mail. Cadastre-se com e-mail.',
+            'account-inactive' => 'Sua ativação aguarda aprovação do administrador',
+            'provider-not-supported' => 'Este provedor de login social não é compatível.',
+            'provider-disabled' => 'Este provedor de login social não está habilitado.',
         ],
 
         'checkout' => [

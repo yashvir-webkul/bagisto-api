@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Email atau kata sandi tidak valid',
             'account-suspended' => 'Akun Anda telah ditangguhkan',
+            'account-inactive' => 'Akun Anda memerlukan persetujuan admin untuk aktivasi.',
+            'email-not-verified' => 'Harap verifikasi akun email Anda terlebih dahulu.',
             'successful' => 'Anda telah berhasil masuk',
             'invalid-request' => 'Permintaan masuk tidak valid',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Berhasil masuk.',
+            'token-required' => 'Token login sosial diperlukan.',
+            'invalid-token' => 'Token login sosial tidak valid atau kedaluwarsa. Silakan coba lagi.',
+            'wrong-audience' => 'Token ini diterbitkan untuk aplikasi lain.',
+            'email-required' => 'Penyedia tidak membagikan alamat email. Silakan daftar dengan email.',
+            'account-inactive' => 'Akun Anda memerlukan persetujuan admin untuk aktivasi.',
+            'provider-not-supported' => 'Penyedia login sosial ini tidak didukung.',
+            'provider-disabled' => 'Penyedia login sosial ini tidak diaktifkan.',
         ],
 
         'checkout' => [

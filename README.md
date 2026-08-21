@@ -107,19 +107,30 @@ Generate schema files for the shop and admin APIs — OpenAPI JSON (REST) and Gr
 php artisan bagisto-api-platform:export-schema
 ```
 
-By default the files are written to the package's `schema/` folder:
+The files are written to `schema/generated/`:
 
 - `openapi-shop.json` — OpenAPI for the shop REST API
 - `openapi-admin.json` — OpenAPI for the admin REST API
 - `shop.graphql` — GraphQL SDL for the shop API
 - `admin.graphql` — GraphQL SDL for the admin API
 
+Each spec is scoped to its own surface: the storefront spec contains no admin path, schema, or tag, and the admin spec contains no storefront one.
+
 Options:
 
 - `--path=<dir>` — write to a different directory
 - `--transport=all|rest|graphql` — limit to one transport (default `all`)
 
-Re-running overwrites the existing files.
+Re-running overwrites those four files and nothing else. The rest of `schema/` is hand-maintained:
+
+| Path | Owner | Contents |
+|---|---|---|
+| `schema/generated/` | the command | the four files above |
+| `schema/collections/` | you | Postman collections for both surfaces |
+| `schema/environments/` | you | Postman environments for both surfaces |
+| `schema/tools/` | you | the collection re-seed converter |
+
+Import instructions and the environment variable reference live in [`schema/README.md`](schema/README.md).
 
 ## Admin API Authentication
 

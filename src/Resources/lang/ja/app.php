@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'メールアドレスまたはパスワードが無効です',
             'account-suspended' => 'お客様のアカウントは停止されています',
+            'account-inactive' => 'アクティベーションは管理者の承認が必要です',
+            'email-not-verified' => 'まずメールアカウントを確認してください。',
             'successful' => '正常にログインしました',
             'invalid-request' => '無効なログインリクエストです',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'サインインしました。',
+            'token-required' => 'ソーシャルログイントークンが必要です。',
+            'invalid-token' => 'ソーシャルログイントークンが無効または期限切れです。もう一度お試しください。',
+            'wrong-audience' => 'このトークンは別のアプリ用に発行されています。',
+            'email-required' => 'プロバイダーがメールアドレスを共有しませんでした。メールで登録してください。',
+            'account-inactive' => 'アクティベーションは管理者の承認が必要です',
+            'provider-not-supported' => 'このソーシャルログインプロバイダーはサポートされていません。',
+            'provider-disabled' => 'このソーシャルログインプロバイダーは有効になっていません。',
         ],
 
         'checkout' => [

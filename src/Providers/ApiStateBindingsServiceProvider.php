@@ -363,6 +363,7 @@ use Webkul\BagistoApi\State\ReorderProcessor;
 use Webkul\BagistoApi\State\ReturnableItemProvider;
 use Webkul\BagistoApi\State\ReturnReasonProvider;
 use Webkul\BagistoApi\State\ShippingRatesProvider;
+use Webkul\BagistoApi\State\SocialLoginProcessor;
 use Webkul\BagistoApi\State\VerifyTokenProcessor;
 use Webkul\BagistoApi\State\WishlistItemProvider;
 use Webkul\BagistoApi\State\WishlistProcessor;
@@ -377,6 +378,7 @@ class ApiStateBindingsServiceProvider extends ServiceProvider
         $this->app->tag(CustomerProcessor::class, ProcessorInterface::class);
         $this->app->tag(CustomizableOptionFileProcessor::class, ProcessorInterface::class);
         $this->app->tag(LoginProcessor::class, ProcessorInterface::class);
+        $this->app->tag(SocialLoginProcessor::class, ProcessorInterface::class);
         $this->app->tag(VerifyTokenProcessor::class, ProcessorInterface::class);
         $this->app->tag(LogoutProcessor::class, ProcessorInterface::class);
         $this->app->tag(ForgotPasswordProcessor::class, ProcessorInterface::class);
