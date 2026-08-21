@@ -207,8 +207,10 @@ class CustomerAuthTest extends GraphQLTestCase
         $this->assertEmpty($data['token'], 'No token should be returned on failure');
     }
 
-    public function test_login_fails_for_suspended_customer(): void
+    public function test_suspended_customer_can_login(): void
     {
+        // A suspended customer may sign in and browse; they are stopped only at
+        // checkout (mirrors the storefront). Only inactive accounts are refused.
         $email = 'suspended_'.uniqid().'@example.com';
         $password = 'secret123';
 
@@ -234,7 +236,7 @@ class CustomerAuthTest extends GraphQLTestCase
         ]);
 
         $data = $response->json('data.createCustomerLogin.customerLogin');
-        $this->assertFalse($data['success'], 'Suspended customer should not be able to log in');
+        $this->assertTrue($data['success'], 'Suspended customer should be able to log in (blocked only at checkout)');
     }
 
     // ─── Logout ─────────────────────────────────────────────────────────
