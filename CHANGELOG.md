@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ready-to-import Postman collections and environments for both surfaces (REST **and** GraphQL) — foldered by API tag, auth wired at collection level, with login / cart-token stored back into the environment automatically.
 - Add a GraphQL operation map to the export (`graphql-operations-shop.json` / `-admin.json`) mapping each root field to its resource tag, so tooling can group GraphQL the way REST is grouped.
 - Add a re-seed tool that rebuilds the collections from the exported schemas.
+- Add two GitHub Actions that keep the repository and the Postman workspace in step: one publishes the collections and environments when they change on `main`, the other pulls them back on a published release. Both refuse to move a storefront key in either direction.
 
 ### Fixed
 

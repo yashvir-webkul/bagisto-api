@@ -113,6 +113,35 @@ Collections are curated by hand, exactly as they are consumed:
 php packages/Webkul/BagistoApi/schema/tools/build-collection.php
 ```
 
+## Workflows
+
+Two GitHub Actions keep the repository and the Postman workspace in step. They live in the
+package's `.github/workflows/` and run in the standalone `bagisto/bagisto-api` repository, where
+this directory is `schema/` at the repo root.
+
+| Workflow | Trigger | Direction |
+|---|---|---|
+| **Push Collections to Postman** | push to `main` touching `schema/collections/**` or `schema/environments/**`, or run manually | repo → Postman |
+| **Sync Collections from Postman** | a published GitHub release, or run manually | Postman → repo |
+
+The push job fans out over the two collections and two environments, and **refuses to publish any
+file containing a storefront key**. The sync job pulls each one back, blanks every value typed
+`secret`, replaces any storefront key it finds anywhere with `{{storefrontKey}}`, fails if one
+survives, and commits only when something actually changed.
+
+Both need these repository secrets:
+
+| Secret | Value |
+|---|---|
+| `POSTMAN_API_KEY` | A Postman API key with access to the workspace |
+| `POSTMAN_SHOP_COLLECTION_ID` | UID of the shop collection |
+| `POSTMAN_ADMIN_COLLECTION_ID` | UID of the admin collection |
+| `POSTMAN_SHOP_ENVIRONMENT_ID` | UID of the shop environment |
+| `POSTMAN_ADMIN_ENVIRONMENT_ID` | UID of the admin environment |
+
+A missing secret fails the job with the name of the one that is not set, rather than pushing
+nothing and reporting success.
+
 ## What the tests guarantee
 
 `tests/Feature/SchemaExportTest.php` runs on every export and asserts that:
