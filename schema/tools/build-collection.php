@@ -18,9 +18,6 @@ final class CollectionBuilder
 
     private string $outputDir;
 
-    /**
-     * @param  string|null  $outputDir  
-     */
     public function __construct(?string $outputDir = null)
     {
         if ($outputDir === null) {
@@ -821,6 +818,7 @@ MD;
 
     /**
      * A usable value for an argument, built from its input type.
+     *
      * @param  array<string, mixed>|null  $example
      */
     private function inputSkeleton(Type $type, int $depth, ?array $example = null, string $argumentName = ''): mixed
