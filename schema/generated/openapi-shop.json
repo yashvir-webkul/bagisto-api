@@ -6848,7 +6848,7 @@
                                     "phone": null,
                                     "isNewCustomer": true,
                                     "success": true,
-                                    "message": "Signed in.",
+                                    "message": "Signed in successfully.",
                                     "code": null
                                 }
                             }

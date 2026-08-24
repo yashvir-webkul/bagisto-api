@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API Değişiklik Geçmişi',
+                'view' => 'Görüntüle',
                 'delete' => 'Geçmişi Sil',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Entegrasyon',
+            'view' => 'Görüntüle',
             'create' => 'Entegrasyon Oluştur',
             'edit' => 'Entegrasyonu Düzenle',
             'delete' => 'Entegrasyon Simgesini İptal Et',

@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API-Änderungsverlauf',
+                'view' => 'Ansehen',
                 'delete' => 'Verlauf löschen',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integration',
+            'view' => 'Ansehen',
             'create' => 'Integration schaffen',
             'edit' => 'Integration bearbeiten',
             'delete' => 'Integrationstoken widerrufen',

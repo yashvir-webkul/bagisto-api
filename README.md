@@ -132,6 +132,16 @@ Re-running overwrites those four files and nothing else. The rest of `schema/` i
 
 Import instructions and the environment variable reference live in [`schema/README.md`](schema/README.md).
 
+## Postman Collections
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/bagisto-apis/bagistoapi)
+
+Ready-to-import Postman collections for both API surfaces live in their own repository:
+
+**[github.com/bagisto/bagisto-api-collection](https://github.com/bagisto/bagisto-api-collection)**
+
+Import a collection and its environment there, fill in your store URL and a key, and every endpoint is ready to send — REST and GraphQL, for both the storefront and the admin API. That repository is the one to point clients and integrators at; this package holds the schemas the collections are generated from.
+
 ## Admin API Authentication
 
 Admin endpoints (`/api/admin/*` and `/api/admin/graphql`) require an integration-token Bearer header:

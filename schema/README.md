@@ -1,17 +1,17 @@
-# Bagisto API — Schema & Postman Collection
+# Bagisto API — Schema
 
-Everything a client needs to call the Bagisto REST and GraphQL APIs: machine-readable schemas, ready-to-import Postman collections, and the environments that drive them.
+Machine-readable schemas for the Bagisto REST and GraphQL APIs: OpenAPI documents, GraphQL SDL, and the generator that turns them into Postman collections.
+
+**Looking for the Postman collections?** They live in their own repository: [bagisto/bagisto-api-collection](https://github.com/bagisto/bagisto-api-collection) — import a collection and an environment there and you are ready to send requests. That repository is the one to reference from client docs; this directory is the source the collections are generated from.
 
 ## What's Included
 
 | Path | Owner | Contents |
 |---|---|---|
 | `generated/` | the export command | `openapi-{shop,admin}.json`, `{shop,admin}.graphql`, `graphql-operations-{shop,admin}.json` |
-| `collections/` | you | `Bagisto-Shop-API` and `Bagisto-Admin-API` Postman collections |
-| `environments/` | you | `Bagisto-Shop-Local` and `Bagisto-Admin-Local` Postman environments |
 | `tools/` | you | `build-collection.php`, the re-seed converter |
 
-`generated/` is rewritten by `php artisan bagisto-api-platform:export-schema`. Never hand-edit it. The command writes those six filenames and nothing else, so the other directories are never at risk.
+`generated/` is rewritten by `php artisan bagisto-api-platform:export-schema`. Never hand-edit it. The command writes those six filenames and nothing else.
 
 | Surface | REST requests | GraphQL requests |
 |---|---|---|
@@ -49,28 +49,20 @@ Each request ships a generated document selecting the type's scalar fields, desc
 
 **Environments** → **Import** → select the matching file, then fill in the blanks.
 
-`Bagisto-Shop-Local`:
+`Bagisto` — one environment serves both collections:
 
-| Variable | Description |
-|---|---|
-| `url` | Your Bagisto URL, e.g. `http://localhost:8000` |
-| `storefrontKey` | Storefront API key, from admin → Configuration → API |
-| `customerEmail` | A storefront customer's email |
-| `customerPassword` | That customer's password |
-| `customerToken` | Set automatically by **Customer login** |
-| `cartToken` | Set automatically by **Create cart token** |
-| `locale` | Locale code, defaults to `en` |
-| `channel` | Channel code, defaults to `default` |
-| `currency` | Currency code, defaults to `USD` |
-
-`Bagisto-Admin-Local`:
-
-| Variable | Description |
-|---|---|
-| `url` | Your Bagisto URL |
-| `adminToken` | Integration token, `<id>\|<plaintext>`, from admin → Settings → Integration |
-| `locale` | Locale code, defaults to `en` |
-| `channel` | Channel code, defaults to `default` |
+| Variable | Used by | Description |
+|---|---|---|
+| `url` | both | Your Bagisto URL, e.g. `http://localhost:8000` |
+| `storefrontKey` | shop | Storefront API key, from admin → Configuration → API |
+| `customerEmail` | shop | A storefront customer's email |
+| `customerPassword` | shop | That customer's password |
+| `customerToken` | shop | Set automatically by **Customer login** |
+| `cartToken` | shop | Set automatically by **Create cart token** |
+| `adminToken` | admin | Integration token, from admin → Settings → Integration |
+| `locale` | both | Locale code, defaults to `en` |
+| `channel` | both | Channel code, defaults to `default` |
+| `currency` | shop | Currency code, defaults to `USD` |
 
 Credential fields are typed `secret`, so Postman masks them and leaves them out of a shared export.
 
@@ -113,34 +105,17 @@ Collections are curated by hand, exactly as they are consumed:
 php packages/Webkul/BagistoApi/schema/tools/build-collection.php
 ```
 
-## Workflows
+## Publishing to Postman
 
-Two GitHub Actions keep the repository and the Postman workspace in step. They live in the
-package's `.github/workflows/` and run in the standalone `bagisto/bagisto-api` repository, where
-this directory is `schema/` at the repo root.
+Nothing here publishes to Postman. The collections, the environments and the two GitHub Actions that sync them with the Postman workspace all live in [bagisto/bagisto-api-collection](https://github.com/bagisto/bagisto-api-collection).
 
-| Workflow | Trigger | Direction |
-|---|---|---|
-| **Push Collections to Postman** | push to `main` touching `schema/collections/**` or `schema/environments/**`, or run manually | repo → Postman |
-| **Sync Collections from Postman** | a published GitHub release, or run manually | Postman → repo |
+To regenerate the collections into a local checkout of that repository:
 
-The push job fans out over the two collections and two environments, and **refuses to publish any
-file containing a storefront key**. The sync job pulls each one back, blanks every value typed
-`secret`, replaces any storefront key it finds anywhere with `{{storefrontKey}}`, fails if one
-survives, and commits only when something actually changed.
+```bash
+php schema/tools/build-collection.php /path/to/bagisto-api-collection/collections
+```
 
-Both need these repository secrets:
-
-| Secret | Value |
-|---|---|
-| `POSTMAN_API_KEY` | A Postman API key with access to the workspace |
-| `POSTMAN_SHOP_COLLECTION_ID` | UID of the shop collection |
-| `POSTMAN_ADMIN_COLLECTION_ID` | UID of the admin collection |
-| `POSTMAN_SHOP_ENVIRONMENT_ID` | UID of the shop environment |
-| `POSTMAN_ADMIN_ENVIRONMENT_ID` | UID of the admin environment |
-
-A missing secret fails the job with the name of the one that is not set, rather than pushing
-nothing and reporting success.
+Then commit them there; its push workflow takes it from that point.
 
 ## What the tests guarantee
 

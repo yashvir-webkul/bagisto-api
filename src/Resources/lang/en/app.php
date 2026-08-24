@@ -1408,6 +1408,7 @@ return [
 
             'acl' => [
                 'title' => 'API Change History',
+                'view' => 'View',
                 'delete' => 'Delete History',
             ],
 
@@ -1468,6 +1469,7 @@ return [
 
         'acl' => [
             'title' => 'Integration',
+            'view' => 'View',
             'create' => 'Create Integration',
             'edit' => 'Edit Integration',
             'delete' => 'Revoke Integration Token',

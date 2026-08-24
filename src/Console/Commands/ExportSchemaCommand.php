@@ -335,7 +335,12 @@ class ExportSchemaCommand extends Command
                             continue;
                         }
 
-                        $map[(string) $field] = ['kind' => $kind, 'tag' => $tag, 'resource' => $resourceClass];
+                        $map[(string) $field] = array_filter([
+                            'kind' => $kind,
+                            'tag' => $tag,
+                            'resource' => $resourceClass,
+                            'example' => $kind === 'mutation' ? $this->resourceRequestExample($collection) : null,
+                        ], fn ($value) => $value !== null);
                     }
                 }
             }
@@ -360,6 +365,44 @@ class ExportSchemaCommand extends Command
         return $operation instanceof CollectionOperationInterface
             ? $fieldsBuilder->getCollectionQueryFields($resourceClass, $operation, $configuration)
             : $fieldsBuilder->getItemQueryFields($resourceClass, $operation, $configuration);
+    }
+
+    /**
+     * The request-body example the resource's REST write operation documents.
+     *
+     * GraphQL input types are almost entirely nullable, so a skeleton built from the schema
+     * alone is empty. The REST example is hand-written per endpoint and therefore carries values
+     * that actually mean something.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function resourceRequestExample(iterable $collection): ?array
+    {
+        foreach ($collection as $resourceMetadata) {
+            foreach ($resourceMetadata->getOperations() ?? [] as $operation) {
+                if (! method_exists($operation, 'getOpenapi')) {
+                    continue;
+                }
+
+                $openapi = $operation->getOpenapi();
+
+                if (! is_object($openapi) || ! method_exists($openapi, 'getRequestBody')) {
+                    continue;
+                }
+
+                $content = $openapi->getRequestBody()?->getContent();
+
+                foreach ((array) ($content instanceof \ArrayObject ? $content->getArrayCopy() : $content) as $media) {
+                    $example = $media['example'] ?? (is_array($media['examples'] ?? null) ? (reset($media['examples'])['value'] ?? null) : null);
+
+                    if (is_array($example) && $example !== []) {
+                        return $example;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

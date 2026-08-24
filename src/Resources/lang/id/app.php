@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Riwayat Perubahan API',
+                'view' => 'Lihat',
                 'delete' => 'Hapus Riwayat',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integrasi',
+            'view' => 'Lihat',
             'create' => 'Buat Integrasi',
             'edit' => 'Sunting Integrasi',
             'delete' => 'Cabut Token Integrasi',

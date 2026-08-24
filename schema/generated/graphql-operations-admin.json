@@ -2,7 +2,11 @@
     "addItemAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "adminAttribute": {
         "kind": "query",
@@ -527,7 +531,11 @@
     "applyCouponAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "cancelAdminSettingsDataTransferImportCancel": {
         "kind": "mutation",
@@ -567,7 +575,90 @@
     "createAdminCatalogProduct": {
         "kind": "mutation",
         "tag": "Admin Catalog: Products",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProduct"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProduct",
+        "example": {
+            "sku": "sp-001",
+            "name": "Arctic Beanie",
+            "product_number": "PN-1001",
+            "url_key": "arctic-beanie",
+            "status": 1,
+            "visible_individually": 1,
+            "guest_checkout": 1,
+            "new": 1,
+            "featured": 1,
+            "manage_stock": 1,
+            "tax_category_id": 2,
+            "color": 1,
+            "size": 6,
+            "brand": 10,
+            "price": "99.99",
+            "cost": "40.00",
+            "special_price": "79.99",
+            "special_price_from": "2026-08-01",
+            "special_price_to": "2026-08-31",
+            "GST": "5.00",
+            "short_description": "Warm knit beanie.",
+            "description": "Full HTML description.",
+            "length": "10",
+            "width": "5",
+            "height": "3",
+            "weight": "0.5",
+            "meta_title": "Arctic Beanie",
+            "meta_keywords": "beanie, winter",
+            "meta_description": "Buy the Arctic Beanie.",
+            "categories": [
+                1,
+                8
+            ],
+            "channels": [
+                1
+            ],
+            "up_sells": [
+                2
+            ],
+            "cross_sells": [
+                3
+            ],
+            "related_products": [
+                2
+            ],
+            "customizable_options": {
+                "option_1": {
+                    "en": {
+                        "label": "Engraving text"
+                    },
+                    "type": "text",
+                    "is_required": "1",
+                    "max_characters": "30",
+                    "sort_order": "1",
+                    "price": "5.00"
+                },
+                "option_2": {
+                    "en": {
+                        "label": "Gift wrap"
+                    },
+                    "type": "checkbox",
+                    "is_required": "0",
+                    "sort_order": "2",
+                    "prices": {
+                        "price_1": {
+                            "en": {
+                                "label": "Standard"
+                            },
+                            "price": "3.00",
+                            "sort_order": "1"
+                        },
+                        "price_2": {
+                            "en": {
+                                "label": "Premium"
+                            },
+                            "price": "6.00",
+                            "sort_order": "2"
+                        }
+                    }
+                }
+            }
+        }
     },
     "createAdminCatalogProductCopy": {
         "kind": "mutation",
@@ -632,12 +723,36 @@
     "createAdminCustomer": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomer"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomer",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane@example.com",
+            "phone": "+1-202-555-0148",
+            "gender": "Female",
+            "date_of_birth": "1990-01-01",
+            "customer_group_id": 2,
+            "status": 1
+        }
     },
     "createAdminCustomerAddress": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "company_name": "Acme Inc.",
+            "vat_id": "GB123456789",
+            "address": "1600 Amphitheatre Parkway",
+            "city": "Mountain View",
+            "state": "CA",
+            "country": "US",
+            "postcode": "94043",
+            "phone": "+1-202-555-0148",
+            "email": "jane@example.com",
+            "default_address": true
+        }
     },
     "createAdminCustomerGdprDownloadData": {
         "kind": "mutation",
@@ -647,17 +762,31 @@
     "createAdminCustomerGdprProcess": {
         "kind": "mutation",
         "tag": "Admin Customer GDPR",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGdprProcess"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGdprProcess",
+        "example": {
+            "message": "Approved and processed per customer request."
+        }
     },
     "createAdminCustomerGroup": {
         "kind": "mutation",
         "tag": "Admin Customer Groups",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroup"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroup",
+        "example": {
+            "code": "wholesale",
+            "name": "Wholesale Buyers"
+        }
     },
     "createAdminCustomerGroupMassDelete": {
         "kind": "mutation",
         "tag": "Admin Customer Groups",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroupMassDelete"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroupMassDelete",
+        "example": {
+            "indices": [
+                5,
+                6,
+                7
+            ]
+        }
     },
     "createAdminCustomerImpersonate": {
         "kind": "mutation",
@@ -667,27 +796,61 @@
     "createAdminCustomerMassDelete": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerMassDelete"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerMassDelete",
+        "example": {
+            "indices": [
+                14,
+                15,
+                16
+            ]
+        }
     },
     "createAdminCustomerMassUpdateStatus": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerMassUpdateStatus"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerMassUpdateStatus",
+        "example": {
+            "indices": [
+                14,
+                15,
+                16
+            ],
+            "value": 1
+        }
     },
     "createAdminCustomerNote": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerNote"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerNote",
+        "example": {
+            "note": "Called the customer about delivery.",
+            "customer_notified": false
+        }
     },
     "createAdminCustomerReviewMassDelete": {
         "kind": "mutation",
         "tag": "Admin Customer Reviews",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerReviewMassDelete"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerReviewMassDelete",
+        "example": {
+            "indices": [
+                21,
+                22,
+                23
+            ]
+        }
     },
     "createAdminCustomerReviewMassUpdateStatus": {
         "kind": "mutation",
         "tag": "Admin Customer Reviews",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerReviewMassUpdateStatus"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerReviewMassUpdateStatus",
+        "example": {
+            "indices": [
+                21,
+                22,
+                23
+            ],
+            "value": "approved"
+        }
     },
     "createAdminDraftCart": {
         "kind": "mutation",
@@ -697,7 +860,20 @@
     "createAdminInvoice": {
         "kind": "mutation",
         "tag": "Admin Sales: Invoices",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminInvoice"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminInvoice",
+        "example": {
+            "items": [
+                {
+                    "orderItemId": 42,
+                    "quantity": 3
+                },
+                {
+                    "orderItemId": 43,
+                    "quantity": 1
+                }
+            ],
+            "can_create_transaction": true
+        }
     },
     "createAdminInvoiceMassUpdateStatus": {
         "kind": "mutation",
@@ -707,7 +883,10 @@
     "createAdminInvoiceSendDuplicate": {
         "kind": "mutation",
         "tag": "Admin Sales: Invoices",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminInvoiceSendDuplicate"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminInvoiceSendDuplicate",
+        "example": {
+            "email": "customer@example.com"
+        }
     },
     "createAdminMarketingCampaign": {
         "kind": "mutation",
@@ -807,7 +986,11 @@
     "createAdminOrderComment": {
         "kind": "mutation",
         "tag": "Admin Sales: Orders",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminOrderComment"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminOrderComment",
+        "example": {
+            "comment": "Customer called to confirm shipping address.",
+            "customerNotified": true
+        }
     },
     "createAdminPlaceOrder": {
         "kind": "mutation",
@@ -817,7 +1000,18 @@
     "createAdminRefund": {
         "kind": "mutation",
         "tag": "Admin Sales: Refunds",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminRefund"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminRefund",
+        "example": {
+            "items": [
+                {
+                    "orderItemId": 42,
+                    "quantity": 1
+                }
+            ],
+            "shipping": 0,
+            "adjustmentRefund": 0,
+            "adjustmentFee": 0
+        }
     },
     "createAdminReorder": {
         "kind": "mutation",
@@ -897,7 +1091,30 @@
     "createAdminSettingsChannel": {
         "kind": "mutation",
         "tag": "Admin Settings: Channels",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsChannel"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsChannel",
+        "example": {
+            "code": "us_store",
+            "name": "US Store",
+            "hostname": "us.example.com",
+            "theme": "default",
+            "timezone": "America/New_York",
+            "locales": [
+                1
+            ],
+            "default_locale_id": 1,
+            "currencies": [
+                1
+            ],
+            "base_currency_id": 1,
+            "inventory_sources": [
+                1
+            ],
+            "root_category_id": 1,
+            "seo_title": "Welcome to the US store",
+            "seo_description": "Best products for the US market",
+            "seo_keywords": "shop, us, store",
+            "is_maintenance_on": false
+        }
     },
     "createAdminSettingsCurrency": {
         "kind": "mutation",
@@ -962,7 +1179,15 @@
     "createAdminSettingsTaxRate": {
         "kind": "mutation",
         "tag": "Admin Settings: Tax Rates",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate",
+        "example": {
+            "identifier": "US-CA-SF",
+            "is_zip": false,
+            "zip_code": "94103",
+            "state": "CA",
+            "country": "US",
+            "tax_rate": 8.5
+        }
     },
     "createAdminSettingsTheme": {
         "kind": "mutation",
@@ -992,12 +1217,29 @@
     "createAdminShipment": {
         "kind": "mutation",
         "tag": "Admin Sales: Shipments",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminShipment"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminShipment",
+        "example": {
+            "source": 1,
+            "items": [
+                {
+                    "orderItemId": 42,
+                    "inventorySourceId": 1,
+                    "quantity": 3
+                }
+            ],
+            "carrierTitle": "UPS",
+            "trackNumber": "1Z999AA1"
+        }
     },
     "createAdminTransaction": {
         "kind": "mutation",
         "tag": "Admin Sales: Transactions",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminTransaction"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminTransaction",
+        "example": {
+            "invoiceId": 12,
+            "paymentMethod": "cashondelivery",
+            "amount": 99.99
+        }
     },
     "declineAdminEuWithdrawal": {
         "kind": "mutation",
@@ -1022,7 +1264,90 @@
     "deleteAdminCatalogProduct": {
         "kind": "mutation",
         "tag": "Admin Catalog: Products",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProduct"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProduct",
+        "example": {
+            "sku": "sp-001",
+            "name": "Arctic Beanie",
+            "product_number": "PN-1001",
+            "url_key": "arctic-beanie",
+            "status": 1,
+            "visible_individually": 1,
+            "guest_checkout": 1,
+            "new": 1,
+            "featured": 1,
+            "manage_stock": 1,
+            "tax_category_id": 2,
+            "color": 1,
+            "size": 6,
+            "brand": 10,
+            "price": "99.99",
+            "cost": "40.00",
+            "special_price": "79.99",
+            "special_price_from": "2026-08-01",
+            "special_price_to": "2026-08-31",
+            "GST": "5.00",
+            "short_description": "Warm knit beanie.",
+            "description": "Full HTML description.",
+            "length": "10",
+            "width": "5",
+            "height": "3",
+            "weight": "0.5",
+            "meta_title": "Arctic Beanie",
+            "meta_keywords": "beanie, winter",
+            "meta_description": "Buy the Arctic Beanie.",
+            "categories": [
+                1,
+                8
+            ],
+            "channels": [
+                1
+            ],
+            "up_sells": [
+                2
+            ],
+            "cross_sells": [
+                3
+            ],
+            "related_products": [
+                2
+            ],
+            "customizable_options": {
+                "option_1": {
+                    "en": {
+                        "label": "Engraving text"
+                    },
+                    "type": "text",
+                    "is_required": "1",
+                    "max_characters": "30",
+                    "sort_order": "1",
+                    "price": "5.00"
+                },
+                "option_2": {
+                    "en": {
+                        "label": "Gift wrap"
+                    },
+                    "type": "checkbox",
+                    "is_required": "0",
+                    "sort_order": "2",
+                    "prices": {
+                        "price_1": {
+                            "en": {
+                                "label": "Standard"
+                            },
+                            "price": "3.00",
+                            "sort_order": "1"
+                        },
+                        "price_2": {
+                            "en": {
+                                "label": "Premium"
+                            },
+                            "price": "6.00",
+                            "sort_order": "2"
+                        }
+                    }
+                }
+            }
+        }
     },
     "deleteAdminCatalogProductCustomerGroupPrice": {
         "kind": "mutation",
@@ -1052,22 +1377,54 @@
     "deleteAdminCustomer": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomer"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomer",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane@example.com",
+            "phone": "+1-202-555-0148",
+            "gender": "Female",
+            "date_of_birth": "1990-01-01",
+            "customer_group_id": 2,
+            "status": 1
+        }
     },
     "deleteAdminCustomerAddress": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "company_name": "Acme Inc.",
+            "vat_id": "GB123456789",
+            "address": "1600 Amphitheatre Parkway",
+            "city": "Mountain View",
+            "state": "CA",
+            "country": "US",
+            "postcode": "94043",
+            "phone": "+1-202-555-0148",
+            "email": "jane@example.com",
+            "default_address": true
+        }
     },
     "deleteAdminCustomerGdprRequest": {
         "kind": "mutation",
         "tag": "Admin Customer GDPR",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGdprRequest"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGdprRequest",
+        "example": {
+            "status": "processing",
+            "message": "Reviewing the request."
+        }
     },
     "deleteAdminCustomerGroup": {
         "kind": "mutation",
         "tag": "Admin Customer Groups",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroup"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroup",
+        "example": {
+            "code": "wholesale",
+            "name": "Wholesale Buyers"
+        }
     },
     "deleteAdminCustomerReview": {
         "kind": "mutation",
@@ -1152,7 +1509,30 @@
     "deleteAdminSettingsChannel": {
         "kind": "mutation",
         "tag": "Admin Settings: Channels",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsChannel"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsChannel",
+        "example": {
+            "code": "us_store",
+            "name": "US Store",
+            "hostname": "us.example.com",
+            "theme": "default",
+            "timezone": "America/New_York",
+            "locales": [
+                1
+            ],
+            "default_locale_id": 1,
+            "currencies": [
+                1
+            ],
+            "base_currency_id": 1,
+            "inventory_sources": [
+                1
+            ],
+            "root_category_id": 1,
+            "seo_title": "Welcome to the US store",
+            "seo_description": "Best products for the US market",
+            "seo_keywords": "shop, us, store",
+            "is_maintenance_on": false
+        }
     },
     "deleteAdminSettingsCurrency": {
         "kind": "mutation",
@@ -1192,7 +1572,15 @@
     "deleteAdminSettingsTaxRate": {
         "kind": "mutation",
         "tag": "Admin Settings: Tax Rates",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate",
+        "example": {
+            "identifier": "US-CA-SF",
+            "is_zip": false,
+            "zip_code": "94103",
+            "state": "CA",
+            "country": "US",
+            "tax_rate": 8.5
+        }
     },
     "deleteAdminSettingsTheme": {
         "kind": "mutation",
@@ -1242,7 +1630,18 @@
     "previewAdminRefund": {
         "kind": "mutation",
         "tag": "Admin Sales: Refunds",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminRefund"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminRefund",
+        "example": {
+            "items": [
+                {
+                    "orderItemId": 42,
+                    "quantity": 1
+                }
+            ],
+            "shipping": 0,
+            "adjustmentRefund": 0,
+            "adjustmentFee": 0
+        }
     },
     "readAdminProfile": {
         "kind": "query",
@@ -1252,12 +1651,20 @@
     "removeCouponAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "removeItemAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "reopenAdminReturn": {
         "kind": "mutation",
@@ -1277,22 +1684,48 @@
     "saveAddressAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "setDefaultAdminCustomerAddress": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "company_name": "Acme Inc.",
+            "vat_id": "GB123456789",
+            "address": "1600 Amphitheatre Parkway",
+            "city": "Mountain View",
+            "state": "CA",
+            "country": "US",
+            "postcode": "94043",
+            "phone": "+1-202-555-0148",
+            "email": "jane@example.com",
+            "default_address": true
+        }
     },
     "setPaymentMethodAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "setShippingMethodAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "startAdminSettingsDataTransferImportStart": {
         "kind": "mutation",
@@ -1342,7 +1775,90 @@
     "updateAdminCatalogProduct": {
         "kind": "mutation",
         "tag": "Admin Catalog: Products",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProduct"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProduct",
+        "example": {
+            "sku": "sp-001",
+            "name": "Arctic Beanie",
+            "product_number": "PN-1001",
+            "url_key": "arctic-beanie",
+            "status": 1,
+            "visible_individually": 1,
+            "guest_checkout": 1,
+            "new": 1,
+            "featured": 1,
+            "manage_stock": 1,
+            "tax_category_id": 2,
+            "color": 1,
+            "size": 6,
+            "brand": 10,
+            "price": "99.99",
+            "cost": "40.00",
+            "special_price": "79.99",
+            "special_price_from": "2026-08-01",
+            "special_price_to": "2026-08-31",
+            "GST": "5.00",
+            "short_description": "Warm knit beanie.",
+            "description": "Full HTML description.",
+            "length": "10",
+            "width": "5",
+            "height": "3",
+            "weight": "0.5",
+            "meta_title": "Arctic Beanie",
+            "meta_keywords": "beanie, winter",
+            "meta_description": "Buy the Arctic Beanie.",
+            "categories": [
+                1,
+                8
+            ],
+            "channels": [
+                1
+            ],
+            "up_sells": [
+                2
+            ],
+            "cross_sells": [
+                3
+            ],
+            "related_products": [
+                2
+            ],
+            "customizable_options": {
+                "option_1": {
+                    "en": {
+                        "label": "Engraving text"
+                    },
+                    "type": "text",
+                    "is_required": "1",
+                    "max_characters": "30",
+                    "sort_order": "1",
+                    "price": "5.00"
+                },
+                "option_2": {
+                    "en": {
+                        "label": "Gift wrap"
+                    },
+                    "type": "checkbox",
+                    "is_required": "0",
+                    "sort_order": "2",
+                    "prices": {
+                        "price_1": {
+                            "en": {
+                                "label": "Standard"
+                            },
+                            "price": "3.00",
+                            "sort_order": "1"
+                        },
+                        "price_2": {
+                            "en": {
+                                "label": "Premium"
+                            },
+                            "price": "6.00",
+                            "sort_order": "2"
+                        }
+                    }
+                }
+            }
+        }
     },
     "updateAdminCatalogProductCustomerGroupPrice": {
         "kind": "mutation",
@@ -1352,7 +1868,13 @@
     "updateAdminCatalogProductInventory": {
         "kind": "mutation",
         "tag": "Admin Catalog: Products",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProductInventory"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProductInventory",
+        "example": {
+            "inventories": {
+                "1": 25,
+                "2": 0
+            }
+        }
     },
     "updateAdminCategory": {
         "kind": "mutation",
@@ -1367,22 +1889,54 @@
     "updateAdminCustomer": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomer"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomer",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane@example.com",
+            "phone": "+1-202-555-0148",
+            "gender": "Female",
+            "date_of_birth": "1990-01-01",
+            "customer_group_id": 2,
+            "status": 1
+        }
     },
     "updateAdminCustomerAddress": {
         "kind": "mutation",
         "tag": "Admin Customers",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerAddress",
+        "example": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "company_name": "Acme Inc.",
+            "vat_id": "GB123456789",
+            "address": "1600 Amphitheatre Parkway",
+            "city": "Mountain View",
+            "state": "CA",
+            "country": "US",
+            "postcode": "94043",
+            "phone": "+1-202-555-0148",
+            "email": "jane@example.com",
+            "default_address": true
+        }
     },
     "updateAdminCustomerGdprRequest": {
         "kind": "mutation",
         "tag": "Admin Customer GDPR",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGdprRequest"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGdprRequest",
+        "example": {
+            "status": "processing",
+            "message": "Reviewing the request."
+        }
     },
     "updateAdminCustomerGroup": {
         "kind": "mutation",
         "tag": "Admin Customer Groups",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroup"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCustomerGroup",
+        "example": {
+            "code": "wholesale",
+            "name": "Wholesale Buyers"
+        }
     },
     "updateAdminCustomerReview": {
         "kind": "mutation",
@@ -1462,7 +2016,30 @@
     "updateAdminSettingsChannel": {
         "kind": "mutation",
         "tag": "Admin Settings: Channels",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsChannel"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsChannel",
+        "example": {
+            "code": "us_store",
+            "name": "US Store",
+            "hostname": "us.example.com",
+            "theme": "default",
+            "timezone": "America/New_York",
+            "locales": [
+                1
+            ],
+            "default_locale_id": 1,
+            "currencies": [
+                1
+            ],
+            "base_currency_id": 1,
+            "inventory_sources": [
+                1
+            ],
+            "root_category_id": 1,
+            "seo_title": "Welcome to the US store",
+            "seo_description": "Best products for the US market",
+            "seo_keywords": "shop, us, store",
+            "is_maintenance_on": false
+        }
     },
     "updateAdminSettingsCurrency": {
         "kind": "mutation",
@@ -1497,7 +2074,15 @@
     "updateAdminSettingsTaxRate": {
         "kind": "mutation",
         "tag": "Admin Settings: Tax Rates",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate",
+        "example": {
+            "identifier": "US-CA-SF",
+            "is_zip": false,
+            "zip_code": "94103",
+            "state": "CA",
+            "country": "US",
+            "tax_rate": 8.5
+        }
     },
     "updateAdminSettingsTheme": {
         "kind": "mutation",
@@ -1512,7 +2097,11 @@
     "updateItemsAdminCart": {
         "kind": "mutation",
         "tag": "Admin: Customer Order creation",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCart",
+        "example": {
+            "productId": 142,
+            "quantity": 1
+        }
     },
     "updateStatusAdminReturn": {
         "kind": "mutation",

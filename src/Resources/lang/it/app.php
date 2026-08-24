@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Cronologia modifiche API',
+                'view' => 'Visualizza',
                 'delete' => 'Elimina cronologia',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integrazione',
+            'view' => 'Visualizza',
             'create' => 'Crea integrazione',
             'edit' => 'Modifica integrazione',
             'delete' => 'Revoca token di integrazione',

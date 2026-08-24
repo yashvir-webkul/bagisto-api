@@ -1754,8 +1754,6 @@ type AttributeFamily implements Node {
   name: String!
   status: String!
   isUserDefined: String!
-  customAttributes: String
-  configurableAttributes: String
 }
 
 "Cursor connection for BookingProduct."

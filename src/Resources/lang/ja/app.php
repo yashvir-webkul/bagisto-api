@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API変更履歴',
+                'view' => '表示',
                 'delete' => '履歴の削除',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => '統合',
+            'view' => '表示',
             'create' => '統合の作成',
             'edit' => '統合の編集',
             'delete' => '統合トークンの取り消し',

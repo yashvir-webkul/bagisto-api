@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Historial de canvis de l\'API',
+                'view' => 'Veure',
                 'delete' => 'Suprimeix l\'historial',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integració',
+            'view' => 'Veure',
             'create' => 'Crea integració',
             'edit' => 'Edita la integració',
             'delete' => 'Revoca el testimoni d\'integració',

@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Histórico de alterações da API',
+                'view' => 'Visualizar',
                 'delete' => 'Excluir histórico',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integração',
+            'view' => 'Visualizar',
             'create' => 'Criar Integração',
             'edit' => 'Editar integração',
             'delete' => 'Revogar token de integração',

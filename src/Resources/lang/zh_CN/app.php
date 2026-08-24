@@ -243,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API变更历史',
+                'view' => '查看',
                 'delete' => '删除历史记录',
             ],
 
@@ -303,6 +304,7 @@ return [
 
         'acl' => [
             'title' => '整合',
+            'view' => '查看',
             'create' => '创建集成',
             'edit' => '编辑集成',
             'delete' => '撤销集成令牌',

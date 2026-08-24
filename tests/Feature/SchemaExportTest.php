@@ -28,6 +28,17 @@ class SchemaExportTest extends BagistoApiTest
         File::deleteDirectory(self::$exportPath);
 
         Artisan::call('bagisto-api-platform:export-schema', ['--path' => self::$exportPath]);
+
+        // The collections ship from the standalone collection repository, not from this package,
+        // so build them into the same temp directory to exercise the generator end to end.
+        File::ensureDirectoryExists(self::$exportPath.'/collections');
+
+        exec(sprintf(
+            'cd %s && php %s %s 2>&1',
+            escapeshellarg(self::$exportPath),
+            escapeshellarg(dirname(__DIR__, 2).'/schema/tools/build-collection.php'),
+            escapeshellarg(self::$exportPath.'/collections'),
+        ));
     }
 
     public static function tearDownAfterClass(): void
@@ -143,11 +154,10 @@ class SchemaExportTest extends BagistoApiTest
         $files = array_merge(
             glob(self::$exportPath.'/*') ?: [],
             glob(dirname(__DIR__, 2).'/schema/generated/*') ?: [],
-            glob(dirname(__DIR__, 2).'/schema/collections/*') ?: [],
-            glob(dirname(__DIR__, 2).'/schema/environments/*') ?: [],
+            glob(self::$exportPath.'/collections/*') ?: [],
         );
 
-        foreach ($files as $file) {
+        foreach (array_filter($files, 'is_file') as $file) {
             expect(str_contains((string) file_get_contents($file), self::STOREFRONT_KEY_PREFIX))
                 ->toBeFalse(basename($file).' contains a storefront key');
         }
@@ -209,7 +219,7 @@ class SchemaExportTest extends BagistoApiTest
     public function test_graphql_folders_mirror_the_rest_folders(): void
     {
         foreach (['Bagisto-Shop-API', 'Bagisto-Admin-API'] as $collection) {
-            $body = json_decode((string) file_get_contents(dirname(__DIR__, 2)."/schema/collections/{$collection}.postman_collection.json"), true);
+            $body = json_decode((string) file_get_contents(self::$exportPath."/collections/{$collection}.postman_collection.json"), true);
 
             $folders = [];
 
@@ -227,7 +237,7 @@ class SchemaExportTest extends BagistoApiTest
     public function test_every_request_url_is_well_formed(): void
     {
         foreach (['Bagisto-Shop-API', 'Bagisto-Admin-API'] as $collection) {
-            $body = json_decode((string) file_get_contents(dirname(__DIR__, 2)."/schema/collections/{$collection}.postman_collection.json"), true);
+            $body = json_decode((string) file_get_contents(self::$exportPath."/collections/{$collection}.postman_collection.json"), true);
 
             $requests = [];
 
@@ -263,29 +273,6 @@ class SchemaExportTest extends BagistoApiTest
 
         foreach ($item['item'] ?? [] as $child) {
             $this->collectAllRequests($child, $requests);
-        }
-    }
-
-    public function test_collections_only_reference_declared_environment_variables(): void
-    {
-        $pairs = [
-            'Bagisto-Shop-API' => 'Bagisto-Shop-Local',
-            'Bagisto-Admin-API' => 'Bagisto-Admin-Local',
-        ];
-
-        foreach ($pairs as $collection => $environment) {
-            $body = (string) file_get_contents(dirname(__DIR__, 2)."/schema/collections/{$collection}.postman_collection.json");
-
-            $declared = array_column(
-                json_decode((string) file_get_contents(dirname(__DIR__, 2)."/schema/environments/{$environment}.postman_environment.json"), true)['values'],
-                'key',
-            );
-
-            preg_match_all('/\{\{(\w+)\}\}/', $body, $matches);
-
-            $undeclared = array_diff(array_unique($matches[1]), array_merge($declared, ['baseUrl']));
-
-            expect(array_values($undeclared))->toBe([], "{$collection} uses variables the environment does not declare");
         }
     }
 
@@ -368,7 +355,7 @@ class SchemaExportTest extends BagistoApiTest
      */
     private function graphQlRequests(string $collection): array
     {
-        $body = json_decode((string) file_get_contents(dirname(__DIR__, 2)."/schema/collections/{$collection}.postman_collection.json"), true);
+        $body = json_decode((string) file_get_contents(self::$exportPath."/collections/{$collection}.postman_collection.json"), true);
 
         $requests = [];
 

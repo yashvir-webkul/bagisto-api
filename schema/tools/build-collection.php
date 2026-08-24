@@ -18,6 +18,31 @@ final class CollectionBuilder
 
     private const OUTPUT_DIR = __DIR__.'/../collections';
 
+    private string $outputDir;
+
+    /**
+     * @param  string|null  $outputDir  Where to write the collections; defaults to the package's
+     *                                  own `schema/collections`. Pass the collections directory of
+     *                                  the standalone collection repo to publish there instead.
+     */
+    public function __construct(?string $outputDir = null)
+    {
+        $this->outputDir = rtrim($outputDir ?: self::OUTPUT_DIR, '/');
+
+        if (! is_dir($this->outputDir)) {
+            fwrite(STDERR, "Output directory does not exist: {$this->outputDir}\n");
+
+            exit(1);
+        }
+    }
+
+    /**
+     * How deep a generated selection may nest. The GraphQL endpoint rejects anything over its
+     * complexity budget, so this stays low enough that every generated request can be sent
+     * without editing.
+     */
+    private const MAX_SELECTION_DEPTH = 1;
+
     private const HEADER_VARS = [
         'X-STOREFRONT-KEY' => '{{storefrontKey}}',
         'X-Locale' => '{{locale}}',
@@ -51,7 +76,6 @@ final class CollectionBuilder
             'file' => 'Bagisto-Shop-API.postman_collection.json',
             'token' => '{{customerToken}}',
             'graphql' => '{{url}}/api/graphql',
-            'description' => 'Storefront (customer-facing) REST and GraphQL endpoints. Import the "Bagisto Shop (Local)" environment and fill in `url` and `storefrontKey` before running anything.',
         ],
         'admin' => [
             'id' => 'a3d5f218-4c60-4b9e-8f71-2b6e93c4a017',
@@ -59,7 +83,6 @@ final class CollectionBuilder
             'file' => 'Bagisto-Admin-API.postman_collection.json',
             'token' => '{{adminToken}}',
             'graphql' => '{{url}}/api/admin/graphql',
-            'description' => 'Administrative REST and GraphQL endpoints. Import the "Bagisto Admin (Local)" environment and set `adminToken` to an integration token from Settings → Integration.',
         ],
     ];
 
@@ -76,7 +99,7 @@ final class CollectionBuilder
                 'info' => [
                     '_postman_id' => $config['id'],
                     'name' => $config['name'],
-                    'description' => $config['description'],
+                    'description' => $this->collectionDescription($surface),
                     'schema' => 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
                 ],
                 'auth' => $this->bearer($config['token']),
@@ -86,12 +109,93 @@ final class CollectionBuilder
                 'item' => $items,
             ];
 
-            $path = self::OUTPUT_DIR.'/'.$config['file'];
+            $path = $this->outputDir.'/'.$config['file'];
 
             file_put_contents($path, json_encode($collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n");
 
             printf("Wrote %s (%d REST requests, %d GraphQL requests)\n", $config['file'], $this->countRequests($items[0] ?? []), $this->countRequests(end($items)));
         }
+    }
+
+    /**
+     * The collection's Overview page. Postman renders this as Markdown, so it is the only place a
+     * consumer reliably reads before firing a request — it has to stand on its own.
+     */
+    private function collectionDescription(string $surface): string
+    {
+        if ($surface === 'shop') {
+            return <<<'MD'
+Storefront endpoints for the [Bagisto](https://bagisto.com) e-commerce platform — products, cart, checkout, orders, returns, reviews, wishlist and more. Both transports are covered: `REST/` and `GraphQL/`.
+
+## Setup
+
+1. Select the **Bagisto** environment (top right). Import it first if it is not in your workspace. One environment serves both the storefront and the admin collection.
+2. Fill in these values:
+
+| Variable | Where it comes from |
+| --- | --- |
+| `url` | Your store, e.g. `http://localhost:8000` |
+| `storefrontKey` | Admin panel → Configuration → API |
+| `customerEmail` / `customerPassword` | Any storefront customer account |
+
+3. Run **REST → Customer → Customer login**. It saves `customerToken` to the environment, and every other request sends it as the bearer automatically.
+
+## Shopping as a guest
+
+Guest carts authenticate with a cart token instead of a customer token. Run **Create cart token** — it saves `cartToken` to the environment.
+
+To act as that guest, send `{{cartToken}}` as the bearer: change it on the collection's **Authorization** tab, or override it on the individual request. Leave it as `{{customerToken}}` for logged-in flows. The cart and checkout endpoints serve both, so which token you send is what decides whose cart you are working on.
+
+## Layout
+
+`REST/` and `GraphQL/` share one folder tree, grouped by feature, so `Cart` holds the cart endpoints on either transport. GraphQL is split into `Queries/` and `Mutations/` under each feature.
+
+## Worth knowing
+
+- `X-STOREFRONT-KEY` is sent on every request and is required by all storefront endpoints.
+- `X-Locale`, `X-Channel` and `X-Currency` are optional; omit them to use the channel defaults.
+- GraphQL requests declare only the arguments an operation **requires**, plus `first` where it paginates. The complete argument list for any operation is in the GraphiQL playground at `/api/graphiql`.
+- Postman's **Auto Fetch** runs a schema introspection query, which costs far more than a normal request. If things feel slow, switch it off and fetch the schema when you need it.
+
+Full reference: [api-docs.bagisto.com](https://api-docs.bagisto.com/)
+MD;
+        }
+
+        return <<<'MD'
+Administrative endpoints for the [Bagisto](https://bagisto.com) e-commerce platform — catalog, sales, customers, marketing, settings, CMS and reporting. Both transports are covered: `REST/` and `GraphQL/`.
+
+## Setup
+
+1. Select the **Bagisto** environment (top right). Import it first if it is not in your workspace. One environment serves both the admin and the storefront collection.
+2. In the admin panel, enable the module under **Configuration → API → Integration → Module Settings**, then go to **Settings → Integration**, create an integration and press **Generate**. The token is shown once — copy it immediately.
+3. Set these values:
+
+| Variable | Where it comes from |
+| --- | --- |
+| `url` | Your store, e.g. `http://localhost:8000` |
+| `adminToken` | The generated token, copied whole — it includes the numeric id prefix |
+
+There is no login request. Admin access is a pre-issued integration token, sent as the bearer on every request:
+
+```
+Authorization: Bearer 5|1dYWpciAn2Ro8dfsabA89ohhduVWWXqicyPyQeIH
+```
+
+## Permissions
+
+A token inherits the permissions of the admin user it belongs to, so a valid token can still return **403** on an endpoint that user cannot reach. Tokens can be revoked at any time from the same screen, or from the link in the notification email.
+
+## Layout
+
+`REST/` and `GraphQL/` share one folder tree that mirrors the admin sidebar — `Settings/Currencies` holds exactly the endpoints behind that screen. GraphQL is split into `Queries/` and `Mutations/` under each area.
+
+## Worth knowing
+
+- GraphQL requests declare only the arguments an operation **requires**, plus `first` where it paginates. The complete argument list for any operation is in the GraphiQL playground at `/api/admin/graphiql`.
+- Postman's **Auto Fetch** runs a schema introspection query, which costs far more than a normal request. If things feel slow, switch it off and fetch the schema when you need it.
+
+Full reference: [api-docs.bagisto.com](https://api-docs.bagisto.com/)
+MD;
     }
 
     /**
@@ -556,7 +660,7 @@ final class CollectionBuilder
 
             $segments[] = $meta['kind'] === 'query' ? 'Queries' : 'Mutations';
 
-            $grouped[implode("\0", $segments)][] = $this->graphQlRequest($field, $definition, $meta['kind'], $url, $surface);
+            $grouped[implode("\0", $segments)][] = $this->graphQlRequest($field, $definition, $meta, $url, $surface);
         }
 
         ksort($grouped);
@@ -581,9 +685,11 @@ final class CollectionBuilder
      *
      * @return array<string, mixed>
      */
-    private function graphQlRequest(string $field, FieldDefinition $definition, string $kind, string $url, string $surface): array
+    private function graphQlRequest(string $field, FieldDefinition $definition, array $meta, string $url, string $surface): array
     {
-        [$arguments, $variables] = $this->arguments($definition, $field);
+        $kind = $meta['kind'];
+
+        [$arguments, $variables] = $this->arguments($definition, $field, $meta['example'] ?? null);
 
         $tree = $this->selectionTree($definition->getType(), 0);
 
@@ -655,11 +761,25 @@ final class CollectionBuilder
      *
      * @return array{0: array{signature: string, call: string}, 1: array<string, mixed>}
      */
-    private function arguments(FieldDefinition $definition, string $field): array
+    private function arguments(FieldDefinition $definition, string $field, ?array $example = null): array
     {
         $signature = [];
         $call = [];
         $variables = [];
+
+        // An item query whose identifying argument is nullable would otherwise be generated with
+        // no arguments at all, leaving nothing to look the record up by.
+        $identity = null;
+
+        foreach (['id', 'urlKey', 'slug', 'code'] as $candidate) {
+            foreach ($definition->args as $argument) {
+                if ($argument->name === $candidate) {
+                    $identity = $candidate;
+
+                    break 2;
+                }
+            }
+        }
 
         foreach ($definition->args as $argument) {
             $required = $argument->getType() instanceof NonNull;
@@ -668,7 +788,7 @@ final class CollectionBuilder
             // rather than leaving an undeclared value sitting in the variables pane.
             $paging = $argument->name === 'first';
 
-            if (! $required && ! $paging) {
+            if (! $required && ! $paging && $argument->name !== $identity) {
                 continue;
             }
 
@@ -676,7 +796,13 @@ final class CollectionBuilder
 
             $signature[] = '$'.$name.': '.$argument->getType()->toString();
             $call[] = $name.': $'.$name;
-            $variables[$name] = $paging && ! $required ? 10 : $this->inputSkeleton($argument->getType(), 0);
+            $variables[$name] = $paging && ! $required
+                ? 10
+                : $this->inputSkeleton($argument->getType(), 0, $name === 'input' ? $example : null, $name);
+
+            if ($name === $identity && ! $required) {
+                $variables[$name] = $this->dummyValue($name, Type::getNamedType($argument->getType())->name);
+            }
         }
 
         $variables = $this->overrideVariables($field, $variables);
@@ -702,9 +828,16 @@ final class CollectionBuilder
     }
 
     /**
-     * A minimal value for a required argument, built from its input type.
+     * A usable value for an argument, built from its input type.
+     *
+     * GraphQL input types here are almost entirely nullable, so filling only the non-null fields
+     * yields `{}` and nothing to send. Where the resource's REST operation documents an example,
+     * that is used — it is hand-written and its values mean something. Otherwise every scalar
+     * field is filled with a value shaped by its name and type.
+     *
+     * @param  array<string, mixed>|null  $example
      */
-    private function inputSkeleton(Type $type, int $depth): mixed
+    private function inputSkeleton(Type $type, int $depth, ?array $example = null, string $argumentName = ''): mixed
     {
         $named = Type::getNamedType($type);
 
@@ -713,14 +846,29 @@ final class CollectionBuilder
                 return new stdClass;
             }
 
+            $fields = $named->getFields();
+
+            $mapped = $example === null ? [] : $this->matchExample($fields, $example);
+
+            if ($mapped !== []) {
+                return $mapped;
+            }
+
             $value = [];
 
-            foreach ($named->getFields() as $inputField) {
-                if (! $inputField->getType() instanceof NonNull) {
+            foreach ($fields as $inputField) {
+                // Postman never sends these; they are Relay/API-Platform plumbing.
+                if (in_array($inputField->name, ['clientMutationId', '_id'], true)) {
                     continue;
                 }
 
-                $value[$inputField->name] = $this->inputSkeleton($inputField->getType(), $depth + 1);
+                $child = Type::getNamedType($inputField->getType());
+
+                if ($child instanceof InputObjectType && $depth >= 1) {
+                    continue;
+                }
+
+                $value[$inputField->name] = $this->inputSkeleton($inputField->getType(), $depth + 1, null, $inputField->name);
             }
 
             return $value === [] ? new stdClass : $value;
@@ -732,11 +880,65 @@ final class CollectionBuilder
             return $values === [] ? '' : reset($values)->name;
         }
 
-        return match ($named->name) {
-            'Int' => 1,
-            'Float' => 0,
-            'Boolean' => false,
-            default => '',
+        return $this->dummyValue($argumentName, $named->name);
+    }
+
+    /**
+     * Keep the example fields the input type actually declares.
+     *
+     * REST examples are written in the shape the REST body takes, which for admin resources is
+     * snake_case; the GraphQL input is camelCase. Match on both so a documented value is not
+     * dropped over a naming convention.
+     *
+     * @param  array<string, mixed>  $fields
+     * @param  array<string, mixed>  $example
+     * @return array<string, mixed>
+     */
+    private function matchExample(array $fields, array $example): array
+    {
+        $matched = [];
+
+        foreach ($example as $key => $value) {
+            $camel = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', (string) $key))));
+
+            foreach ([$key, $camel] as $candidate) {
+                if (isset($fields[$candidate])) {
+                    $matched[$candidate] = $value;
+
+                    continue 2;
+                }
+            }
+        }
+
+        return $matched;
+    }
+
+    /**
+     * A placeholder shaped by the field name, so a generated body reads like a real request
+     * rather than a wall of empty strings.
+     */
+    private function dummyValue(string $name, string $scalar): mixed
+    {
+        $lower = strtolower($name);
+
+        return match (true) {
+            $scalar === 'Int' => str_contains($lower, 'quantity') || str_contains($lower, 'qty') ? 1 : 1,
+            $scalar === 'Float' => str_contains($lower, 'price') || str_contains($lower, 'amount') ? 100 : 1,
+            $scalar === 'Boolean' => false,
+            $scalar === 'ID' => '1',
+            str_contains($lower, 'email') => 'customer@example.com',
+            str_contains($lower, 'password') => 'password',
+            str_contains($lower, 'phone') => '1234567890',
+            $lower === 'locale' => '{{locale}}',
+            $lower === 'channel' => '{{channel}}',
+            $lower === 'currency' => '{{currency}}',
+            str_contains($lower, 'urlkey') || str_contains($lower, 'slug') => 'sample-url-key',
+            str_contains($lower, 'sku') => 'sample-sku',
+            str_contains($lower, 'code') => 'SAMPLE',
+            str_contains($lower, 'date') || str_ends_with($lower, 'at') || str_contains($lower, 'from') || str_contains($lower, 'till') => '2026-01-01',
+            str_contains($lower, 'description') || str_contains($lower, 'comment') || str_contains($lower, 'message') || str_contains($lower, 'content') => 'Sample text',
+            str_contains($lower, 'name') || str_contains($lower, 'title') || str_contains($lower, 'label') => 'Sample',
+            default => 'sample',
         };
     }
 
@@ -750,7 +952,9 @@ final class CollectionBuilder
     {
         $named = Type::getNamedType($type);
 
-        if (! $named instanceof ObjectType || $depth > 2) {
+        // The server caps query complexity, and a generated selection that walks every nested
+        // object blows past it. One level of nesting keeps the request sendable as-is.
+        if (! $named instanceof ObjectType || $depth > self::MAX_SELECTION_DEPTH) {
             return null;
         }
 
@@ -844,4 +1048,4 @@ final class CollectionBuilder
     }
 }
 
-(new CollectionBuilder)->build();
+(new CollectionBuilder($argv[1] ?? null))->build();
