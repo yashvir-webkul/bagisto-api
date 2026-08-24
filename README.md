@@ -109,28 +109,24 @@ php artisan bagisto-api-platform:export-schema
 
 The files are written to `schema/generated/`:
 
-- `openapi-shop.json` — OpenAPI for the shop REST API
-- `openapi-admin.json` — OpenAPI for the admin REST API
-- `shop.graphql` — GraphQL SDL for the shop API
-- `admin.graphql` — GraphQL SDL for the admin API
+| File | Contents |
+|---|---|
+| `openapi-shop.json` / `openapi-admin.json` | OpenAPI for each REST surface |
+| `shop.graphql` / `admin.graphql` | GraphQL SDL for each surface |
+| `graphql-operations-shop.json` / `-admin.json` | Every root GraphQL field mapped to its resource tag |
 
-Each spec is scoped to its own surface: the storefront spec contains no admin path, schema, or tag, and the admin spec contains no storefront one.
+Each spec is scoped to its own surface: the storefront spec contains no admin path, schema, or tag, and the admin spec contains no storefront one. The command refuses to write a schema that leaks another surface, references a definition it does not include, carries an unused definition, or contains a storefront key.
 
 Options:
 
 - `--path=<dir>` — write to a different directory
 - `--transport=all|rest|graphql` — limit to one transport (default `all`)
 
-Re-running overwrites those four files and nothing else. The rest of `schema/` is hand-maintained:
+Re-running overwrites those six files and nothing else. `schema/tools/build-collection.php` turns the exported specs into the Postman collections; it takes the target directory as an argument:
 
-| Path | Owner | Contents |
-|---|---|---|
-| `schema/generated/` | the command | the four files above |
-| `schema/collections/` | you | Postman collections for both surfaces |
-| `schema/environments/` | you | Postman environments for both surfaces |
-| `schema/tools/` | you | the collection re-seed converter |
-
-Import instructions and the environment variable reference live in [`schema/README.md`](schema/README.md).
+```bash
+php schema/tools/build-collection.php /path/to/bagisto-api-collection/collections
+```
 
 ## Postman Collections
 

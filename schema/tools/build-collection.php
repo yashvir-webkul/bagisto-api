@@ -16,18 +16,23 @@ final class CollectionBuilder
 {
     private const SCHEMA_DIR = __DIR__.'/../generated';
 
-    private const OUTPUT_DIR = __DIR__.'/../collections';
-
     private string $outputDir;
 
     /**
-     * @param  string|null  $outputDir  Where to write the collections; defaults to the package's
-     *                                  own `schema/collections`. Pass the collections directory of
-     *                                  the standalone collection repo to publish there instead.
+     * @param  string|null  $outputDir  
      */
     public function __construct(?string $outputDir = null)
     {
-        $this->outputDir = rtrim($outputDir ?: self::OUTPUT_DIR, '/');
+        if ($outputDir === null) {
+            fwrite(STDERR, "Usage: php build-collection.php <collections-directory>\n\n");
+            fwrite(STDERR, "The collections live in the standalone bagisto-api-collection repository,\n");
+            fwrite(STDERR, "so pass its collections/ directory, e.g.\n\n");
+            fwrite(STDERR, "  php build-collection.php /path/to/bagisto-api-collection/collections\n");
+
+            exit(1);
+        }
+
+        $this->outputDir = rtrim($outputDir, '/');
 
         if (! is_dir($this->outputDir)) {
             fwrite(STDERR, "Output directory does not exist: {$this->outputDir}\n");
@@ -36,11 +41,6 @@ final class CollectionBuilder
         }
     }
 
-    /**
-     * How deep a generated selection may nest. The GraphQL endpoint rejects anything over its
-     * complexity budget, so this stays low enough that every generated request can be sent
-     * without editing.
-     */
     private const MAX_SELECTION_DEPTH = 1;
 
     private const HEADER_VARS = [
@@ -117,10 +117,6 @@ final class CollectionBuilder
         }
     }
 
-    /**
-     * The collection's Overview page. Postman renders this as Markdown, so it is the only place a
-     * consumer reliably reads before firing a request — it has to stand on its own.
-     */
     private function collectionDescription(string $surface): string
     {
         if ($surface === 'shop') {
@@ -767,8 +763,6 @@ MD;
         $call = [];
         $variables = [];
 
-        // An item query whose identifying argument is nullable would otherwise be generated with
-        // no arguments at all, leaving nothing to look the record up by.
         $identity = null;
 
         foreach (['id', 'urlKey', 'slug', 'code'] as $candidate) {
@@ -784,8 +778,6 @@ MD;
         foreach ($definition->args as $argument) {
             $required = $argument->getType() instanceof NonNull;
 
-            // `first` is optional but every paginated query needs it to be useful, so declare it
-            // rather than leaving an undeclared value sitting in the variables pane.
             $paging = $argument->name === 'first';
 
             if (! $required && ! $paging && $argument->name !== $identity) {
@@ -829,12 +821,6 @@ MD;
 
     /**
      * A usable value for an argument, built from its input type.
-     *
-     * GraphQL input types here are almost entirely nullable, so filling only the non-null fields
-     * yields `{}` and nothing to send. Where the resource's REST operation documents an example,
-     * that is used — it is hand-written and its values mean something. Otherwise every scalar
-     * field is filled with a value shaped by its name and type.
-     *
      * @param  array<string, mixed>|null  $example
      */
     private function inputSkeleton(Type $type, int $depth, ?array $example = null, string $argumentName = ''): mixed
@@ -857,7 +843,6 @@ MD;
             $value = [];
 
             foreach ($fields as $inputField) {
-                // Postman never sends these; they are Relay/API-Platform plumbing.
                 if (in_array($inputField->name, ['clientMutationId', '_id'], true)) {
                     continue;
                 }
@@ -884,12 +869,6 @@ MD;
     }
 
     /**
-     * Keep the example fields the input type actually declares.
-     *
-     * REST examples are written in the shape the REST body takes, which for admin resources is
-     * snake_case; the GraphQL input is camelCase. Match on both so a documented value is not
-     * dropped over a naming convention.
-     *
      * @param  array<string, mixed>  $fields
      * @param  array<string, mixed>  $example
      * @return array<string, mixed>
@@ -913,10 +892,6 @@ MD;
         return $matched;
     }
 
-    /**
-     * A placeholder shaped by the field name, so a generated body reads like a real request
-     * rather than a wall of empty strings.
-     */
     private function dummyValue(string $name, string $scalar): mixed
     {
         $lower = strtolower($name);
@@ -943,29 +918,21 @@ MD;
     }
 
     /**
-     * Selection tree for a field's return type: field name => null for a leaf, or a nested tree.
-     * Returns null when the field itself is a leaf, or when nothing selectable remains.
-     *
      * @return array<string, mixed>|null
      */
     private function selectionTree(Type $type, int $depth): ?array
     {
         $named = Type::getNamedType($type);
 
-        // The server caps query complexity, and a generated selection that walks every nested
-        // object blows past it. One level of nesting keeps the request sendable as-is.
         if (! $named instanceof ObjectType || $depth > self::MAX_SELECTION_DEPTH) {
             return null;
         }
 
         $fields = $named->getFields();
 
-        // Relay connection: descend through edges -> node rather than listing cursor plumbing.
         if (isset($fields['edges'])) {
             $node = $this->selectionTree(Type::getNamedType($fields['edges']->getType())->getFields()['node']->getType(), $depth + 1);
 
-            // A node whose own selection is depth-limited away cannot be selected bare — drop the
-            // whole connection instead of emitting an object field with no sub-selection.
             return $node === null ? null : [
                 'edges' => ['node' => $node],
                 'pageInfo' => ['hasNextPage' => null, 'endCursor' => null],
