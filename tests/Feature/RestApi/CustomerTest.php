@@ -78,8 +78,10 @@ class CustomerTest extends RestApiTestCase
         }
     }
 
-    public function test_suspended_customer_cannot_login(): void
+    public function test_suspended_customer_can_login(): void
     {
+        // A suspended customer may sign in and browse; they are stopped only at
+        // checkout (mirrors the storefront). Only inactive accounts are refused.
         $this->seedRequiredData();
         $customer = $this->createCustomer([
             'password' => bcrypt('Password123!'),
@@ -92,7 +94,8 @@ class CustomerTest extends RestApiTestCase
         ]);
 
         $response->assertCreated();
-        expect($response->json('success'))->toBeFalse();
+        expect($response->json('success'))->toBeTrue();
+        expect($response->json('token'))->not->toBeNull();
     }
 
     public function test_authenticated_customer_can_logout(): void

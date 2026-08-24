@@ -38,14 +38,25 @@ class LoginProcessor implements ProcessorInterface
                     ]);
                 }
 
-                if ($customer->is_suspended) {
+                if (! $customer->status) {
                     return $this->output([
                         'id' => 0,
                         '_id' => 0,
                         'apiToken' => '',
                         'token' => '',
                         'success' => false,
-                        'message' => __('bagistoapi::app.graphql.login.account-suspended'),
+                        'message' => __('bagistoapi::app.graphql.login.account-inactive'),
+                    ]);
+                }
+
+                if (! $customer->is_verified) {
+                    return $this->output([
+                        'id' => 0,
+                        '_id' => 0,
+                        'apiToken' => '',
+                        'token' => '',
+                        'success' => false,
+                        'message' => __('bagistoapi::app.graphql.login.email-not-verified'),
                     ]);
                 }
 
@@ -54,7 +65,6 @@ class LoginProcessor implements ProcessorInterface
                     $customer->save();
                 }
 
-                // Dispatch event to save device_token - PushNotification package will handle this
                 $deviceToken = $data->deviceToken ?? null;
                 if ($deviceToken) {
                     Event::dispatch('bagistoapi.customer.device-token.save', [

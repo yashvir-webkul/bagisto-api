@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Correo electrónico o contraseña inválidos',
             'account-suspended' => 'Su cuenta ha sido suspendida',
+            'account-inactive' => 'Tu activación requiere la aprobación del administrador.',
+            'email-not-verified' => 'Verifica primero tu cuenta de correo electrónico.',
             'successful' => 'Ha iniciado sesión correctamente',
             'invalid-request' => 'Solicitud de inicio de sesión inválida',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Sesión iniciada correctamente.',
+            'token-required' => 'Se requiere un token de inicio de sesión social.',
+            'invalid-token' => 'El token de inicio de sesión social no es válido o ha caducado. Inténtalo de nuevo.',
+            'wrong-audience' => 'Este token se emitió para otra aplicación.',
+            'email-required' => 'El proveedor no compartió una dirección de correo electrónico. Regístrate con correo electrónico.',
+            'account-inactive' => 'Tu activación requiere la aprobación del administrador.',
+            'provider-not-supported' => 'Este proveedor de inicio de sesión social no es compatible.',
+            'provider-disabled' => 'Este proveedor de inicio de sesión social no está habilitado.',
         ],
 
         'checkout' => [
@@ -230,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Historial de cambios de API',
+                'view' => 'Ver',
                 'delete' => 'Eliminar historial',
             ],
 
@@ -290,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integración',
+            'view' => 'Ver',
             'create' => 'Crear integración',
             'edit' => 'Editar integración',
             'delete' => 'Revocar token de integración',

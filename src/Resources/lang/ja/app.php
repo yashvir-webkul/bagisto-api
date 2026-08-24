@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'メールアドレスまたはパスワードが無効です',
             'account-suspended' => 'お客様のアカウントは停止されています',
+            'account-inactive' => 'アクティベーションは管理者の承認が必要です',
+            'email-not-verified' => 'まずメールアカウントを確認してください。',
             'successful' => '正常にログインしました',
             'invalid-request' => '無効なログインリクエストです',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'サインインしました。',
+            'token-required' => 'ソーシャルログイントークンが必要です。',
+            'invalid-token' => 'ソーシャルログイントークンが無効または期限切れです。もう一度お試しください。',
+            'wrong-audience' => 'このトークンは別のアプリ用に発行されています。',
+            'email-required' => 'プロバイダーがメールアドレスを共有しませんでした。メールで登録してください。',
+            'account-inactive' => 'アクティベーションは管理者の承認が必要です',
+            'provider-not-supported' => 'このソーシャルログインプロバイダーはサポートされていません。',
+            'provider-disabled' => 'このソーシャルログインプロバイダーは有効になっていません。',
         ],
 
         'checkout' => [
@@ -230,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API変更履歴',
+                'view' => '表示',
                 'delete' => '履歴の削除',
             ],
 
@@ -290,6 +304,7 @@ return [
 
         'acl' => [
             'title' => '統合',
+            'view' => '表示',
             'create' => '統合の作成',
             'edit' => '統合の編集',
             'delete' => '統合トークンの取り消し',

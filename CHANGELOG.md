@@ -5,6 +5,34 @@ All notable changes to `bagisto/bagisto-api` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.3] - 2026-08-24
+
+### Added
+
+- Add social login — sign in or sign up with a Google, Facebook or LinkedIn token the app or web already holds (no redirect), returning a Bearer token. `POST /api/shop/customers/social-login` and the `createSocialLogin` mutation.
+
+- Add a GraphQL operation map to the export (`graphql-operations-shop.json` / `-admin.json`) mapping each root field to its resource tag, so tooling can group GraphQL the way REST is grouped.
+- Add a re-seed tool that rebuilds the collections from the exported schemas.
+- Add **View** permissions for Integration and API Change History, so read access to those screens can be granted or withheld separately from creating, editing and deleting.
+
+### Fixed
+
+- Fix a fatal error at boot after installing on a newer Symfony release.
+- Fix an inactive customer being able to log in; inactive accounts are now rejected.
+- Fix a suspended customer being blocked at login; they can now log in and browse, and are stopped only at checkout.
+- Fix a customer logging in without verifying their email when email verification is required.
+- Honour permissions on the Integration and API Change History screens.
+- Scope each exported schema to its own surface.
+- Restore tag descriptions in the exported schemas and the interactive docs (the tag list and folders were unlabelled).
+- Write a placeholder storefront key into the exported storefront schema instead of the configured key (it resolves from the Postman environment).
+- Include two missing storefront endpoints in the export: the invoice PDF and the downloadable-product download.
+- Make the exported schemas import cleanly into Postman — they now carry a title and a configurable server URL.
+
+### Changed
+
+- `bagisto-api-platform:export-schema` now writes to `schema/generated/` instead of `schema/`, leaving the hand-maintained collections and environments untouched; `--path` is unchanged.
+- The export now refuses to write a schema that leaks another surface, references a missing definition, carries an unused definition, or contains a storefront key.
+
 ## [2.4.2] - 2026-08-17
 
 ### Added
@@ -449,6 +477,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swagger / OpenAPI documentation at `/api/docs` and GraphQL playground at `/graphiql`.
 - Initial documentation and demo links in the README.
 
+[2.4.3]: https://github.com/bagisto/bagisto-api/compare/v2.4.2...v2.4.3
 [2.4.2]: https://github.com/bagisto/bagisto-api/compare/v2.4.1...v2.4.2
 [2.4.1]: https://github.com/bagisto/bagisto-api/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/bagisto/bagisto-api/compare/v2.3.1...v2.4.0

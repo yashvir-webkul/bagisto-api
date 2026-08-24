@@ -268,8 +268,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Invalid email or password',
             'account-suspended' => 'Your account has been suspended',
+            'account-inactive' => 'Your account is not activated. Please contact support.',
+            'email-not-verified' => 'Please verify your email address before logging in.',
             'successful' => 'You have logged in successfully',
             'invalid-request' => 'Invalid login request',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Signed in successfully.',
+            'token-required' => 'A social login token is required.',
+            'invalid-token' => 'The social login token is invalid or expired. Please try again.',
+            'wrong-audience' => 'This token was issued for a different app.',
+            'email-required' => 'The provider did not share an email address. Please sign up with email instead.',
+            'account-inactive' => 'Your account is not activated. Please contact support.',
+            'provider-not-supported' => 'This social login provider is not supported.',
+            'provider-disabled' => 'This social login provider is not enabled.',
         ],
 
         'checkout' => [
@@ -1395,6 +1408,7 @@ return [
 
             'acl' => [
                 'title' => 'API Change History',
+                'view' => 'View',
                 'delete' => 'Delete History',
             ],
 
@@ -1455,6 +1469,7 @@ return [
 
         'acl' => [
             'title' => 'Integration',
+            'view' => 'View',
             'create' => 'Create Integration',
             'edit' => 'Edit Integration',
             'delete' => 'Revoke Integration Token',

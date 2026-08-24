@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'E-mail ou mot de passe invalide',
             'account-suspended' => 'Votre compte a été suspendu',
+            'account-inactive' => 'Votre activation nécessite l\'approbation de l\'administrateur',
+            'email-not-verified' => 'Vérifiez d\'abord votre compte e-mail.',
             'successful' => 'Vous vous êtes connecté avec succès',
             'invalid-request' => 'Demande de connexion invalide',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Connexion réussie.',
+            'token-required' => 'Un jeton de connexion sociale est requis.',
+            'invalid-token' => 'Le jeton de connexion sociale est invalide ou expiré. Veuillez réessayer.',
+            'wrong-audience' => 'Ce jeton a été émis pour une autre application.',
+            'email-required' => 'Le fournisseur n’a pas communiqué d’adresse e-mail. Veuillez vous inscrire avec un e-mail.',
+            'account-inactive' => 'Votre activation nécessite l\'approbation de l\'administrateur',
+            'provider-not-supported' => 'Ce fournisseur de connexion sociale n’est pas pris en charge.',
+            'provider-disabled' => 'Ce fournisseur de connexion sociale n’est pas activé.',
         ],
 
         'checkout' => [
@@ -230,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Historique des modifications de l\'API',
+                'view' => 'Voir',
                 'delete' => 'Supprimer l\'historique',
             ],
 
@@ -290,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Intégration',
+            'view' => 'Voir',
             'create' => 'Créer une intégration',
             'edit' => 'Modifier l\'intégration',
             'delete' => 'Révoquer le jeton d\'intégration',

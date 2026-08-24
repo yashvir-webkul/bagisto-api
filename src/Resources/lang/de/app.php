@@ -131,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Ungültige E-Mail-Adresse oder Passwort',
             'account-suspended' => 'Ihr Konto wurde gesperrt',
+            'account-inactive' => 'Ihre Aktivierung erfordert die Zustimmung des Administrators',
+            'email-not-verified' => 'Bitte verifizieren Sie zuerst Ihr E-Mail-Konto.',
             'successful' => 'Sie haben sich erfolgreich angemeldet',
             'invalid-request' => 'Ungültige Anmeldeanfrage',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Erfolgreich angemeldet.',
+            'token-required' => 'Ein Social-Login-Token ist erforderlich.',
+            'invalid-token' => 'Das Social-Login-Token ist ungültig oder abgelaufen. Bitte versuchen Sie es erneut.',
+            'wrong-audience' => 'Dieses Token wurde für eine andere App ausgestellt.',
+            'email-required' => 'Der Anbieter hat keine E-Mail-Adresse übermittelt. Bitte registrieren Sie sich stattdessen mit E-Mail.',
+            'account-inactive' => 'Ihre Aktivierung erfordert die Zustimmung des Administrators',
+            'provider-not-supported' => 'Dieser Social-Login-Anbieter wird nicht unterstützt.',
+            'provider-disabled' => 'Dieser Social-Login-Anbieter ist nicht aktiviert.',
         ],
 
         'checkout' => [
@@ -230,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API-Änderungsverlauf',
+                'view' => 'Ansehen',
                 'delete' => 'Verlauf löschen',
             ],
 
@@ -290,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integration',
+            'view' => 'Ansehen',
             'create' => 'Integration schaffen',
             'edit' => 'Integration bearbeiten',
             'delete' => 'Integrationstoken widerrufen',

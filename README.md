@@ -107,19 +107,36 @@ Generate schema files for the shop and admin APIs — OpenAPI JSON (REST) and Gr
 php artisan bagisto-api-platform:export-schema
 ```
 
-By default the files are written to the package's `schema/` folder:
+The files are written to `schema/generated/`:
 
-- `openapi-shop.json` — OpenAPI for the shop REST API
-- `openapi-admin.json` — OpenAPI for the admin REST API
-- `shop.graphql` — GraphQL SDL for the shop API
-- `admin.graphql` — GraphQL SDL for the admin API
+| File | Contents |
+|---|---|
+| `openapi-shop.json` / `openapi-admin.json` | OpenAPI for each REST surface |
+| `shop.graphql` / `admin.graphql` | GraphQL SDL for each surface |
+| `graphql-operations-shop.json` / `-admin.json` | Every root GraphQL field mapped to its resource tag |
+
+Each spec is scoped to its own surface: the storefront spec contains no admin path, schema, or tag, and the admin spec contains no storefront one. The command refuses to write a schema that leaks another surface, references a definition it does not include, carries an unused definition, or contains a storefront key.
 
 Options:
 
 - `--path=<dir>` — write to a different directory
 - `--transport=all|rest|graphql` — limit to one transport (default `all`)
 
-Re-running overwrites the existing files.
+Re-running overwrites those six files and nothing else. `schema/tools/build-collection.php` turns the exported specs into the Postman collections; it takes the target directory as an argument:
+
+```bash
+php schema/tools/build-collection.php /path/to/bagisto-api-collection/collections
+```
+
+## Postman Collections
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/bagisto-apis/bagistoapi)
+
+Ready-to-import Postman collections for both API surfaces live in their own repository:
+
+**[github.com/bagisto/bagisto-api-collection](https://github.com/bagisto/bagisto-api-collection)**
+
+Import a collection and its environment there, fill in your store URL and a key, and every endpoint is ready to send — REST and GraphQL, for both the storefront and the admin API. That repository is the one to point clients and integrators at; this package holds the schemas the collections are generated from.
 
 ## Admin API Authentication
 
