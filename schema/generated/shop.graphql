@@ -712,12 +712,8 @@ type Query {
     "Order id to list returnable items for"
     orderId: Int!
   ): [ReturnableItem]
-
-  "Get available shipping rates for a cart by token"
-  collectionShippingRates: [ShippingRates]
-
-  themeCustomization(id: ID!): ThemeCustomization
-  themeCustomizations(
+  section(id: ID!): Section
+  sections(
     "Returns the first n elements from the list."
     first: Int
 
@@ -731,7 +727,13 @@ type Query {
     after: String
 
     type: String
-  ): ThemeCustomizationCursorConnection
+  ): SectionCursorConnection
+
+  "Get available shipping rates for a cart by token"
+  collectionShippingRates: [ShippingRates]
+
+  "The theme the current channel runs, and the section types it draws."
+  theme: Theme
 
   """
   Wishlist Item API Resource
@@ -861,6 +863,7 @@ type AttributeOption implements Node {
   sortOrder: Int
   swatchValue: String
   swatchValueUrl: String
+  swatchFileName: String
 
   "Current locale translation"
   translation: AttributeOptionTranslation
@@ -886,6 +889,7 @@ type AttributeOptionTranslation implements Node {
   attributeOptionId: String!
   locale: String!
   label: String
+  swatchAlt: String
 }
 
 "Cursor connection for AttributeOptionTranslation."
@@ -963,7 +967,11 @@ type BookingSlot implements Node {
   to: String
   timestamp: String
   qty: String
+  slots: Iterable
 }
+
+"The `Iterable` scalar type represents an array or a Traversable with any kind of data."
+scalar Iterable
 
 type Category implements Node {
   id: ID!
@@ -983,6 +991,8 @@ type Category implements Node {
   url: String
   logoUrl: String
   bannerUrl: String
+  logoFileName: String
+  bannerFileName: String
 
   "Filterable attributes assigned to this category"
   filterableAttributes(
@@ -1044,6 +1054,8 @@ type CategoryTranslation implements Node {
   metaTitle: String
   metaDescription: String
   metaKeywords: String
+  logoAlt: String
+  bannerAlt: String
   localeId: String
   locale: String!
 }
@@ -1113,12 +1125,15 @@ type Channel implements Node {
   hostname: String
   logo: String
   favicon: String
+  homeSeo: Iterable
   isMaintenanceOn: String!
   allowedIps: String
   createdAt: String
   updatedAt: String
   logoUrl: String
   faviconUrl: String
+  logoFileName: String
+  faviconFileName: String
   locales(
     "Returns the first n elements from the list."
     first: Int
@@ -1239,6 +1254,8 @@ type ChannelTranslation implements Node {
   name: String!
   description: String
   maintenanceModeText: String
+  logoAlt: String
+  homeSeo: Iterable
   createdAt: String
   updatedAt: String
 }
@@ -1338,6 +1355,7 @@ type Product implements Node {
   _id: Int!
   sku: String!
   type: String!
+  additional: Iterable
   createdAt: String
   updatedAt: String
   isSaleable: String
@@ -1650,6 +1668,7 @@ type AttributeValue implements Node {
   floatValue: Float
   datetimeValue: String
   dateValue: String
+  jsonValue: Iterable
   uniqueId: String
   value: String
   attribute: Attribute
@@ -2424,7 +2443,6 @@ type Customer implements Node {
   isSuspended: String!
   token: String
   rememberToken: String
-  deviceToken: String
   name: String
 }
 
@@ -2972,6 +2990,7 @@ type CustomerOrderAddress implements Node {
   vatId: String
   defaultAddress: Boolean!
   useForShipping: String!
+  additional: Iterable
   createdAt: String
   updatedAt: String
   name: String
@@ -2997,6 +3016,7 @@ type CustomerOrderPayment implements Node {
   orderId: Int
   method: String!
   methodTitle: String
+  additional: Iterable
   createdAt: String
   updatedAt: String
 }
@@ -3096,6 +3116,7 @@ type CustomerOrderShipmentItem implements Node {
   basePriceInclTax: Float!
   productId: String
   productType: String
+  additional: Iterable
   createdAt: String
   updatedAt: String
   shipment: CustomerOrderShipment
@@ -3249,6 +3270,7 @@ type CustomerInvoiceItem implements Node {
   productType: String
   orderItemId: Int
   invoiceId: Int
+  additional: Iterable
   createdAt: String
   updatedAt: String
 }
@@ -3302,6 +3324,7 @@ type CustomerInvoiceAddress implements Node {
   vatId: String
   defaultAddress: Boolean!
   useForShipping: String!
+  additional: Iterable
   createdAt: String
   updatedAt: String
   name: String
@@ -3389,6 +3412,8 @@ type CustomerReturn implements Node {
   canClose: Boolean
   canReopen: Boolean
   isExpired: Boolean
+  item: Iterable
+  images: Iterable
   messagesCount: Int
   createdAt: String
   updatedAt: String
@@ -3503,6 +3528,10 @@ type DefaultChannel implements Node {
   createdAt: String
   updatedAt: String
   maintenanceModeText: String
+  locales: Iterable
+  currencies: Iterable
+  inventorySources: Iterable
+  translations: Iterable
 }
 
 "Information about the current page."
@@ -3834,6 +3863,7 @@ type PaymentMethods implements Node {
   title: String
   description: String
   icon: String
+  additionalData: Iterable
   isAllowed: Boolean
 }
 
@@ -3862,6 +3892,87 @@ type ReturnableItem implements Node {
   rmaReturnPeriod: Int
 }
 
+type Section implements Node {
+  id: ID!
+  _id: Int!
+  themeCode: String
+  type: String!
+  name: String!
+  sortOrder: Int!
+  status: String!
+  channelId: String!
+  createdAt: String
+  updatedAt: String
+
+  "Current locale translation"
+  translation: SectionTranslation
+
+  "All translations"
+  translations(
+    "Returns the first n elements from the list."
+    first: Int
+
+    "Returns the last n elements from the list."
+    last: Int
+
+    "Returns the elements in the list that come before the specified cursor."
+    before: String
+
+    "Returns the elements in the list that come after the specified cursor."
+    after: String
+  ): SectionTranslationCursorConnection
+}
+
+type SectionTranslation implements Node {
+  id: ID!
+  _id: Int!
+  sectionId: String!
+  locale: String!
+  options: String
+}
+
+"Cursor connection for SectionTranslation."
+type SectionTranslationCursorConnection {
+  edges: [SectionTranslationEdge]
+  pageInfo: SectionTranslationPageInfo!
+  totalCount: Int!
+}
+
+"Edge of SectionTranslation."
+type SectionTranslationEdge {
+  node: SectionTranslation
+  cursor: String!
+}
+
+"Information about the current page."
+type SectionTranslationPageInfo {
+  endCursor: String
+  startCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+"Cursor connection for Section."
+type SectionCursorConnection {
+  edges: [SectionEdge]
+  pageInfo: SectionPageInfo!
+  totalCount: Int!
+}
+
+"Edge of Section."
+type SectionEdge {
+  node: Section
+  cursor: String!
+}
+
+"Information about the current page."
+type SectionPageInfo {
+  endCursor: String
+  startCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
 "Get available shipping rates for a cart by token"
 type ShippingRates implements Node {
   id: ID!
@@ -3880,85 +3991,12 @@ type ShippingRates implements Node {
   carrierTitle: String
 }
 
-type ThemeCustomization implements Node {
+"The theme the current channel runs, and the section types it draws."
+type Theme implements Node {
   id: ID!
-  _id: Int!
-  themeCode: String
-  type: String!
-  name: String!
-  sortOrder: Int!
-  status: String!
-  channelId: String!
-  createdAt: String
-  updatedAt: String
-
-  "Current locale translation"
-  translation: ThemeCustomizationTranslation
-
-  "All translations"
-  translations(
-    "Returns the first n elements from the list."
-    first: Int
-
-    "Returns the last n elements from the list."
-    last: Int
-
-    "Returns the elements in the list that come before the specified cursor."
-    before: String
-
-    "Returns the elements in the list that come after the specified cursor."
-    after: String
-  ): ThemeCustomizationTranslationCursorConnection
-}
-
-type ThemeCustomizationTranslation implements Node {
-  id: ID!
-  _id: Int!
-  themeCustomizationId: String!
-  locale: String!
-  options: String!
-}
-
-"Cursor connection for ThemeCustomizationTranslation."
-type ThemeCustomizationTranslationCursorConnection {
-  edges: [ThemeCustomizationTranslationEdge]
-  pageInfo: ThemeCustomizationTranslationPageInfo!
-  totalCount: Int!
-}
-
-"Edge of ThemeCustomizationTranslation."
-type ThemeCustomizationTranslationEdge {
-  node: ThemeCustomizationTranslation
-  cursor: String!
-}
-
-"Information about the current page."
-type ThemeCustomizationTranslationPageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
-"Cursor connection for ThemeCustomization."
-type ThemeCustomizationCursorConnection {
-  edges: [ThemeCustomizationEdge]
-  pageInfo: ThemeCustomizationPageInfo!
-  totalCount: Int!
-}
-
-"Edge of ThemeCustomization."
-type ThemeCustomizationEdge {
-  node: ThemeCustomization
-  cursor: String!
-}
-
-"Information about the current page."
-type ThemeCustomizationPageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
+  code: String
+  name: String
+  sectionTypes: Iterable!
 }
 
 """
@@ -3969,6 +4007,7 @@ Allows customers to add and manage products in their wishlist
 type Wishlist implements Node {
   id: ID!
   _id: Int!
+  additional: Iterable
   movedToCart: String
   shared: String
   createdAt: String
@@ -4180,6 +4219,7 @@ input createAddProductInCartInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -4191,6 +4231,8 @@ input createAddProductInCartInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -4210,8 +4252,23 @@ input createAddProductInCartInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -4290,6 +4347,7 @@ type createAddProductInCartPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -4323,6 +4381,15 @@ type createAddProductInCartPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -4396,6 +4463,7 @@ type CartItem implements Node {
   baseDiscountAmount: Float
   taxAmount: Float
   baseTaxAmount: Float
+  options: Iterable
   type: String
   formattedPrice: String
   formattedTotal: String
@@ -4425,6 +4493,7 @@ input createApplyCouponInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -4436,6 +4505,8 @@ input createApplyCouponInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -4455,8 +4526,23 @@ input createApplyCouponInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -4535,6 +4621,7 @@ type createApplyCouponPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -4568,6 +4655,15 @@ type createApplyCouponPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -4632,6 +4728,7 @@ input createCartTokenInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -4643,6 +4740,8 @@ input createCartTokenInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -4662,8 +4761,23 @@ input createCartTokenInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -4690,6 +4804,7 @@ type createCartTokenPayloadData implements Node {
   customerId: Int
   channelId: Int
   itemsCount: Int
+  items: Iterable
   subtotal: Float
   baseSubtotal: Float
   discountAmount: Float
@@ -4708,6 +4823,7 @@ type createCartTokenPayloadData implements Node {
   couponCode: String
   success: Boolean
   message: String
+  carts: Iterable
   sessionToken: String
   isGuest: Boolean
 }
@@ -5182,7 +5298,6 @@ type createCustomerNestedPayload implements Node {
   isSuspended: String!
   token: String
   rememberToken: String
-  deviceToken: String
   name: String
 }
 
@@ -5234,7 +5349,6 @@ input createCustomerInput {
   subscribedToNewsLetter: Boolean!
   isVerified: String!
   isSuspended: String!
-  deviceToken: String
   confirmPassword: String
   clientMutationId: String
 }
@@ -5735,6 +5849,7 @@ input createEstimateShippingInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -5746,6 +5861,8 @@ input createEstimateShippingInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -5765,8 +5882,23 @@ input createEstimateShippingInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -5845,6 +5977,7 @@ type createEstimateShippingPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -5878,6 +6011,15 @@ type createEstimateShippingPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -6033,6 +6175,7 @@ input readGetCartTokenInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -6044,6 +6187,8 @@ input readGetCartTokenInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -6063,8 +6208,23 @@ input readGetCartTokenInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -6143,6 +6303,7 @@ type readGetCartTokenPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -6176,6 +6337,15 @@ type readGetCartTokenPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -6252,6 +6422,7 @@ input createMergeCartInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -6263,6 +6434,8 @@ input createMergeCartInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -6282,8 +6455,23 @@ input createMergeCartInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -6362,6 +6550,7 @@ type createMergeCartPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -6395,6 +6584,15 @@ type createMergeCartPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -6437,6 +6635,7 @@ input createMoveToWishlistInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -6448,6 +6647,8 @@ input createMoveToWishlistInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -6467,8 +6668,23 @@ input createMoveToWishlistInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -6547,6 +6763,7 @@ type createMoveToWishlistPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -6580,6 +6797,15 @@ type createMoveToWishlistPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -6691,6 +6917,7 @@ type moveWishlistToCartPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -6724,6 +6951,15 @@ type moveWishlistToCartPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -7022,6 +7258,7 @@ type createReadCartPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -7055,6 +7292,15 @@ type createReadCartPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -7097,6 +7343,7 @@ input createRemoveCartItemInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -7108,6 +7355,8 @@ input createRemoveCartItemInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -7127,8 +7376,23 @@ input createRemoveCartItemInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -7207,6 +7471,7 @@ type createRemoveCartItemPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -7240,6 +7505,15 @@ type createRemoveCartItemPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -7282,6 +7556,7 @@ input createRemoveCartItemsInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -7293,6 +7568,8 @@ input createRemoveCartItemsInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -7312,8 +7589,23 @@ input createRemoveCartItemsInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -7392,6 +7684,7 @@ type createRemoveCartItemsPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -7425,6 +7718,15 @@ type createRemoveCartItemsPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -7467,6 +7769,7 @@ input createRemoveCouponInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -7478,6 +7781,8 @@ input createRemoveCouponInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -7497,8 +7802,23 @@ input createRemoveCouponInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -7577,6 +7897,7 @@ type createRemoveCouponPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -7610,6 +7931,15 @@ type createRemoveCouponPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -7705,6 +8035,7 @@ input createUpdateCartItemInput {
   productId: Int
   cartItemId: Int
   quantity: Int
+  options: Iterable
   couponCode: String
   shippingAddressId: Int
   billingAddressId: Int
@@ -7716,6 +8047,8 @@ input createUpdateCartItemInput {
 
   "Generate new cart with unique token"
   createNew: Boolean
+  itemIds: Iterable
+  quantities: Iterable
   country: String
   state: String
   postcode: String
@@ -7735,8 +8068,23 @@ input createUpdateCartItemInput {
   "Selected configurable option (child product ID)"
   selectedConfigurableOption: Int
 
+  "Super attributes for configurable products"
+  superAttribute: Iterable
+
+  "Quantities for grouped product associated products"
+  qty: Iterable
+
   "Grouped product quantities as JSON string. Example: {\"101\":2,\"102\":1}"
   groupedQty: String
+
+  "Downloadable product link IDs"
+  links: Iterable
+
+  "Customizable options"
+  customizableOptions: Iterable
+
+  "Additional product data"
+  additional: Iterable
 
   "Booking options as JSON string"
   booking: String
@@ -7815,6 +8163,7 @@ type createUpdateCartItemPayloadData implements Node {
 
   success: Boolean
   message: String
+  carts: Iterable
 
   "Unique session token for guest cart"
   sessionToken: String
@@ -7848,6 +8197,15 @@ type createUpdateCartItemPayloadData implements Node {
 
   "Formatted shipping amount including tax"
   formattedShippingAmountInclTax: String
+
+  "Billing address"
+  billingAddress: Iterable
+
+  "Shipping address"
+  shippingAddress: Iterable
+
+  "Applied taxes"
+  appliedTaxes: Iterable
 
   "Has stockable items"
   haveStockableItems: Boolean
@@ -7922,6 +8280,7 @@ type createWishlistPayload {
 type createWishlistPayloadData implements Node {
   id: ID!
   _id: Int!
+  additional: Iterable
   movedToCart: String
   shared: String
   createdAt: String
@@ -7955,6 +8314,7 @@ type toggleWishlistPayload {
 type toggleWishlistPayloadData implements Node {
   id: ID!
   _id: Int!
+  additional: Iterable
   movedToCart: String
   shared: String
   createdAt: String

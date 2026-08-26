@@ -181,6 +181,29 @@ class SchemaExportTest extends BagistoApiTest
         )))->toBe([]);
     }
 
+    public function test_exported_graphql_keeps_array_typed_fields(): void
+    {
+        foreach (['shop', 'admin'] as $surface) {
+            $sdl = (string) file_get_contents(self::$exportPath."/{$surface}.graphql");
+
+            // Array-valued fields carry the Iterable scalar. Rebuilding the types container
+            // between the two surfaces once left the type converter reading the old one, and
+            // every one of these fields was dropped from the printed schema in silence.
+            expect(substr_count($sdl, 'Iterable'))->toBeGreaterThan(0, "{$surface}.graphql lost every array-typed field");
+
+            expect(preg_match('/^scalar Iterable$/m', $sdl))->toBe(1, "{$surface}.graphql uses Iterable without defining it");
+        }
+    }
+
+    public function test_exported_graphql_matches_the_running_schema(): void
+    {
+        $sdl = (string) file_get_contents(self::$exportPath.'/shop.graphql');
+
+        preg_match('/^type Theme implements Node \{(.*?)^\}/ms', $sdl, $matches);
+
+        expect($matches[1] ?? '')->toContain('sectionTypes: Iterable!');
+    }
+
     public function test_collection_graphql_requests_validate_against_the_schema(): void
     {
         foreach (['shop' => 'Bagisto-Shop-API', 'admin' => 'Bagisto-Admin-API'] as $surface => $name) {

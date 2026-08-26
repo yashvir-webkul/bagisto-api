@@ -8,6 +8,41 @@
             "quantity": 1
         }
     },
+    "adminAppearanceSection": {
+        "kind": "query",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSection"
+    },
+    "adminAppearanceSectionFields": {
+        "kind": "query",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionFields"
+    },
+    "adminAppearanceSectionPreview": {
+        "kind": "query",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionPreview"
+    },
+    "adminAppearanceSections": {
+        "kind": "query",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSection"
+    },
+    "adminAppearanceTheme": {
+        "kind": "query",
+        "tag": "Admin Appearance: Themes",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceTheme"
+    },
+    "adminAppearanceThemeImpact": {
+        "kind": "query",
+        "tag": "Admin Appearance: Themes",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceThemeImpact"
+    },
+    "adminAppearanceThemes": {
+        "kind": "query",
+        "tag": "Admin Appearance: Themes",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceTheme"
+    },
     "adminAttribute": {
         "kind": "query",
         "tag": "Admin Catalog: Attributes",
@@ -488,16 +523,6 @@
         "tag": "Admin Settings: Tax Rates",
         "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTaxRate"
     },
-    "adminSettingsTheme": {
-        "kind": "query",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTheme"
-    },
-    "adminSettingsThemes": {
-        "kind": "query",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTheme"
-    },
     "adminSettingsUser": {
         "kind": "query",
         "tag": "Admin Settings: Users",
@@ -546,6 +571,46 @@
         "kind": "mutation",
         "tag": "Admin Marketing: Promotions",
         "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminMarketingCartRule"
+    },
+    "createAdminAppearanceSection": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSection"
+    },
+    "createAdminAppearanceSectionDiscard": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionDiscard"
+    },
+    "createAdminAppearanceSectionDraft": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionDraft"
+    },
+    "createAdminAppearanceSectionDuplicate": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionDuplicate"
+    },
+    "createAdminAppearanceSectionPublish": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionPublish"
+    },
+    "createAdminAppearanceSectionReorder": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionReorder"
+    },
+    "createAdminAppearanceSectionStatus": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionStatus"
+    },
+    "createAdminAppearanceThemeActivate": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Themes",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceThemeActivate"
     },
     "createAdminAttribute": {
         "kind": "mutation",
@@ -1189,21 +1254,6 @@
             "tax_rate": 8.5
         }
     },
-    "createAdminSettingsTheme": {
-        "kind": "mutation",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTheme"
-    },
-    "createAdminSettingsThemeMassDelete": {
-        "kind": "mutation",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsThemeMassDelete"
-    },
-    "createAdminSettingsThemeMassUpdateStatus": {
-        "kind": "mutation",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsThemeMassUpdateStatus"
-    },
     "createAdminSettingsUser": {
         "kind": "mutation",
         "tag": "Admin Settings: Users",
@@ -1245,6 +1295,11 @@
         "kind": "mutation",
         "tag": "Admin Sales: EU Withdrawal",
         "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminEuWithdrawal"
+    },
+    "deleteAdminAppearanceSection": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSection"
     },
     "deleteAdminAttribute": {
         "kind": "mutation",
@@ -1582,11 +1637,6 @@
             "tax_rate": 8.5
         }
     },
-    "deleteAdminSettingsTheme": {
-        "kind": "mutation",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTheme"
-    },
     "deleteAdminSettingsUser": {
         "kind": "mutation",
         "tag": "Admin Settings: Users",
@@ -1756,6 +1806,11 @@
         "kind": "query",
         "tag": "Admin Reporting: Sales",
         "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminReportingSales"
+    },
+    "updateAdminAppearanceSection": {
+        "kind": "mutation",
+        "tag": "Admin Appearance: Sections",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSection"
     },
     "updateAdminAttribute": {
         "kind": "mutation",
@@ -2083,11 +2138,6 @@
             "country": "US",
             "tax_rate": 8.5
         }
-    },
-    "updateAdminSettingsTheme": {
-        "kind": "mutation",
-        "tag": "Admin Settings: Themes",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminSettingsTheme"
     },
     "updateAdminSettingsUser": {
         "kind": "mutation",

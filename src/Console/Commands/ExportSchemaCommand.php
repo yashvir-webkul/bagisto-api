@@ -31,11 +31,18 @@ class ExportSchemaCommand extends Command
 
     protected $description = 'Export the shop and admin API schemas — OpenAPI JSON (REST) and SDL (GraphQL) — split per surface, for Postman, tooling, and codegen.';
 
+    /**
+     * Singletons rebuilt between the two surfaces so neither carries the other's
+     * resources. `TypesContainerInterface` is deliberately NOT in here — it is shared by
+     * the type converter and the fields builder, and replacing only the container leaves
+     * the converter looking up scalar types in the old one. `Iterable` is then never
+     * found, and every array-typed field is dropped from the printed schema without an
+     * error.
+     */
     private const DEPS = [
         ResourceNameCollectionFactoryInterface::class,
         ResourceMetadataCollectionFactoryInterface::class,
         TypesFactoryInterface::class,
-        TypesContainerInterface::class,
         FieldsBuilderEnumInterface::class,
     ];
 

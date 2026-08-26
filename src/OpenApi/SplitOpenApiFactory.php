@@ -11,6 +11,7 @@ use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\Response;
 use ApiPlatform\OpenApi\Model\Server;
+use ApiPlatform\OpenApi\Model\Tag;
 use ApiPlatform\OpenApi\OpenApi;
 
 /**
@@ -291,7 +292,11 @@ class SplitOpenApiFactory implements OpenApiFactoryInterface
         $filteredTags = [];
         foreach ($tags as $tag) {
             if (isset($usedTags[$tag->getName()])) {
-                $filteredTags[] = $tag;
+                // Drop the tag description. It is auto-derived from a resource
+                // class docblock, which carries internal implementation notes
+                // (e.g. "bypass API Platform's ID requirement") not meant for
+                // consumers. The tag name alone labels the group.
+                $filteredTags[] = new Tag($tag->getName());
             }
         }
 

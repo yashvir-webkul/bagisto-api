@@ -735,15 +735,20 @@
             "message": "Please delete my personal data."
         }
     },
-    "themeCustomization": {
+    "section": {
         "kind": "query",
-        "tag": "ThemeCustomization",
-        "resource": "Webkul\\BagistoApi\\Models\\ThemeCustomization"
+        "tag": "Section",
+        "resource": "Webkul\\BagistoApi\\Models\\Section"
     },
-    "themeCustomizations": {
+    "sections": {
         "kind": "query",
-        "tag": "ThemeCustomization",
-        "resource": "Webkul\\BagistoApi\\Models\\ThemeCustomization"
+        "tag": "Section",
+        "resource": "Webkul\\BagistoApi\\Models\\Section"
+    },
+    "theme": {
+        "kind": "query",
+        "tag": "Theme",
+        "resource": "Webkul\\BagistoApi\\Models\\Theme"
     },
     "toggleWishlist": {
         "kind": "mutation",

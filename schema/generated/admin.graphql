@@ -1,5 +1,28 @@
 type Query {
   node(id: ID!): Node
+  adminAppearanceSection(id: ID!): AdminAppearanceSection
+  adminAppearanceSections(code: String!, channel: Int, locale: String): [AdminAppearanceSection]
+
+  """
+  The field set a section of this type is built from, with the values currently held for
+  the locale — everything a client needs to render an editor for it.
+  """
+  adminAppearanceSectionFields(sectionId: Int!, locale: String): AdminAppearanceSectionFields
+
+  """
+  A theme and channel as the editor is holding it: staged options, status and order
+  applied, so a headless storefront can render the preview the admin panel renders.
+  """
+  adminAppearanceSectionPreview(code: String!, channel: Int, locale: String): AdminAppearanceSectionPreview
+
+  adminAppearanceTheme(code: String!): AdminAppearanceTheme
+  adminAppearanceThemes: [AdminAppearanceTheme]
+
+  """
+  What switching the named channels over to a theme would leave behind, so a client can
+  spell it out before activating.
+  """
+  adminAppearanceThemeImpact(code: String!, channelIds: [Int!]!): AdminAppearanceThemeImpact
 
   "Admin catalog attributes listing (cursor pagination). Mirrors GET /api/admin/catalog/attributes."
   adminAttributes(
@@ -1081,32 +1104,6 @@ type Query {
   "Admin settings tax-rate detail by id."
   adminSettingsTaxRate(id: ID!): AdminSettingsTaxRate
 
-  "Admin settings theme customizations listing (cursor pagination)."
-  adminSettingsThemes(
-    "Returns the first n elements from the list."
-    first: Int
-
-    "Returns the last n elements from the list."
-    last: Int
-
-    "Returns the elements in the list that come before the specified cursor."
-    before: String
-
-    "Returns the elements in the list that come after the specified cursor."
-    after: String
-
-    name: String
-    type: String
-    theme_code: String
-    channel_id: Int
-    status: Int
-    sort: String
-    order: String
-  ): AdminSettingsThemeCursorConnection
-
-  "Admin settings theme customization detail by id."
-  adminSettingsTheme(id: ID!): AdminSettingsTheme
-
   "Admin settings users listing (cursor pagination)."
   adminSettingsUsers(
     "Returns the first n elements from the list."
@@ -1199,6 +1196,123 @@ interface Node {
   id: ID!
 }
 
+type AdminAppearanceSection implements Node {
+  id: ID!
+  _id: Int!
+  themeCode: String
+  type: String!
+  name: String!
+  sortOrder: Int!
+  draftSortOrder: Int
+  status: Int!
+  draftStatus: Boolean
+  channelId: Int!
+  createdAt: String
+  updatedAt: String
+  hasDraft: String
+  isPinned: String
+  message: String
+  translations(
+    "Returns the first n elements from the list."
+    first: Int
+
+    "Returns the last n elements from the list."
+    last: Int
+
+    "Returns the elements in the list that come before the specified cursor."
+    before: String
+
+    "Returns the elements in the list that come after the specified cursor."
+    after: String
+  ): AdminAppearanceSectionTranslationCursorConnection
+}
+
+"Cursor connection for AdminAppearanceSectionTranslation."
+type AdminAppearanceSectionTranslationCursorConnection {
+  edges: [AdminAppearanceSectionTranslationEdge]
+  pageInfo: AdminAppearanceSectionTranslationPageInfo!
+  totalCount: Int!
+}
+
+"Edge of AdminAppearanceSectionTranslation."
+type AdminAppearanceSectionTranslationEdge {
+  node: AdminAppearanceSectionTranslation
+  cursor: String!
+}
+
+type AdminAppearanceSectionTranslation implements Node {
+  id: ID!
+  _id: Int!
+  sectionId: Int!
+  locale: String!
+  options: Iterable
+  draftOptions: Iterable
+}
+
+"The `Iterable` scalar type represents an array or a Traversable with any kind of data."
+scalar Iterable
+
+"Information about the current page."
+type AdminAppearanceSectionTranslationPageInfo {
+  endCursor: String
+  startCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+"""
+The field set a section of this type is built from, with the values currently held for
+the locale — everything a client needs to render an editor for it.
+"""
+type AdminAppearanceSectionFields implements Node {
+  id: ID!
+  sectionId: Int
+  type: String
+  locale: String
+  schema: Iterable!
+  options: Iterable!
+}
+
+"""
+A theme and channel as the editor is holding it: staged options, status and order
+applied, so a headless storefront can render the preview the admin panel renders.
+"""
+type AdminAppearanceSectionPreview implements Node {
+  id: ID!
+  themeCode: String
+  channelId: Int
+  locale: String
+  sections: Iterable!
+}
+
+type AdminAppearanceTheme implements Node {
+  id: ID!
+  code: String
+  name: String
+  author: String
+  version: String
+  url: String
+  demoUrl: String
+  screenshot: String
+  rating: String
+  tags: Iterable!
+  description: String
+  isInstalled: Boolean
+  status: String
+  activeOn: Iterable!
+  message: String
+}
+
+"""
+What switching the named channels over to a theme would leave behind, so a client can
+spell it out before activating.
+"""
+type AdminAppearanceThemeImpact implements Node {
+  id: ID!
+  code: String
+  impact: Iterable!
+}
+
 "Cursor connection for AdminAttribute."
 type AdminAttributeCursorConnection {
   edges: [AdminAttributeEdge]
@@ -1232,6 +1346,8 @@ type AdminAttribute implements Node {
   locale: String
   createdAt: String
   updatedAt: String
+  translations: Iterable
+  options: Iterable
   validation: String
   defaultValue: String
   isComparable: Int
@@ -1266,6 +1382,7 @@ type AdminAttributeFamily implements Node {
   _id: Int
   code: String
   name: String
+  attributeGroups: Iterable
 }
 
 "Information about the current page."
@@ -1293,10 +1410,17 @@ type AdminBooking implements Node {
   fromFormatted: String
   toFormatted: String
   bookingProductEventTicketId: Int
+  order: Iterable
+  orderItem: Iterable
   paymentMethod: String
   paymentTitle: String
   shippingMethod: String
   shippingTitle: String
+  billingAddress: Iterable
+  shippingAddress: Iterable
+  invoices: Iterable
+  shipments: Iterable
+  refunds: Iterable
   createdAt: String
 }
 
@@ -1345,6 +1469,9 @@ type AdminCart implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -1912,6 +2039,12 @@ type AdminProductDetailTranslation implements Node {
   specialPriceFrom: String
   specialPriceTo: String
   weight: Float
+  quantity: Int
+  imagesCount: Int
+  manageStock: String
+  baseImage: String
+  categoryName: String
+  attributeFamilyName: String
   createdAt: String
   locale: String
   channel: String
@@ -2742,6 +2875,8 @@ type AdminCategory implements Node {
   locale: String
   createdAt: String
   updatedAt: String
+  translations: Iterable
+  filterableAttributeIds: Iterable
 }
 
 "Information about the current page."
@@ -2775,6 +2910,7 @@ type AdminCategoryTree implements Node {
   position: Int
   parentId: Int
   displayMode: String
+  children: Iterable
 }
 
 "Information about the current page."
@@ -2931,12 +3067,14 @@ type AdminConfigurationMenu implements Node {
   id: ID!
   _id: String
   slug: String
+  tree: [Iterable]
 }
 
 "Lists every registered configuration slug for discovery."
 type AdminConfigurationSlug implements Node {
   id: ID!
   _id: String
+  slugs: Iterable
 }
 
 "Returns the effective configuration values for the given slug."
@@ -2945,6 +3083,7 @@ type AdminConfigurationValues implements Node {
   slug: String
   channel: String
   locale: String
+  values: Iterable
 }
 
 "Cursor connection for AdminCustomer."
@@ -2982,7 +3121,6 @@ type AdminCustomer implements Node {
   rememberToken: String
   createdAt: String
   updatedAt: String
-  deviceToken: String
   message: String
   name: String
   totalAddresses: String
@@ -3082,6 +3220,7 @@ type AdminCustomerCartItem implements Node {
   formattedPrice: String
   total: Float
   formattedTotal: String
+  additional: Iterable
 }
 
 "Information about the current page."
@@ -3252,6 +3391,7 @@ type AdminCustomerRecentOrderItem implements Node {
   price: Float
   formattedPrice: String
   productImage: String
+  additional: Iterable
 }
 
 "Information about the current page."
@@ -3370,7 +3510,6 @@ type AdminCustomerReviewCustomerRef implements Node {
   rememberToken: String
   createdAt: String
   updatedAt: String
-  deviceToken: String
   name: String
 }
 
@@ -3408,6 +3547,7 @@ type AdminCustomerWishlistItem implements Node {
   price: Float
   formattedPrice: String
   productImage: String
+  additional: Iterable
 }
 
 "Information about the current page."
@@ -3423,6 +3563,7 @@ type AdminDashboard implements Node {
   id: ID!
   type: String
   dateRange: String
+  statistics: Iterable
 }
 
 "Cursor connection for AdminEuWithdrawal."
@@ -3594,6 +3735,7 @@ type AdminInvoiceItem implements Node {
   productType: String
   orderItemId: Int
   invoiceId: String
+  additional: Iterable
   createdAt: String
   updatedAt: String
   formattedPrice: String
@@ -3841,6 +3983,7 @@ type AdminOrderDetailItem implements Node {
   orderId: String
   taxCategoryId: String
   parentId: String
+  additional: Iterable
   rmaReturnPeriod: Int
   createdAt: String
   updatedAt: String
@@ -4095,7 +4238,6 @@ type AdminOrderDetailCustomer implements Node {
   rememberToken: String
   createdAt: String
   updatedAt: String
-  deviceToken: String
   name: String
   group: AdminOrderDetailCustomerGroup
 }
@@ -4322,6 +4464,7 @@ type AdminMarketingCartRule implements Node {
   usesPerCoupon: Int!
   timesUsed: Int!
   conditionType: Int!
+  conditions: Iterable
   endOtherRules: Int!
   usesAttributeConditions: Int!
   actionType: String
@@ -4474,6 +4617,7 @@ type AdminMarketingCatalogRule implements Node {
   endsTill: String
   status: Int!
   conditionType: Int!
+  conditions: Iterable
   endOtherRules: Int!
   actionType: String
   discountAmount: Float!
@@ -4642,6 +4786,9 @@ type AdminMarketingSitemap implements Node {
   "Detail-only: path of the generated sitemap index file under the public disk."
   indexFile: String
 
+  "Detail-only: list of generated child sitemap file paths under the public disk."
+  generatedSitemaps: Iterable
+
   createdAt: String
   updatedAt: String
 }
@@ -4758,6 +4905,7 @@ type AdminMarketingUrlRewritePageInfo {
 type AdminMenu implements Node {
   id: ID!
   _id: String
+  tree: Iterable
 }
 
 "Cursor connection for AdminOrder."
@@ -4987,6 +5135,7 @@ type AdminPermissions implements Node {
   id: ID!
   _id: String
   permissionType: String
+  permissions: Iterable
 }
 
 "Cursor connection for AdminProduct."
@@ -5103,6 +5252,9 @@ type AdminRefund implements Node {
   paymentTitle: String
   shippingMethod: String
   shippingTitle: String
+  billingAddress: Iterable
+  shippingAddress: Iterable
+  items: Iterable!
 }
 
 "Cursor connection for AdminRefund."
@@ -5131,6 +5283,8 @@ type AdminReportingCustomers implements Node {
   id: ID!
   entity: String
   type: String
+  dateRange: Iterable
+  statistics: Iterable
 }
 
 "Reporting overview — aggregate headline stats. `type` picks the stat group, `start`/`end` (ISO) + `channel` (code) bound the period."
@@ -5138,6 +5292,8 @@ type AdminReportingOverview implements Node {
   id: ID!
   entity: String
   type: String
+  dateRange: Iterable
+  statistics: Iterable
 }
 
 "Product reporting stats."
@@ -5145,6 +5301,8 @@ type AdminReportingProducts implements Node {
   id: ID!
   entity: String
   type: String
+  dateRange: Iterable
+  statistics: Iterable
 }
 
 "Sales reporting stats."
@@ -5152,6 +5310,8 @@ type AdminReportingSales implements Node {
   id: ID!
   entity: String
   type: String
+  dateRange: Iterable
+  statistics: Iterable
 }
 
 "Cursor connection for AdminReturn."
@@ -5182,6 +5342,9 @@ type AdminReturn implements Node {
   packageCondition: String
   information: String
   canReopen: Boolean
+  item: Iterable
+  images: Iterable
+  availableStatuses: Iterable
   messagesCount: Int
   createdAt: String
   updatedAt: String
@@ -5252,6 +5415,7 @@ type AdminRmaCustomField implements Node {
   position: Int
   inputValidation: String
   status: Int
+  options: Iterable
   message: String
   createdAt: String
   updatedAt: String
@@ -5285,6 +5449,7 @@ type AdminRmaReason implements Node {
   status: Int
   position: Int
   isAdmin: Int
+  resolutionType: Iterable
   message: String
   createdAt: String
   updatedAt: String
@@ -5388,7 +5553,9 @@ type AdminSettingsChannel implements Node {
   hostname: String
   logo: String
   favicon: String
+  homeSeo: Iterable
   isMaintenanceOn: Boolean!
+  allowedIps: Iterable
   rootCategoryId: Int
   defaultLocaleId: Int!
   baseCurrencyId: Int!
@@ -5489,6 +5656,8 @@ type AdminSettingsChannelTranslationRef implements Node {
   name: String!
   description: String
   maintenanceModeText: String
+  logoAlt: String
+  homeSeo: Iterable
   createdAt: String
   updatedAt: String
 }
@@ -5702,16 +5871,19 @@ type AdminSettingsDataTransferImport implements Node {
   processedRowsCount: Int
   invalidRowsCount: Int
   errorsCount: Int
+  errors: Iterable
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
   errorFilePath: String
+  summary: Iterable
   startedAt: String
   completedAt: String
   createdAt: String
   updatedAt: String
   success: Boolean
   isValid: Boolean
+  stats: Iterable
   message: String
 }
 
@@ -5736,16 +5908,19 @@ type AdminSettingsDataTransferImportStats implements Node {
   processedRowsCount: Int
   invalidRowsCount: Int
   errorsCount: Int
+  errors: Iterable
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
   errorFilePath: String
+  summary: Iterable
   startedAt: String
   completedAt: String
   createdAt: String
   updatedAt: String
   success: Boolean
   isValid: Boolean
+  stats: Iterable
   message: String
 }
 
@@ -5884,6 +6059,7 @@ type AdminSettingsRole implements Node {
   name: String
   description: String
   permissionType: String
+  permissions: Iterable
   createdAt: String
   updatedAt: String
   message: String
@@ -6024,92 +6200,6 @@ type AdminSettingsTaxRatePageInfo {
   hasPreviousPage: Boolean!
 }
 
-"Cursor connection for AdminSettingsTheme."
-type AdminSettingsThemeCursorConnection {
-  edges: [AdminSettingsThemeEdge]
-  pageInfo: AdminSettingsThemePageInfo!
-  totalCount: Int!
-}
-
-"Edge of AdminSettingsTheme."
-type AdminSettingsThemeEdge {
-  node: AdminSettingsTheme
-  cursor: String!
-}
-
-"Admin settings theme customizations listing (cursor pagination)."
-type AdminSettingsTheme implements Node {
-  id: ID!
-  _id: Int!
-  themeCode: String
-  type: String!
-  name: String!
-  sortOrder: Int!
-  status: Boolean!
-  channelId: Int!
-  createdAt: String
-  updatedAt: String
-  message: String
-  translations(
-    "Returns the first n elements from the list."
-    first: Int
-
-    "Returns the last n elements from the list."
-    last: Int
-
-    "Returns the elements in the list that come before the specified cursor."
-    before: String
-
-    "Returns the elements in the list that come after the specified cursor."
-    after: String
-  ): AdminSettingsThemeTranslationRefCursorConnection
-}
-
-"Cursor connection for AdminSettingsThemeTranslationRef."
-type AdminSettingsThemeTranslationRefCursorConnection {
-  edges: [AdminSettingsThemeTranslationRefEdge]
-  pageInfo: AdminSettingsThemeTranslationRefPageInfo!
-  totalCount: Int!
-}
-
-"Edge of AdminSettingsThemeTranslationRef."
-type AdminSettingsThemeTranslationRefEdge {
-  node: AdminSettingsThemeTranslationRef
-  cursor: String!
-}
-
-"""
-Theme translation — nested sub-resource of AdminSettingsTheme (`translations`
-connection). Backed by `theme_customization_translations` as a plain HasMany
-(standard FK `theme_customization_id` → no pivot gotcha).
-
-`options` is genuinely dynamic theme-config JSON, so it stays a JSON scalar
-node field (never objectified). `locale` surfaces as `locale`, the row id as
-`_id`, via the central converter.
-"""
-type AdminSettingsThemeTranslationRef implements Node {
-  id: ID!
-  _id: Int!
-  themeCustomizationId: String!
-  locale: String!
-}
-
-"Information about the current page."
-type AdminSettingsThemeTranslationRefPageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
-"Information about the current page."
-type AdminSettingsThemePageInfo {
-  endCursor: String
-  startCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-}
-
 "Cursor connection for AdminSettingsUser."
 type AdminSettingsUserCursorConnection {
   edges: [AdminSettingsUserEdge]
@@ -6175,8 +6265,11 @@ type AdminShipment implements Node {
   emailSent: Boolean
   inventorySourceId: Int
   inventorySourceName: String
+  billingAddress: Iterable
+  shippingAddress: Iterable
   createdAt: String
   updatedAt: String
+  items: Iterable!
 }
 
 "Cursor connection for AdminShipment."
@@ -6214,8 +6307,10 @@ type AdminTransaction implements Node {
   type: String
   paymentMethod: String
   paymentTitle: String
+  data: Iterable
   createdAt: String
   updatedAt: String
+  order: Iterable
 }
 
 "Cursor connection for AdminTransaction."
@@ -6240,6 +6335,36 @@ type AdminTransactionPageInfo {
 }
 
 type Mutation {
+  "Creates a AdminAppearanceSection."
+  createAdminAppearanceSection(input: createAdminAppearanceSectionInput!): createAdminAppearanceSectionPayload
+
+  "Updates a AdminAppearanceSection."
+  updateAdminAppearanceSection(input: updateAdminAppearanceSectionInput!): updateAdminAppearanceSectionPayload
+
+  "Deletes a AdminAppearanceSection."
+  deleteAdminAppearanceSection(input: deleteAdminAppearanceSectionInput!): deleteAdminAppearanceSectionPayload
+
+  "Creates a AdminAppearanceSectionDiscard."
+  createAdminAppearanceSectionDiscard(input: createAdminAppearanceSectionDiscardInput!): createAdminAppearanceSectionDiscardPayload
+
+  "Creates a AdminAppearanceSectionDraft."
+  createAdminAppearanceSectionDraft(input: createAdminAppearanceSectionDraftInput!): createAdminAppearanceSectionDraftPayload
+
+  "Creates a AdminAppearanceSectionDuplicate."
+  createAdminAppearanceSectionDuplicate(input: createAdminAppearanceSectionDuplicateInput!): createAdminAppearanceSectionDuplicatePayload
+
+  "Creates a AdminAppearanceSectionPublish."
+  createAdminAppearanceSectionPublish(input: createAdminAppearanceSectionPublishInput!): createAdminAppearanceSectionPublishPayload
+
+  "Creates a AdminAppearanceSectionReorder."
+  createAdminAppearanceSectionReorder(input: createAdminAppearanceSectionReorderInput!): createAdminAppearanceSectionReorderPayload
+
+  "Creates a AdminAppearanceSectionStatus."
+  createAdminAppearanceSectionStatus(input: createAdminAppearanceSectionStatusInput!): createAdminAppearanceSectionStatusPayload
+
+  "Creates a AdminAppearanceThemeActivate."
+  createAdminAppearanceThemeActivate(input: createAdminAppearanceThemeActivateInput!): createAdminAppearanceThemeActivatePayload
+
   "Create a new catalog attribute. Becomes createAdminAttribute in GraphQL."
   createAdminAttribute(input: createAdminAttributeInput!): createAdminAttributePayload
 
@@ -6780,21 +6905,6 @@ type Mutation {
   "Delete a tax rate. Becomes deleteAdminSettingsTaxRate."
   deleteAdminSettingsTaxRate(input: deleteAdminSettingsTaxRateInput!): deleteAdminSettingsTaxRatePayload
 
-  "Create a theme customization. Becomes createAdminSettingsTheme."
-  createAdminSettingsTheme(input: createAdminSettingsThemeInput!): createAdminSettingsThemePayload
-
-  "Update a theme customization. Becomes updateAdminSettingsTheme."
-  updateAdminSettingsTheme(input: updateAdminSettingsThemeInput!): updateAdminSettingsThemePayload
-
-  "Delete a theme customization. Becomes deleteAdminSettingsTheme."
-  deleteAdminSettingsTheme(input: deleteAdminSettingsThemeInput!): deleteAdminSettingsThemePayload
-
-  "Mass-delete theme customizations. Becomes createAdminSettingsThemeMassDelete."
-  createAdminSettingsThemeMassDelete(input: createAdminSettingsThemeMassDeleteInput!): createAdminSettingsThemeMassDeletePayload
-
-  "Mass-update status of theme customizations. Becomes createAdminSettingsThemeMassUpdateStatus."
-  createAdminSettingsThemeMassUpdateStatus(input: createAdminSettingsThemeMassUpdateStatusInput!): createAdminSettingsThemeMassUpdateStatusPayload
-
   "Create a new admin user. Becomes createAdminSettingsUser."
   createAdminSettingsUser(input: createAdminSettingsUserInput!): createAdminSettingsUserPayload
 
@@ -6812,6 +6922,285 @@ type Mutation {
 
   "Record a payment against an invoice (create transaction)."
   createAdminTransaction(input: createAdminTransactionInput!): createAdminTransactionPayload
+}
+
+"Creates a AdminAppearanceSection."
+input createAdminAppearanceSectionInput {
+  "Theme code the section belongs to"
+  code: String
+
+  "Channel the section is created for; defaults to the current channel"
+  channel: Int
+
+  "Section name shown in the editor"
+  name: String
+
+  "Section type: image_carousel, product_carousel, category_carousel, footer_links, static_content or services_content"
+  type: String
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSection."
+type createAdminAppearanceSectionPayload {
+  adminAppearanceSection: createAdminAppearanceSectionPayloadData
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSection."
+type createAdminAppearanceSectionPayloadData implements Node {
+  id: ID!
+  _id: Int!
+  themeCode: String
+  type: String!
+  name: String!
+  sortOrder: Int!
+  draftSortOrder: Int
+  status: Int!
+  draftStatus: Boolean
+  channelId: Int!
+  createdAt: String
+  updatedAt: String
+  hasDraft: String
+  isPinned: String
+  message: String
+  translations: AdminAppearanceSectionTranslationCursorConnection
+}
+
+"Updates a AdminAppearanceSection."
+input updateAdminAppearanceSectionInput {
+  id: ID!
+  _id: String
+  name: String
+
+  "Section type: image_carousel, product_carousel, category_carousel, footer_links, static_content or services_content"
+  type: String
+  sortOrder: Int
+  channelId: Int
+  themeCode: String
+
+  "Published on/off state"
+  status: Boolean
+
+  "Locale the options belong to; defaults to the channel locale"
+  locale: String
+
+  "Published options for the locale"
+  options: Iterable
+  clientMutationId: String
+}
+
+"Updates a AdminAppearanceSection."
+type updateAdminAppearanceSectionPayload {
+  adminAppearanceSection: updateAdminAppearanceSectionPayloadData
+  clientMutationId: String
+}
+
+"Updates a AdminAppearanceSection."
+type updateAdminAppearanceSectionPayloadData implements Node {
+  id: ID!
+  _id: Int
+  themeCode: String
+  type: String
+  name: String
+  sortOrder: Int
+  draftSortOrder: Int
+  status: Int
+  draftStatus: Boolean
+  channelId: Int
+  createdAt: String
+  updatedAt: String
+  hasDraft: String
+  isPinned: String
+  message: String
+  translations: AdminAppearanceSectionTranslationCursorConnection
+}
+
+"Deletes a AdminAppearanceSection."
+input deleteAdminAppearanceSectionInput {
+  id: ID!
+  clientMutationId: String
+}
+
+"Deletes a AdminAppearanceSection."
+type deleteAdminAppearanceSectionPayload {
+  adminAppearanceSection: AdminAppearanceSection
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionDiscard."
+input createAdminAppearanceSectionDiscardInput {
+  "Theme whose staged edits are being discarded"
+  code: String
+
+  "Channel being discarded; defaults to the current channel"
+  channel: Int
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionDiscard."
+type createAdminAppearanceSectionDiscardPayload {
+  adminAppearanceSectionDiscard: AdminAppearanceSectionDiscard
+  clientMutationId: String
+}
+
+"Throws away every staged edit of a theme and channel, leaving the published content."
+type AdminAppearanceSectionDiscard implements Node {
+  id: ID!
+  themeCode: String
+  channelId: Int
+  sectionIds: Iterable!
+  message: String
+}
+
+"Creates a AdminAppearanceSectionDraft."
+input createAdminAppearanceSectionDraftInput {
+  "Section the draft belongs to"
+  sectionId: Int
+
+  "Locale the options are written for; defaults to the channel locale"
+  locale: String
+
+  "Staged options for the locale"
+  options: Iterable
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionDraft."
+type createAdminAppearanceSectionDraftPayload {
+  adminAppearanceSectionDraft: AdminAppearanceSectionDraft
+  clientMutationId: String
+}
+
+"Unpublished edits for one section and locale, held until the theme is published."
+type AdminAppearanceSectionDraft implements Node {
+  id: ID!
+  sectionId: Int
+  locale: String
+  hasDraft: Boolean
+  message: String
+}
+
+"Creates a AdminAppearanceSectionDuplicate."
+input createAdminAppearanceSectionDuplicateInput {
+  "Section being copied"
+  sectionId: Int
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionDuplicate."
+type createAdminAppearanceSectionDuplicatePayload {
+  adminAppearanceSectionDuplicate: AdminAppearanceSectionDuplicate
+  clientMutationId: String
+}
+
+type AdminAppearanceSectionDuplicate implements Node {
+  id: ID!
+  sectionId: Int
+  sourceId: Int
+  name: String
+  type: String
+  message: String
+}
+
+"Creates a AdminAppearanceSectionPublish."
+input createAdminAppearanceSectionPublishInput {
+  "Theme whose staged edits are being published"
+  code: String
+
+  "Channel being published; defaults to the current channel"
+  channel: Int
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionPublish."
+type createAdminAppearanceSectionPublishPayload {
+  adminAppearanceSectionPublish: AdminAppearanceSectionPublish
+  clientMutationId: String
+}
+
+"Promotes every staged edit of a theme and channel to what the storefront draws."
+type AdminAppearanceSectionPublish implements Node {
+  id: ID!
+  themeCode: String
+  channelId: Int
+  sectionIds: Iterable!
+  message: String
+}
+
+"Creates a AdminAppearanceSectionReorder."
+input createAdminAppearanceSectionReorderInput {
+  "Section IDs in the order they should be drawn"
+  sectionIds: Iterable
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionReorder."
+type createAdminAppearanceSectionReorderPayload {
+  adminAppearanceSectionReorder: AdminAppearanceSectionReorder
+  clientMutationId: String
+}
+
+"""
+Render order is staged like any other edit. Footer links are always drawn last, so
+they are moved back to the end of whatever order is sent.
+"""
+type AdminAppearanceSectionReorder implements Node {
+  id: ID!
+  _id: String
+  sectionIds: Iterable!
+  hasDraft: Iterable!
+  message: String
+}
+
+"Creates a AdminAppearanceSectionStatus."
+input createAdminAppearanceSectionStatusInput {
+  "Section whose on/off state is being staged"
+  sectionId: Int
+
+  "Whether the section should be shown once published"
+  status: Boolean
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceSectionStatus."
+type createAdminAppearanceSectionStatusPayload {
+  adminAppearanceSectionStatus: AdminAppearanceSectionStatus
+  clientMutationId: String
+}
+
+"""
+Switching a section on or off is staged like any other edit, so the storefront only
+changes once the theme is published.
+"""
+type AdminAppearanceSectionStatus implements Node {
+  id: ID!
+  sectionId: Int
+  draftStatus: Boolean
+  hasDraft: Boolean
+  message: String
+}
+
+"Creates a AdminAppearanceThemeActivate."
+input createAdminAppearanceThemeActivateInput {
+  "Theme code to activate"
+  code: String
+
+  "Channels the theme is applied to"
+  channelIds: Iterable
+  clientMutationId: String
+}
+
+"Creates a AdminAppearanceThemeActivate."
+type createAdminAppearanceThemeActivatePayload {
+  adminAppearanceThemeActivate: AdminAppearanceThemeActivate
+  clientMutationId: String
+}
+
+type AdminAppearanceThemeActivate implements Node {
+  id: ID!
+  code: String
+  activatedOn: Iterable!
+  message: String
 }
 
 "Create a new catalog attribute. Becomes createAdminAttribute in GraphQL."
@@ -6866,6 +7255,12 @@ input createAdminAttributeInput {
 
   "Sort position."
   position: Int
+
+  "Locale-keyed translations map."
+  translations: Iterable
+
+  "Options array (for select/multiselect/checkbox types)."
+  options: Iterable
   clientMutationId: String
 }
 
@@ -6932,6 +7327,12 @@ input updateAdminAttributeInput {
 
   "Sort position."
   position: Int
+
+  "Locale-keyed translations map."
+  translations: Iterable
+
+  "Full replacement options array. Items with id are updated; without id are inserted; omitted ids are deleted."
+  options: Iterable
   clientMutationId: String
 }
 
@@ -6960,6 +7361,9 @@ input createAdminAttributeFamilyInput {
 
   "Family display name."
   name: String
+
+  "Attribute groups (each with optional custom_attributes list)."
+  attributeGroups: Iterable
   clientMutationId: String
 }
 
@@ -6981,6 +7385,9 @@ input updateAdminAttributeFamilyInput {
 
   "Family display name."
   name: String
+
+  "Attribute groups map (numeric keys = existing, group_* keys = new). Omitted ids are deleted."
+  attributeGroups: Iterable
   clientMutationId: String
 }
 
@@ -7004,6 +7411,8 @@ type deleteAdminAttributeFamilyPayload {
 
 "Mass-delete a batch of user-defined attributes. Becomes createAdminAttributeMassDelete in GraphQL."
 input createAdminAttributeMassDeleteInput {
+  "Array of attribute IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -7027,6 +7436,7 @@ GraphQL:
 type AdminAttributeMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -7040,6 +7450,9 @@ input createAdminAttributeOptionInput {
 
   "Swatch value (hex color, image path, or text label depending on parent swatch_type)."
   swatchValue: String
+
+  "Locale-keyed label translations."
+  translations: Iterable
   clientMutationId: String
   attributeId: Int!
 }
@@ -7089,6 +7502,9 @@ input updateAdminAttributeOptionInput {
 
   "Swatch value (hex color, image path, or text label depending on parent swatch_type)."
   swatchValue: String
+
+  "Locale-keyed label translations."
+  translations: Iterable
   clientMutationId: String
   attributeId: Int!
   optionId: Int!
@@ -7157,6 +7573,15 @@ input addItemAdminCartInput {
 
   "Configurable products: the chosen variant product id."
   selectedConfigurableOption: Int
+
+  "Downloadable products: list of downloadable-link ids."
+  links: Iterable
+
+  "Grouped products: list of { productId, quantity }."
+  groupedQuantities: Iterable
+
+  "Bundle products: list of { optionId, productIds, quantity }."
+  bundleOptions: Iterable
   clientMutationId: String
 }
 
@@ -7190,6 +7615,9 @@ type addItemAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7198,6 +7626,7 @@ type addItemAdminCartPayloadData implements Node {
 input updateItemsAdminCartInput {
   id: ID!
   cartId: String
+  qty: Iterable
   clientMutationId: String
 }
 
@@ -7231,6 +7660,9 @@ type updateItemsAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7273,6 +7705,9 @@ type removeItemAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7281,6 +7716,8 @@ type removeItemAdminCartPayloadData implements Node {
 input saveAddressAdminCartInput {
   id: ID!
   cartId: String
+  billing: Iterable
+  shipping: Iterable
   clientMutationId: String
 }
 
@@ -7314,6 +7751,9 @@ type saveAddressAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7356,6 +7796,9 @@ type applyCouponAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7398,6 +7841,9 @@ type removeCouponAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7444,6 +7890,9 @@ type setShippingMethodAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7490,6 +7939,9 @@ type setPaymentMethodAdminCartPayloadData implements Node {
   paymentMethod: String
   paymentMethodTitle: String
   haveStockableItems: Boolean
+  items: Iterable!
+  billingAddress: Iterable
+  shippingAddress: Iterable
   success: Boolean
   message: String
 }
@@ -7504,6 +7956,9 @@ input createAdminCatalogProductInput {
 
   "Product type. Defaults to \"simple\". One of: simple, virtual, downloadable, grouped, bundle, configurable, booking."
   type: String
+
+  "Required for type=configurable. Map of attribute code (or id) to option_ids, e.g. { \"color\": [1,2], \"size\": [4,5] }. Generates the Cartesian-product of variants on the server."
+  superAttributes: Iterable
   clientMutationId: String
 }
 
@@ -7594,6 +8049,17 @@ input updateAdminCatalogProductInput {
   cost: String
   weight: String
   taxCategoryId: Int
+  categories: Iterable
+  channels: Iterable
+  translations: Iterable
+  superAttributes: Iterable
+  variants: Iterable
+  bundleOptions: Iterable
+  links: Iterable
+  downloadableLinks: Iterable
+  downloadableSamples: Iterable
+  booking: Iterable
+  extras: Iterable
   clientMutationId: String
 }
 
@@ -7782,6 +8248,7 @@ type deleteAdminCatalogProductCustomerGroupPricePayload {
 "Placeholder for createAdminCatalogProductImage — binary upload is REST-only. Use POST /api/admin/catalog/products/{productId}/images."
 input createAdminCatalogProductImageInput {
   productId: Int
+  order: Iterable
   clientMutationId: String
 }
 
@@ -7823,12 +8290,14 @@ type AdminCatalogProductImage implements Node {
   url: String
   success: Boolean
   message: String
+  images: Iterable
 }
 
 "Reorder product images. Becomes reorderAdminCatalogProductImage."
 input reorderAdminCatalogProductImageInput {
   id: ID!
   productId: Int
+  order: Iterable
   clientMutationId: String
 }
 
@@ -7856,6 +8325,9 @@ input updateAdminCatalogProductInventoryInput {
 
   "Product ID — taken from the URL on REST, required on GraphQL."
   productId: Int
+
+  "Map of inventory_source_id → quantity. Use 0 to zero-out a source."
+  inventories: Iterable
   clientMutationId: String
 }
 
@@ -7887,6 +8359,8 @@ type updateAdminCatalogProductInventoryPayloadData implements Node {
 
 "Mass-delete a batch of catalog products. Becomes createAdminCatalogProductMassDelete in GraphQL."
 input createAdminCatalogProductMassDeleteInput {
+  "Array of product IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -7910,11 +8384,15 @@ GraphQL:
 type AdminCatalogProductMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
 "Mass-update status for a batch of catalog products. Becomes createAdminCatalogProductMassUpdateStatus."
 input createAdminCatalogProductMassUpdateStatusInput {
+  "Array of product IDs to update."
+  indices: Iterable
+
   "New status value (0 = disabled, 1 = enabled)."
   value: Int
   clientMutationId: String
@@ -7940,6 +8418,7 @@ GraphQL:
 type AdminCatalogProductMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -8008,6 +8487,9 @@ input createAdminCategoryInput {
   "Sort position among siblings."
   position: Int
 
+  "List of filterable attribute IDs to attach."
+  attributes: Iterable
+
   "Parent category ID. Null/omitted for a root category."
   parentId: Int
 
@@ -8028,6 +8510,12 @@ input createAdminCategoryInput {
 
   "SEO meta keywords."
   metaKeywords: String
+
+  "Optional logo path(s). File-upload is not supported in v1 — accepts pre-uploaded storage paths."
+  logoPath: Iterable
+
+  "Optional banner path(s). File-upload is not supported in v1 — accepts pre-uploaded storage paths."
+  bannerPath: Iterable
   clientMutationId: String
 }
 
@@ -8050,6 +8538,9 @@ input updateAdminCategoryInput {
   "Sort position among siblings."
   position: Int
 
+  "Filterable attribute IDs to sync onto the category."
+  attributes: Iterable
+
   "Parent category ID. Change this (with position) to move the category."
   parentId: Int
 
@@ -8058,6 +8549,15 @@ input updateAdminCategoryInput {
 
   "Status (1 = enabled, 0 = disabled)."
   status: Int
+
+  "Optional logo path(s). File-upload is not supported in v1."
+  logoPath: Iterable
+
+  "Optional banner path(s). File-upload is not supported in v1."
+  bannerPath: Iterable
+
+  "Per-locale translation block: { en: { slug, name, description, ... } }."
+  en: Iterable
   clientMutationId: String
 }
 
@@ -8081,6 +8581,8 @@ type deleteAdminCategoryPayload {
 
 "Mass-delete a batch of categories. Becomes createAdminCategoryMassDelete in GraphQL."
 input createAdminCategoryMassDeleteInput {
+  "Array of category IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -8105,11 +8607,15 @@ GraphQL:
 type AdminCategoryMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
 "Mass-update status for a batch of categories. Becomes createAdminCategoryMassUpdateStatus."
 input createAdminCategoryMassUpdateStatusInput {
+  "Array of category IDs to update."
+  indices: Iterable
+
   "New status value (0 = disabled, 1 = enabled)."
   value: Int
   clientMutationId: String
@@ -8135,6 +8641,7 @@ GraphQL:
 type AdminCategoryMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -8148,6 +8655,9 @@ input createAdminCmsPageInput {
 
   "Page HTML content."
   htmlContent: String
+
+  "Channel IDs to attach the page to."
+  channels: Iterable
 
   "SEO meta title."
   metaTitle: String
@@ -8175,6 +8685,12 @@ input updateAdminCmsPageInput {
 
   "Locale code (e.g. \"en\"). Determines which nested locale block is required."
   locale: String
+
+  "Channel IDs to sync onto the page."
+  channels: Iterable
+
+  "Per-locale translation block: { en: { url_key, page_title, html_content, ... } }."
+  en: Iterable
   clientMutationId: String
 }
 
@@ -8198,6 +8714,8 @@ type deleteAdminCmsPagePayload {
 
 "Mass-delete a batch of CMS pages. Becomes createAdminCmsPageMassDelete."
 input createAdminCmsPageMassDeleteInput {
+  "Array of CMS page IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -8221,6 +8739,7 @@ GraphQL:
 type AdminCmsPageMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -8234,6 +8753,9 @@ input createAdminConfigurationUpdateInput {
 
   "Locale code for locale-based fields."
   locale: String
+
+  "Flat map of dotted field codes to values."
+  values: Iterable
   clientMutationId: String
 }
 
@@ -8267,6 +8789,7 @@ type AdminConfigurationUpdate implements Node {
   message: String
   channel: String
   locale: String
+  values: Iterable
 }
 
 "Create a new customer. Becomes createAdminCustomer."
@@ -8457,6 +8980,7 @@ type AdminCustomerGdprDownloadData implements Node {
   customerId: Int
   customerEmail: String
   generatedAt: String
+  data: Iterable
 }
 
 "Approve + execute a GDPR request. Becomes createAdminCustomerGdprProcess."
@@ -8580,6 +9104,7 @@ type deleteAdminCustomerGroupPayload {
 
 "Creates a AdminCustomerGroupMassDelete."
 input createAdminCustomerGroupMassDeleteInput {
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -8592,6 +9117,8 @@ type createAdminCustomerGroupMassDeletePayload {
 type AdminCustomerGroupMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
+  skipped: Iterable
   message: String
 }
 
@@ -8629,6 +9156,7 @@ type AdminCustomerImpersonate implements Node {
 
 "Creates a AdminCustomerMassDelete."
 input createAdminCustomerMassDeleteInput {
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -8641,11 +9169,14 @@ type createAdminCustomerMassDeletePayload {
 type AdminCustomerMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
+  skipped: Iterable
   message: String
 }
 
 "Creates a AdminCustomerMassUpdateStatus."
 input createAdminCustomerMassUpdateStatusInput {
+  indices: Iterable
   value: Int
   clientMutationId: String
 }
@@ -8659,6 +9190,7 @@ type createAdminCustomerMassUpdateStatusPayload {
 type AdminCustomerMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   value: Int
   message: String
 }
@@ -8710,6 +9242,7 @@ type deleteAdminCustomerReviewPayload {
 
 "Creates a AdminCustomerReviewMassDelete."
 input createAdminCustomerReviewMassDeleteInput {
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -8722,11 +9255,15 @@ type createAdminCustomerReviewMassDeletePayload {
 type AdminCustomerReviewMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
+  skipped: Iterable
   message: String
 }
 
 "Creates a AdminCustomerReviewMassUpdateStatus."
 input createAdminCustomerReviewMassUpdateStatusInput {
+  indices: Iterable
+
   "pending|approved|disapproved"
   value: String
   clientMutationId: String
@@ -8741,6 +9278,7 @@ type createAdminCustomerReviewMassUpdateStatusPayload {
 type AdminCustomerReviewMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   value: String
   message: String
 }
@@ -8823,6 +9361,9 @@ input createAdminInvoiceInput {
   "Order id (GraphQL only — REST takes it from the URL)."
   orderId: Int
 
+  "Items to invoice: array of { orderItemId, quantity }."
+  items: Iterable!
+
   "When true, also records an order transaction for the invoice (the admin \"Create Transaction\" checkbox). The transaction captures the invoice amount against the order's payment method. Defaults to false."
   canCreateTransaction: Boolean
   clientMutationId: String
@@ -8836,6 +9377,9 @@ type createAdminInvoicePayload {
 
 "Mass-update status for a batch of invoices. Becomes createAdminInvoiceMassUpdateStatus."
 input createAdminInvoiceMassUpdateStatusInput {
+  "Array of invoice ids to update."
+  indices: Iterable
+
   "New invoice status: pending, paid, or overdue."
   value: String
   clientMutationId: String
@@ -8850,6 +9394,7 @@ type createAdminInvoiceMassUpdateStatusPayload {
 type AdminInvoiceMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -8971,6 +9516,12 @@ input createAdminMarketingCartRuleInput {
   "Description."
   description: String
 
+  "Channel ids the rule applies to."
+  channels: Iterable
+
+  "Customer-group ids the rule applies to."
+  customerGroups: Iterable
+
   "Start date (ISO 8601 / Y-m-d)."
   startsFrom: String
 
@@ -8997,6 +9548,9 @@ input createAdminMarketingCartRuleInput {
 
   "Condition combinator: 1=ALL, 0=ANY."
   conditionType: Int
+
+  "Conditions JSON tree."
+  conditions: Iterable
 
   "Action type: by_percent | by_fixed | cart_fixed | buy_x_get_y."
   actionType: String
@@ -9041,6 +9595,8 @@ input updateAdminMarketingCartRuleInput {
   _id: String
   name: String
   description: String
+  channels: Iterable
+  customerGroups: Iterable
   startsFrom: String
   endsTill: String
   status: Int
@@ -9050,6 +9606,7 @@ input updateAdminMarketingCartRuleInput {
   usagePerCustomer: Int
   usesPerCoupon: Int
   conditionType: Int
+  conditions: Iterable
   actionType: String
   discountAmount: Float
   discountQuantity: Int
@@ -9161,6 +9718,7 @@ type AdminMarketingCartRuleCouponGenerate implements Node {
   _id: Int
   cartRuleId: Int
   generated: Int
+  coupons: Iterable
   success: Boolean
   message: String
 }
@@ -9168,6 +9726,9 @@ type AdminMarketingCartRuleCouponGenerate implements Node {
 "Mass-delete coupons for a cart rule. Becomes createAdminMarketingCartRuleCouponMassDelete."
 input createAdminMarketingCartRuleCouponMassDeleteInput {
   cartRuleId: Int
+
+  "Coupon IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -9182,12 +9743,15 @@ type AdminMarketingCartRuleCouponMassDelete implements Node {
   _id: Int
   cartRuleId: Int
   deleted: Int
+  skipped: Iterable
   success: Boolean
   message: String
 }
 
 "Becomes createAdminMarketingCartRuleMassDelete."
 input createAdminMarketingCartRuleMassDeleteInput {
+  "Array of cart rule IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -9206,6 +9770,8 @@ GraphQL: createAdminMarketingCartRuleMassDelete
 type AdminMarketingCartRuleMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
+  skipped: Iterable
   message: String
 }
 
@@ -9232,6 +9798,9 @@ input createAdminMarketingCatalogRuleInput {
   "Condition matching: 1 = ALL, 0 = ANY."
   conditionType: Int
 
+  "Conditions JSON — array of {attribute, operator, value, ...} rows."
+  conditions: Iterable
+
   "Stop processing other rules after this one matches (0/1)."
   endOtherRules: Int
 
@@ -9240,6 +9809,12 @@ input createAdminMarketingCatalogRuleInput {
 
   "Discount amount. For by_percent: 0..100."
   discountAmount: Float
+
+  "Channel ids to attach via catalog_rule_channels pivot."
+  channels: Iterable
+
+  "Customer group ids to attach via catalog_rule_customer_groups pivot."
+  customerGroups: Iterable
   clientMutationId: String
 }
 
@@ -9262,9 +9837,12 @@ input updateAdminMarketingCatalogRuleInput {
   status: Int
   sortOrder: Int
   conditionType: Int
+  conditions: Iterable
   endOtherRules: Int
   actionType: String
   discountAmount: Float
+  channels: Iterable
+  customerGroups: Iterable
   clientMutationId: String
 }
 
@@ -9288,6 +9866,8 @@ type deleteAdminMarketingCatalogRulePayload {
 
 "Mass-delete a batch of catalog rules. Becomes createAdminMarketingCatalogRuleMassDelete."
 input createAdminMarketingCatalogRuleMassDeleteInput {
+  "Array of catalog rule IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -9311,6 +9891,8 @@ GraphQL:
 type AdminMarketingCatalogRuleMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
+  skipped: Iterable
   message: String
 }
 
@@ -9410,6 +9992,8 @@ type deleteAdminMarketingSearchSynonymPayload {
 
 "Mass-delete search synonyms. Becomes createAdminMarketingSearchSynonymMassDelete."
 input createAdminMarketingSearchSynonymMassDeleteInput {
+  "Array of search synonym IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -9433,6 +10017,7 @@ GraphQL:
 type AdminMarketingSearchSynonymMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -9493,6 +10078,8 @@ type deleteAdminMarketingSearchTermPayload {
 
 "Mass-delete a batch of search terms. Becomes createAdminMarketingSearchTermMassDelete."
 input createAdminMarketingSearchTermMassDeleteInput {
+  "Array of search term IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -9516,6 +10103,7 @@ GraphQL:
 type AdminMarketingSearchTermMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -9584,6 +10172,9 @@ type AdminMarketingSitemapGenerate implements Node {
 
   "Generated sitemap index file path under the public disk."
   indexFile: String
+
+  "Generated child sitemap file paths."
+  generatedSitemaps: Iterable
 
   generatedAt: String
   message: String
@@ -9727,6 +10318,8 @@ type deleteAdminMarketingUrlRewritePayload {
 
 "Mass-delete a batch of URL rewrites. Becomes createAdminMarketingUrlRewriteMassDelete."
 input createAdminMarketingUrlRewriteMassDeleteInput {
+  "Array of URL rewrite IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -9750,6 +10343,7 @@ GraphQL:
 type AdminMarketingUrlRewriteMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -9800,6 +10394,9 @@ type createAdminPlaceOrderPayloadData implements Node {
 input createAdminRefundInput {
   orderId: Int
 
+  "Items to refund: array of { orderItemId, quantity }."
+  items: Iterable!
+
   "Amount of original shipping to refund (in base currency)."
   shipping: Float
 
@@ -9821,6 +10418,9 @@ type createAdminRefundPayload {
 input previewAdminRefundInput {
   id: ID!
   orderId: Int
+
+  "Items to refund: array of { orderItemId, quantity }."
+  items: Iterable!
 
   "Amount of original shipping to refund (in base currency)."
   shipping: Float
@@ -9975,6 +10575,9 @@ input createAdminRmaCustomFieldInput {
   position: Int
   inputValidation: String
   status: Int
+
+  "Required for select/multiselect/checkbox/radio: [{ name, value }]"
+  options: Iterable
   clientMutationId: String
 }
 
@@ -9999,6 +10602,9 @@ input updateAdminRmaCustomFieldInput {
   position: Int
   inputValidation: String
   status: Int
+
+  "Required for select/multiselect/checkbox/radio: [{ name, value }]"
+  options: Iterable
   clientMutationId: String
 }
 
@@ -10022,6 +10628,8 @@ type deleteAdminRmaCustomFieldPayload {
 
 "Creates a AdminRmaCustomFieldMassDelete."
 input createAdminRmaCustomFieldMassDeleteInput {
+  "RMA custom field ids"
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -10034,11 +10642,15 @@ type createAdminRmaCustomFieldMassDeletePayload {
 type AdminRmaCustomFieldMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
 "Creates a AdminRmaCustomFieldMassUpdateStatus."
 input createAdminRmaCustomFieldMassUpdateStatusInput {
+  "RMA custom field ids"
+  indices: Iterable
+
   "New status: 0 or 1"
   value: Int
   clientMutationId: String
@@ -10053,6 +10665,7 @@ type createAdminRmaCustomFieldMassUpdateStatusPayload {
 type AdminRmaCustomFieldMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -10061,6 +10674,9 @@ input createAdminRmaReasonInput {
   title: String
   status: Int
   position: Int
+
+  "One or more of: return, cancel_items"
+  resolutionType: Iterable
   clientMutationId: String
 }
 
@@ -10079,6 +10695,9 @@ input updateAdminRmaReasonInput {
   title: String
   status: Int
   position: Int
+
+  "One or more of: return, cancel_items"
+  resolutionType: Iterable
   clientMutationId: String
 }
 
@@ -10102,6 +10721,8 @@ type deleteAdminRmaReasonPayload {
 
 "Creates a AdminRmaReasonMassDelete."
 input createAdminRmaReasonMassDeleteInput {
+  "RMA reason ids to delete"
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -10114,11 +10735,15 @@ type createAdminRmaReasonMassDeletePayload {
 type AdminRmaReasonMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
 "Creates a AdminRmaReasonMassUpdateStatus."
 input createAdminRmaReasonMassUpdateStatusInput {
+  "RMA reason ids to update"
+  indices: Iterable
+
   "New status: 0 or 1"
   value: Int
   clientMutationId: String
@@ -10133,6 +10758,7 @@ type createAdminRmaReasonMassUpdateStatusPayload {
 type AdminRmaReasonMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -10188,6 +10814,8 @@ type deleteAdminRmaRulePayload {
 
 "Creates a AdminRmaRuleMassDelete."
 input createAdminRmaRuleMassDeleteInput {
+  "RMA rule ids"
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -10200,11 +10828,15 @@ type createAdminRmaRuleMassDeletePayload {
 type AdminRmaRuleMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
 "Creates a AdminRmaRuleMassUpdateStatus."
 input createAdminRmaRuleMassUpdateStatusInput {
+  "RMA rule ids"
+  indices: Iterable
+
   "New status: 0 or 1"
   value: Int
   clientMutationId: String
@@ -10219,6 +10851,7 @@ type createAdminRmaRuleMassUpdateStatusPayload {
 type AdminRmaRuleMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -10268,6 +10901,8 @@ type deleteAdminRmaStatusPayload {
 
 "Creates a AdminRmaStatusMassDelete."
 input createAdminRmaStatusMassDeleteInput {
+  "RMA status ids"
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -10280,11 +10915,15 @@ type createAdminRmaStatusMassDeletePayload {
 type AdminRmaStatusMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
 "Creates a AdminRmaStatusMassUpdateStatus."
 input createAdminRmaStatusMassUpdateStatusInput {
+  "RMA status ids"
+  indices: Iterable
+
   "New status: 0 or 1"
   value: Int
   clientMutationId: String
@@ -10299,6 +10938,7 @@ type createAdminRmaStatusMassUpdateStatusPayload {
 type AdminRmaStatusMassUpdateStatus implements Node {
   id: ID!
   _id: Int
+  updated: Iterable
   message: String
 }
 
@@ -10322,11 +10962,20 @@ input createAdminSettingsChannelInput {
   "Optional timezone (e.g. \"UTC\", \"America/New_York\")."
   timezone: String
 
+  "Locale ids attached to this channel."
+  locales: Iterable
+
   "Default locale id (must appear in `locales`)."
   defaultLocaleId: Int
 
+  "Currency ids attached to this channel."
+  currencies: Iterable
+
   "Base currency id (must appear in `currencies`)."
   baseCurrencyId: Int
+
+  "Inventory source ids attached to this channel."
+  inventorySources: Iterable
 
   "Root category id."
   rootCategoryId: Int
@@ -10354,6 +11003,9 @@ input createAdminSettingsChannelInput {
 
   "Optional storage path of an already-uploaded favicon (binary upload deferred)."
   favicon: String
+
+  "Optional locale-nested overrides: { \"<locale>\": { name, description, home_page_content, footer_content, seo_title, seo_description, seo_keywords, maintenance_mode_text } }. Top-level fields are broadcast to every locale unless overridden here."
+  translations: Iterable
   clientMutationId: String
 }
 
@@ -10388,11 +11040,20 @@ input updateAdminSettingsChannelInput {
   "Optional timezone."
   timezone: String
 
+  "Locale ids attached to this channel."
+  locales: Iterable
+
   "Default locale id."
   defaultLocaleId: Int
 
+  "Currency ids attached to this channel."
+  currencies: Iterable
+
   "Base currency id."
   baseCurrencyId: Int
+
+  "Inventory source ids attached to this channel."
+  inventorySources: Iterable
 
   "Root category id."
   rootCategoryId: Int
@@ -10420,6 +11081,9 @@ input updateAdminSettingsChannelInput {
 
   "Storage path of an already-uploaded favicon (binary upload deferred)."
   favicon: String
+
+  "Locale-nested overrides — see Create DTO."
+  translations: Iterable
   clientMutationId: String
 }
 
@@ -10519,6 +11183,8 @@ type deleteAdminSettingsCurrencyPayload {
 
 "Mass-delete a batch of currencies. Becomes createAdminSettingsCurrencyMassDelete."
 input createAdminSettingsCurrencyMassDeleteInput {
+  "Array of currency IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -10543,6 +11209,7 @@ GraphQL:
 type AdminSettingsCurrencyMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -10661,16 +11328,19 @@ type AdminSettingsDataTransferImportIndex implements Node {
   processedRowsCount: Int
   invalidRowsCount: Int
   errorsCount: Int
+  errors: Iterable
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
   errorFilePath: String
+  summary: Iterable
   startedAt: String
   completedAt: String
   createdAt: String
   updatedAt: String
   success: Boolean
   isValid: Boolean
+  stats: Iterable
   message: String
 }
 
@@ -10708,16 +11378,19 @@ type AdminSettingsDataTransferImportLink implements Node {
   processedRowsCount: Int
   invalidRowsCount: Int
   errorsCount: Int
+  errors: Iterable
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
   errorFilePath: String
+  summary: Iterable
   startedAt: String
   completedAt: String
   createdAt: String
   updatedAt: String
   success: Boolean
   isValid: Boolean
+  stats: Iterable
   message: String
 }
 
@@ -10756,16 +11429,19 @@ type AdminSettingsDataTransferImportStart implements Node {
   processedRowsCount: Int
   invalidRowsCount: Int
   errorsCount: Int
+  errors: Iterable
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
   errorFilePath: String
+  summary: Iterable
   startedAt: String
   completedAt: String
   createdAt: String
   updatedAt: String
   success: Boolean
   isValid: Boolean
+  stats: Iterable
   message: String
 }
 
@@ -10803,16 +11479,19 @@ type AdminSettingsDataTransferImportValidate implements Node {
   processedRowsCount: Int
   invalidRowsCount: Int
   errorsCount: Int
+  errors: Iterable
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
   errorFilePath: String
+  summary: Iterable
   startedAt: String
   completedAt: String
   createdAt: String
   updatedAt: String
   success: Boolean
   isValid: Boolean
+  stats: Iterable
   message: String
 }
 
@@ -10867,6 +11546,8 @@ type deleteAdminSettingsExchangeRatePayload {
 
 "Mass-delete a batch of exchange rates. Becomes createAdminSettingsExchangeRateMassDelete."
 input createAdminSettingsExchangeRateMassDeleteInput {
+  "Array of exchange-rate IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -10885,6 +11566,7 @@ GraphQL: createAdminSettingsExchangeRateMassDelete
 type AdminSettingsExchangeRateMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -11001,6 +11683,8 @@ type deleteAdminSettingsInventorySourcePayload {
 
 "Mass-delete a batch of inventory sources. Becomes createAdminSettingsInventorySourceMassDelete."
 input createAdminSettingsInventorySourceMassDeleteInput {
+  "Array of inventory-source IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -11022,6 +11706,7 @@ refuses any id that is referenced by product_inventories.
 type AdminSettingsInventorySourceMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
   message: String
 }
 
@@ -11088,6 +11773,8 @@ type deleteAdminSettingsLocalePayload {
 
 "Mass-delete a batch of locales. Becomes createAdminSettingsLocaleMassDelete."
 input createAdminSettingsLocaleMassDeleteInput {
+  "Array of locale IDs to delete."
+  indices: Iterable
   clientMutationId: String
 }
 
@@ -11109,6 +11796,8 @@ channel-default. Non-existent IDs are silently skipped.
 type AdminSettingsLocaleMassDelete implements Node {
   id: ID!
   _id: Int
+  deleted: Iterable
+  skipped: Iterable
   message: String
 }
 
@@ -11122,6 +11811,9 @@ input createAdminSettingsRoleInput {
 
   "Permission type. One of: all, custom."
   permissionType: String
+
+  "Permission keys (required when permission_type=custom)."
+  permissions: Iterable
   clientMutationId: String
 }
 
@@ -11146,6 +11838,9 @@ input updateAdminSettingsRoleInput {
 
   "Permission type. One of: all, custom."
   permissionType: String
+
+  "Permission keys (required when permission_type=custom)."
+  permissions: Iterable
   clientMutationId: String
 }
 
@@ -11177,6 +11872,9 @@ input createAdminSettingsTaxCategoryInput {
 
   "Long-form description."
   description: String
+
+  "Array of tax_rate ids to attach via the tax_categories_tax_rates pivot."
+  taxrates: Iterable
   clientMutationId: String
 }
 
@@ -11201,6 +11899,9 @@ input updateAdminSettingsTaxCategoryInput {
 
   "Long-form description."
   description: String
+
+  "Array of tax_rate ids to sync via the tax_categories_tax_rates pivot."
+  taxrates: Iterable
   clientMutationId: String
 }
 
@@ -11289,136 +11990,6 @@ input deleteAdminSettingsTaxRateInput {
 type deleteAdminSettingsTaxRatePayload {
   adminSettingsTaxRate: AdminSettingsTaxRate
   clientMutationId: String
-}
-
-"Create a theme customization. Becomes createAdminSettingsTheme."
-input createAdminSettingsThemeInput {
-  "Theme customization name."
-  name: String
-
-  "Sort order (integer)."
-  sortOrder: Int
-
-  "Customization type — one of product_carousel, category_carousel, static_content, image_carousel, footer_links, services_content."
-  type: String
-
-  "Channel id this customization belongs to."
-  channelId: Int
-
-  "Theme code this customization belongs to (e.g. default)."
-  themeCode: String
-
-  "Status (true = enabled)."
-  status: Boolean
-  clientMutationId: String
-}
-
-"Create a theme customization. Becomes createAdminSettingsTheme."
-type createAdminSettingsThemePayload {
-  adminSettingsTheme: AdminSettingsTheme
-  clientMutationId: String
-}
-
-"Update a theme customization. Becomes updateAdminSettingsTheme."
-input updateAdminSettingsThemeInput {
-  id: ID!
-
-  "Resource IRI (e.g. /api/admin/settings/themes/4)."
-  _id: String
-
-  "Theme customization name."
-  name: String
-
-  "Sort order (integer)."
-  sortOrder: Int
-
-  "Customization type — see create input for allowed values."
-  type: String
-
-  "Channel id this customization belongs to."
-  channelId: Int
-
-  "Theme code this customization belongs to."
-  themeCode: String
-
-  "Status (true = enabled)."
-  status: Boolean
-
-  "Locale code under which translatable options are stored."
-  locale: String
-  clientMutationId: String
-}
-
-"Update a theme customization. Becomes updateAdminSettingsTheme."
-type updateAdminSettingsThemePayload {
-  adminSettingsTheme: AdminSettingsTheme
-  clientMutationId: String
-}
-
-"Delete a theme customization. Becomes deleteAdminSettingsTheme."
-input deleteAdminSettingsThemeInput {
-  id: ID!
-  clientMutationId: String
-}
-
-"Delete a theme customization. Becomes deleteAdminSettingsTheme."
-type deleteAdminSettingsThemePayload {
-  adminSettingsTheme: AdminSettingsTheme
-  clientMutationId: String
-}
-
-"Mass-delete theme customizations. Becomes createAdminSettingsThemeMassDelete."
-input createAdminSettingsThemeMassDeleteInput {
-  clientMutationId: String
-}
-
-"Mass-delete theme customizations. Becomes createAdminSettingsThemeMassDelete."
-type createAdminSettingsThemeMassDeletePayload {
-  adminSettingsThemeMassDelete: AdminSettingsThemeMassDelete
-  clientMutationId: String
-}
-
-"""
-Mass-delete admin settings theme customizations.
-
-REST:    POST /api/admin/settings/themes/mass-delete
-GraphQL: createAdminSettingsThemeMassDelete
-
-Mirrors Bagisto admin ThemeController::massDestroy. Non-existent IDs are
-silently skipped (matches monolith — best-effort loop).
-"""
-type AdminSettingsThemeMassDelete implements Node {
-  id: ID!
-  _id: Int
-  message: String
-}
-
-"Mass-update status of theme customizations. Becomes createAdminSettingsThemeMassUpdateStatus."
-input createAdminSettingsThemeMassUpdateStatusInput {
-  "New status value (0 or 1)."
-  value: Int
-  clientMutationId: String
-}
-
-"Mass-update status of theme customizations. Becomes createAdminSettingsThemeMassUpdateStatus."
-type createAdminSettingsThemeMassUpdateStatusPayload {
-  adminSettingsThemeMassUpdateStatus: AdminSettingsThemeMassUpdateStatus
-  clientMutationId: String
-}
-
-"""
-Mass-update status admin settings theme customizations.
-
-REST:    POST /api/admin/settings/themes/mass-update-status
-GraphQL: createAdminSettingsThemeMassUpdateStatus
-
-Mirrors Bagisto admin ThemeController::massUpdate which calls
-ThemeCustomizationRepository::massUpdateStatus.
-"""
-type AdminSettingsThemeMassUpdateStatus implements Node {
-  id: ID!
-  _id: Int
-  message: String
 }
 
 "Create a new admin user. Becomes createAdminSettingsUser."
@@ -11532,6 +12103,9 @@ input createAdminShipmentInput {
 
   "Inventory source id all items ship from."
   source: Int
+
+  "Items to ship: array of { orderItemId, inventorySourceId, quantity }."
+  items: Iterable!
   carrierTitle: String
   trackNumber: String
   clientMutationId: String

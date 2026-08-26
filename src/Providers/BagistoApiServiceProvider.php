@@ -46,6 +46,10 @@ use Webkul\BagistoApi\Admin\Audit\AdminApiAuditRecorder;
 use Webkul\BagistoApi\Admin\Auth\AdminApiGuard;
 use Webkul\BagistoApi\Admin\Metadata\NullableToOnePropertyMetadataFactory;
 use Webkul\BagistoApi\Admin\Models\AdminPersonalAccessToken;
+use Webkul\BagistoApi\Admin\Resolver\AdminAppearanceSectionFieldsQueryResolver;
+use Webkul\BagistoApi\Admin\Resolver\AdminAppearanceSectionPreviewQueryResolver;
+use Webkul\BagistoApi\Admin\Resolver\AdminAppearanceThemeImpactQueryResolver;
+use Webkul\BagistoApi\Admin\Resolver\AdminAppearanceThemeQueryResolver;
 use Webkul\BagistoApi\Admin\Resolver\AdminConfigurationMenuQueryResolver;
 use Webkul\BagistoApi\Admin\Resolver\AdminConfigurationSlugQueryResolver;
 use Webkul\BagistoApi\Admin\Resolver\AdminConfigurationValuesQueryResolver;
@@ -114,6 +118,7 @@ use Webkul\BagistoApi\Resolver\GdprRequestQueryResolver;
 use Webkul\BagistoApi\Resolver\PageByUrlKeyResolver;
 use Webkul\BagistoApi\Resolver\ProductCollectionResolver;
 use Webkul\BagistoApi\Resolver\SingleProductBagistoApiResolver;
+use Webkul\BagistoApi\Resolver\ThemeQueryResolver;
 use Webkul\BagistoApi\Resolver\WishlistQueryResolver;
 use Webkul\BagistoApi\Routing\CustomIriConverter;
 use Webkul\BagistoApi\Serializer\AdminCollectionEnvelopeNormalizer;
@@ -364,8 +369,6 @@ class BagistoApiServiceProvider extends ServiceProvider
         // Marketing → Cart Rules CRUD
 
         // Settings → Locales CRUD
-
-        // Settings → Themes (theme customizations) CRUD
 
         // Settings → Users (admins) CRUD
 
@@ -698,6 +701,11 @@ class BagistoApiServiceProvider extends ServiceProvider
 
         $this->app->singleton(AdminConfigurationSchemaResolver::class);
         $this->app->tag(AdminConfigurationMenuQueryResolver::class, QueryItemResolverInterface::class);
+        $this->app->tag(ThemeQueryResolver::class, QueryItemResolverInterface::class);
+        $this->app->tag(AdminAppearanceThemeQueryResolver::class, QueryItemResolverInterface::class);
+        $this->app->tag(AdminAppearanceThemeImpactQueryResolver::class, QueryItemResolverInterface::class);
+        $this->app->tag(AdminAppearanceSectionFieldsQueryResolver::class, QueryItemResolverInterface::class);
+        $this->app->tag(AdminAppearanceSectionPreviewQueryResolver::class, QueryItemResolverInterface::class);
         $this->app->tag(AdminConfigurationValuesQueryResolver::class, QueryItemResolverInterface::class);
         $this->app->tag(AdminConfigurationSlugQueryResolver::class, QueryItemResolverInterface::class);
         $this->app->tag(AdminMenuQueryResolver::class, QueryItemResolverInterface::class);

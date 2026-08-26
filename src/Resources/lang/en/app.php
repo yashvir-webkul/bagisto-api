@@ -418,10 +418,10 @@ return [
             'deleted' => 'Your GDPR data request has been deleted successfully.',
         ],
 
-        'theme-customization' => [
-            'id-required' => 'Theme Customization ID is required',
-            'invalid-id-format' => 'Invalid ID format. Expected IRI format like "/api/shop/theme-customizations/1" or numeric ID',
-            'not-found' => 'Theme Customization not found',
+        'section' => [
+            'id-required' => 'Section ID is required',
+            'invalid-id-format' => 'Invalid ID format. Expected IRI format like "/api/shop/sections/1" or numeric ID',
+            'not-found' => 'Section not found',
         ],
 
         'install' => [
@@ -784,6 +784,41 @@ return [
                     'success' => 'Refund created successfully.',
                     'failed' => 'Could not create the refund.',
                 ],
+            ],
+        ],
+
+        'appearance' => [
+            'no-permission' => 'You do not have permission to manage appearance.',
+
+            'theme' => [
+                'not-found' => 'Theme not found.',
+                'not-installed' => 'This theme is not installed.',
+                'channel-ids-required' => 'At least one channel is required.',
+                'unknown-channel' => 'One or more channels do not exist.',
+                'activated' => 'Theme activated successfully.',
+            ],
+
+            'section' => [
+                'not-found' => 'Section not found.',
+                'invalid-payload' => 'Unsupported section payload.',
+                'footer-links-exists' => 'This channel already has a footer links section.',
+                'options-required' => 'Options are required.',
+                'status-required' => 'Status is required.',
+                'section-ids-required' => 'At least one section is required.',
+                'reorder-single-scope' => 'Sections can only be reordered within one theme and channel at a time.',
+                'reorder-incomplete' => 'Reordering needs every section of the theme and channel, in the order they should render.',
+                'unknown-section' => 'One or more sections do not exist.',
+                'file-required' => 'A file is required.',
+                'created' => 'Section created successfully.',
+                'updated' => 'Section updated successfully.',
+                'deleted' => 'Section deleted successfully.',
+                'draft-saved' => 'Section changes staged successfully.',
+                'status-staged' => 'Section status staged successfully.',
+                'order-staged' => 'Section order staged successfully.',
+                'duplicated' => 'Section copied successfully.',
+                'published' => 'Section changes published successfully.',
+                'discarded' => 'Section changes discarded successfully.',
+                'media-uploaded' => 'Media uploaded successfully.',
             ],
         ],
 
