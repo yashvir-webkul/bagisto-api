@@ -123,8 +123,11 @@ jobs:
 
       - name: Report the serializer stack
         working-directory: bagisto
+        continue-on-error: true
         run: |
-          composer show symfony/serializer api-platform/graphql api-platform/serializer api-platform/metadata | grep -E "^(name|versions)"
+          for pkg in symfony/serializer api-platform/graphql api-platform/serializer api-platform/metadata; do
+            composer show "$pkg" 2>/dev/null | grep -E "^(name|versions)" || true
+          done
           php -r '
             require "vendor/autoload.php";
             foreach ([
