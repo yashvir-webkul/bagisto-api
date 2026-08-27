@@ -111,11 +111,40 @@ jobs:
           composer dump-autoload --no-interaction
           php artisan optimize:clear
 
+      # Every worker otherwise builds the API Platform metadata for ~370 resources on its
+      # first request. Four of them doing that at once on a 2-vCPU runner is the only
+      # condition under which the GraphQL suites fail, and it has never reproduced off the
+      # runner — not against the same install shape, the same cache store, the same opcache
+      # settings, or a cold shared opcache file cache. Build the pool once, here, so that no
+      # worker pays the cold start.
+      - name: Warm the API metadata cache
+        working-directory: bagisto
+        run: php artisan bagisto-api-platform:warm-cache
+
+      - name: Report the serializer stack
+        working-directory: bagisto
+        run: |
+          composer show symfony/serializer api-platform/graphql api-platform/serializer api-platform/metadata | grep -E "^(name|versions)"
+          php -r '
+            require "vendor/autoload.php";
+            foreach ([
+              "ApiPlatform\\GraphQl\\Serializer\\ItemNormalizer",
+              "ApiPlatform\\Serializer\\ItemNormalizer",
+              "Symfony\\Component\\Serializer\\Normalizer\\AbstractNormalizer",
+            ] as $c) {
+              printf("%s\n  exists=%d setSerializer=%d\n  file=%s\n  parents=%s\n", $c, class_exists($c), method_exists($c, "setSerializer"), (new ReflectionClass($c))->getFileName(), implode(" < ", array_values(class_parents($c))));
+            }
+            printf("trait file=%s\n", (new ReflectionClass("Symfony\\Component\\Serializer\\SerializerAwareTrait"))->getFileName());
+            printf("memory_limit=%s opcache=%d\n", ini_get("memory_limit"), (int) function_exists("opcache_get_status"));
+          '
+          free -m
+          nproc
+
       - name: Run GraphQL APIs Pest (plugin suite)
         id: graphql_tests
         working-directory: bagisto
         continue-on-error: true
-        run: vendor/bin/pest --parallel --processes=4 --colors=always vendor/bagisto/bagisto-api/tests/Feature/GraphQL
+        run: vendor/bin/pest --parallel --processes=2 --colors=always vendor/bagisto/bagisto-api/tests/Feature/GraphQL
 
       - name: Run REST APIs Pest (plugin suite)
         id: rest_tests
@@ -129,7 +158,7 @@ jobs:
         if: always()
         working-directory: bagisto
         continue-on-error: true
-        run: vendor/bin/pest --parallel --processes=4 --colors=always vendor/bagisto/bagisto-api/tests/Feature/Admin/GraphQL
+        run: vendor/bin/pest --parallel --processes=2 --colors=always vendor/bagisto/bagisto-api/tests/Feature/Admin/GraphQL
 
       - name: Run Admin REST APIs Pest (plugin suite)
         id: admin_rest_tests
