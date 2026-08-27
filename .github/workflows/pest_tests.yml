@@ -111,12 +111,6 @@ jobs:
           composer dump-autoload --no-interaction
           php artisan optimize:clear
 
-      # Every worker otherwise builds the API Platform metadata for ~370 resources on its
-      # first request. Four of them doing that at once on a 2-vCPU runner is the only
-      # condition under which the GraphQL suites fail, and it has never reproduced off the
-      # runner — not against the same install shape, the same cache store, the same opcache
-      # settings, or a cold shared opcache file cache. Build the pool once, here, so that no
-      # worker pays the cold start.
       - name: Warm the API metadata cache
         working-directory: bagisto
         run: php artisan bagisto-api-platform:warm-cache
@@ -142,6 +136,21 @@ jobs:
           '
           free -m
           nproc
+          # The class is fine at rest, so resolve it the way a booted app does and report
+          # which file the instance actually came from.
+          php -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $n = $app->make("ApiPlatform\\GraphQl\\Serializer\\ItemNormalizer");
+            printf("resolved=%s setSerializer=%d file=%s\n", get_class($n), method_exists($n, "setSerializer"), (new ReflectionClass($n))->getFileName());
+            foreach (get_included_files() as $f) {
+              if (str_contains($f, "Serializer/ItemNormalizer.php") || str_contains($f, "SerializerAwareTrait.php")) {
+                printf("included=%s\n", $f);
+              }
+            }
+            printf("autoloaders=%d\n", count(spl_autoload_functions()));
+          '
 
       - name: Run GraphQL APIs Pest (plugin suite)
         id: graphql_tests

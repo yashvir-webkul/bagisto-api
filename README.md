@@ -2,10 +2,12 @@
 
 Comprehensive REST and GraphQL APIs for seamless e-commerce integration and extensibility.
 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/bagisto-apis/bagistoapi)
+
 ## Requirements
 
 - PHP 8.3+
-- [Bagisto](https://github.com/bagisto/bagisto) **v2.4.7** (the version this package is tested against in CI)
+- [Bagisto](https://github.com/bagisto/bagisto) **v2.4.10** (the version this package is tested against in CI)
 - Composer 2
 - MySQL 8.0+ or PostgreSQL 14+
 - API Platform for Laravel — `api-platform/laravel` and `api-platform/graphql` (`~4.3.8`), which bring in the remaining `api-platform/*` components at a matching version, installed automatically via `composer require`
@@ -115,28 +117,60 @@ The files are written to `schema/generated/`:
 | `shop.graphql` / `admin.graphql` | GraphQL SDL for each surface |
 | `graphql-operations-shop.json` / `-admin.json` | Every root GraphQL field mapped to its resource tag |
 
-Each spec is scoped to its own surface: the storefront spec contains no admin path, schema, or tag, and the admin spec contains no storefront one. The command refuses to write a schema that leaks another surface, references a definition it does not include, carries an unused definition, or contains a storefront key.
+Each spec is scoped to its own surface — the storefront spec carries no admin path, schema or tag, and the reverse — and the command refuses to write one that leaks the other surface or references a definition it does not include.
 
 Options:
 
-- `--path=<dir>` — write to a different directory
+- `--path=<dir>` — write elsewhere
 - `--transport=all|rest|graphql` — limit to one transport (default `all`)
 
-Re-running overwrites those six files and nothing else. `schema/tools/build-collection.php` turns the exported specs into the Postman collections; it takes the target directory as an argument:
+Re-running overwrites those six files and nothing else. To rebuild the Postman collections from them:
 
 ```bash
-php schema/tools/build-collection.php /path/to/bagisto-api-collection/collections
+php schema/tools/build-collection.php
 ```
 
 ## Postman Collections
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/bagisto-apis/bagistoapi)
+Run them from the [public workspace](https://www.postman.com/bagisto-apis/bagistoapi), or import the copies that ship with the package:
 
-Ready-to-import Postman collections for both API surfaces live in their own repository:
+- `collections/Bagisto-Shop-API.postman_collection.json` — storefront: browsing, cart, checkout, orders, account
+- `collections/Bagisto-Admin-API.postman_collection.json` — admin, foldered to mirror the admin sidebar
+- `environments/Bagisto.postman_environment.json` — one environment for both
 
-**[github.com/bagisto/bagisto-api-collection](https://github.com/bagisto/bagisto-api-collection)**
+Both transports are covered: requests are foldered `REST/` and `GraphQL/` under the same resource names, with GraphQL split into `Queries/` and `Mutations/`.
 
-Import a collection and its environment there, fill in your store URL and a key, and every endpoint is ready to send — REST and GraphQL, for both the storefront and the admin API. That repository is the one to point clients and integrators at; this package holds the schemas the collections are generated from.
+### Importing
+
+1. Postman → **Import** → pick a file from `collections/`.
+2. Postman → **Environments** → **Import** → pick `environments/Bagisto.postman_environment.json`, select it, then fill in your values.
+
+| Variable | Used by | Description |
+|---|---|---|
+| `url` | Both | Your Bagisto URL, e.g. `http://localhost:8000` |
+| `storefrontKey` | Shop | Storefront API key, from admin → Configuration → API |
+| `customerEmail` | Shop | A storefront customer's email |
+| `customerPassword` | Shop | That customer's password |
+| `customerToken` | Shop | Filled in by the Customer login request |
+| `cartToken` | Shop | Filled in by the Create cart token request |
+| `adminToken` | Admin | Integration token, from admin → Settings → Integration |
+| `locale` | Both | Locale code, defaults to `en` |
+| `channel` | Both | Channel code, defaults to `default` |
+| `currency` | Shop | Currency code, defaults to `USD` |
+
+Fill in only what the collection you are using needs.
+
+### Authenticating
+
+**Shop** — run **REST → Customer → Customer login**. It stores `customerToken`, which every other request sends as the bearer. For a guest cart, run **Create cart token** instead and set the collection's **Authorization** tab to `{{cartToken}}`; the cart and checkout endpoints serve guests and logged-in customers alike, so the token you send decides whose cart you are working on.
+
+**Admin** — there is no login request. Generate an integration token in the admin panel (see [Admin API Authentication](#admin-api-authentication)) and paste it into `adminToken`.
+
+### Keeping them current
+
+`schema/tools/build-collection.php` regenerates the collections from the exported schemas, so a collection follows the API rather than being maintained by hand. Three workflows keep the published copies in step: **Validate** checks the files on every push, **Push Collections to Postman** publishes them to the official workspace when they change on `main`, and **Sync Collections from Postman** pulls edits made in Postman back into the repository on a release. All three refuse to move a real storefront key.
+
+Values in the requests are placeholders — replace them with records that exist on your store. Postman's **Auto Fetch** runs a schema introspection query that costs far more than a normal request; switch it off if the GraphQL folders feel slow.
 
 ## Admin API Authentication
 

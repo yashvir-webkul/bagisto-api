@@ -5,6 +5,48 @@ All notable changes to `bagisto/bagisto-api` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+_Release coming soon._
+
+### Added
+
+- Appearance API for Bagisto 2.4.10: theme gallery, impact report, activation per channel, and section management for the theme a channel runs.
+- Section draft workflow: stage content per locale, stage status and order, then publish or discard in one call.
+- Section preview endpoint, rendering a theme with its staged edits applied.
+- Section fields endpoint, returning the field schema for a section's type plus its current values.
+- Section media upload (REST only) and section copy.
+- `GET /api/shop/theme` and the `theme` query — the theme the current channel runs and the section types it holds.
+- Sitemap channels: a sitemap now carries `channels`, returns the index URL per channel, and reports `generatedFiles`.
+- Product image `alt_text`, settable on upload and editable via `PUT /api/admin/catalog/products/{productId}/images/{id}`.
+- Product import image sources — `image_source` of `url`, `upload` or `directory`, with `upload_images` for a ZIP.
+- `manageStock` on the product listing.
+
+### Fixed
+
+- Section update dropped `options` and `locale`, so content could not be published through it.
+- Section update erased a locale's content when `options` were omitted.
+- Section create ignored the `channel` it named.
+- Copying a footer links section produced a second one; it is refused, as in the admin.
+- Section media upload of an unsupported type failed with a server error; it is refused with the admin's types and 50 MB limit.
+- Reordering a subset of sections reshuffled the published order; a reorder must carry every section of one theme and channel.
+- Storefront sections returned only ten per page; the default is now 50.
+- Exported GraphQL schemas dropped every array-valued field.
+- Creating or updating a sitemap failed outright, and a channel-less sitemap generated nothing.
+- Product listing worked out image, quantity, category and family on the fly; they are read as the admin reads them.
+- Storefront product images came back in arbitrary order; they are in gallery order.
+- Deleting an email template or marketing event still used by a campaign is refused.
+- An attribute `regex` the storefront cannot compile is refused.
+- Customer email is unique per channel, not per store.
+
+### Changed
+
+- **BREAKING** — Storefront theme customizations are now sections: `/api/shop/theme-customizations[/{id}]` and `themeCustomization(s)` become `/api/shop/sections[/{id}]` and `section`/`sections`; translations carry `sectionId`.
+- **BREAKING** — Storefront sections return only published sections of the channel's active theme.
+- **BREAKING** — Admin theme customizations move out of Settings: `/api/admin/settings/themes` and `adminSettingsTheme*` become `/api/admin/appearance/themes` and `/api/admin/appearance/sections`, under `appearance.*` permissions. Mass-delete and mass-update-status are gone; bulk status is the staged status plus publish.
+- **BREAKING** — Deleting an attribute family is refused for the default family rather than the last remaining one.
+- CI runs against Bagisto v2.4.10, and a failing Pest suite now fails the build.
+
 ## [2.4.3] - 2026-08-26
 
 ### Added
