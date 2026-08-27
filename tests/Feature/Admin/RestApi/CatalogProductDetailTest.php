@@ -4,14 +4,10 @@ namespace Webkul\BagistoApi\Tests\Feature\Admin\RestApi;
 
 use Illuminate\Support\Facades\DB;
 use Webkul\BagistoApi\Tests\AdminApiTestCase;
+use Webkul\Product\Helpers\Indexers\Flat;
 
 /**
  * REST coverage for GET /api/admin/catalog/products/{id}
- *
- * Tests: auth guards, 404 edge cases, base-25-field shape,
- * per-type specific blocks (configurable/bundle/grouped/downloadable),
- * and sub-resource arrays (translations, images, inventories,
- * categories, customerGroupPrices).
  */
 class CatalogProductDetailTest extends AdminApiTestCase
 {
@@ -40,6 +36,13 @@ class CatalogProductDetailTest extends AdminApiTestCase
             'featured' => 0,
             'new' => 0,
         ], $overrides));
+
+        $this->refreshFlatDerived((int) $product->id);
+    }
+
+    protected function refreshFlatDerived(int $productId): void
+    {
+        app(Flat::class)->refreshDerivedColumns([$productId]);
     }
 
     public function test_detail_requires_admin_token(): void

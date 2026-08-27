@@ -137,9 +137,11 @@ class AdminAttributeFamilyProcessor implements ProcessorInterface
             throw new ResourceNotFoundException(__('bagistoapi::app.admin.family.not-found'));
         }
 
-        if ($this->attributeFamilyRepository->count() === 1) {
+        // The default family backs every product form, so core refuses to remove it — the
+        // count of remaining families is not what protects the store.
+        if ($family->code === AttributeFamily::DEFAULT_CODE) {
             throw new InvalidInputException(
-                __('bagistoapi::app.admin.family.last-delete-error'),
+                __('bagistoapi::app.admin.family.default-delete-error'),
                 400,
             );
         }

@@ -962,6 +962,8 @@ return [
 
             'image' => [
                 'uploaded' => 'Product image uploaded successfully.',
+                'updated' => 'Product image updated successfully.',
+                'update-empty' => 'Send an alt text or a position to update.',
                 'reordered' => 'Product images reordered successfully.',
                 'deleted' => 'Product image deleted successfully.',
                 'image-required' => 'An image file is required (multipart field "image").',
@@ -1083,7 +1085,7 @@ return [
             'group-name-duplicate' => 'An attribute group name must be unique within the attribute family.',
             'update-failed' => 'Attribute family could not be updated.',
             'create-failed' => 'Attribute family could not be created.',
-            'last-delete-error' => 'At least one attribute family is required.',
+            'default-delete-error' => 'The default attribute family cannot be deleted.',
             'attribute-product-error' => 'This attribute family is in use by one or more products. Reassign those products before deleting it.',
             'delete-failed' => 'Attribute family could not be deleted.',
             'no-permission' => 'You do not have permission to manage attribute families.',
@@ -1333,6 +1335,7 @@ return [
                 'no-permission' => 'You do not have permission to manage sitemaps.',
                 'generate' => [
                     'id-required' => 'Sitemap id is required.',
+                    'no-channels' => 'This sitemap covers no channel, so there is nothing to generate. Assign at least one channel to it first.',
                     'success' => 'Sitemap regenerated successfully.',
                     'failed' => 'Sitemap generation failed: :message',
                 ],
@@ -1356,6 +1359,7 @@ return [
             ],
 
             'template' => [
+                'campaign-associated' => 'This email template is used by a campaign, so it cannot be deleted. Remove it from the campaign first.',
                 'not-found' => 'Email template not found.',
                 'created' => 'Email template created successfully.',
                 'updated' => 'Email template updated successfully.',
@@ -1366,6 +1370,7 @@ return [
             ],
 
             'event' => [
+                'campaign-associated' => 'This event is used by a campaign, so it cannot be deleted. Remove it from the campaign first.',
                 'not-found' => 'Marketing event not found.',
                 'created' => 'Marketing event created successfully.',
                 'updated' => 'Marketing event updated successfully.',

@@ -20,14 +20,9 @@ final class CollectionBuilder
 
     public function __construct(?string $outputDir = null)
     {
-        if ($outputDir === null) {
-            fwrite(STDERR, "Usage: php build-collection.php <collections-directory>\n\n");
-            fwrite(STDERR, "The collections live in the standalone bagisto-api-collection repository,\n");
-            fwrite(STDERR, "so pass its collections/ directory, e.g.\n\n");
-            fwrite(STDERR, "  php build-collection.php /path/to/bagisto-api-collection/collections\n");
-
-            exit(1);
-        }
+        // The package's own collections/ directory, so running the tool with no argument
+        // regenerates the collections that ship with it.
+        $outputDir ??= __DIR__.'/../../collections';
 
         $this->outputDir = rtrim($outputDir, '/');
 

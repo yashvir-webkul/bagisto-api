@@ -24,6 +24,7 @@ use Webkul\BagistoApi\Exception\AuthorizationException;
 use Webkul\BagistoApi\Exception\InvalidInputException;
 use Webkul\BagistoApi\Exception\ResourceNotFoundException;
 use Webkul\Core\Rules\Code;
+use Webkul\Core\Rules\Regex;
 
 /**
  * Handles POST, PUT, DELETE on AdminAttribute resource.
@@ -88,6 +89,10 @@ class AdminAttributeProcessor implements ProcessorInterface
             $rules['default_value'] = 'nullable|in:0,1';
         }
 
+        // A pattern is run by the server and written into the storefront form, so one the
+        // browser cannot compile takes the product form down rather than failing here.
+        $rules['regex'] = ['nullable', 'required_if:validation,regex', new Regex];
+
         $v = Validator::make($input, $rules);
         if ($v->fails()) {
             $first = $v->errors()->first();
@@ -128,6 +133,10 @@ class AdminAttributeProcessor implements ProcessorInterface
         if (($input['type'] ?? '') === 'boolean') {
             $rules['default_value'] = 'nullable|in:0,1';
         }
+
+        // A pattern is run by the server and written into the storefront form, so one the
+        // browser cannot compile takes the product form down rather than failing here.
+        $rules['regex'] = ['nullable', 'required_if:validation,regex', new Regex];
 
         $v = Validator::make($input, $rules);
         if ($v->fails()) {

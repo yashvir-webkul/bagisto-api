@@ -136,6 +136,15 @@ class AdminMarketingEventProcessor implements ProcessorInterface
             throw new ResourceNotFoundException(__('bagistoapi::app.admin.marketing.event.not-found'));
         }
 
+        // A campaign is scheduled against this event, so removing it would leave that
+        // campaign with nothing to fire on.
+        if ($event->campaigns()->count()) {
+            throw new InvalidInputException(
+                __('bagistoapi::app.admin.marketing.event.campaign-associated'),
+                400,
+            );
+        }
+
         Event::dispatch('marketing.events.delete.before', $id);
 
         try {

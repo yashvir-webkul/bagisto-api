@@ -23,20 +23,6 @@ use Webkul\Marketing\Repositories\TemplateRepository;
 
 /**
  * Handles POST, PUT, DELETE on AdminMarketingTemplate.
- *
- * Mirrors Webkul\Admin\Http\Controllers\Marketing\Communications\TemplateController:
- *   store / update / destroy. Events fired:
- *     marketing.templates.create.before / after
- *     marketing.templates.update.before / after
- *     marketing.templates.delete.before / after
- *
- * Permission resolution: Sanctum pattern — read role->permission_type /
- * role->permissions directly. Never calls bouncer().
- *
- * Validation mirrors TemplateController::store / ::update:
- *   - name    required
- *   - status  required|in:active,inactive,draft
- *   - content required
  */
 class AdminMarketingTemplateProcessor implements ProcessorInterface
 {
@@ -128,6 +114,13 @@ class AdminMarketingTemplateProcessor implements ProcessorInterface
         $template = Template::find($id);
         if (! $template) {
             throw new ResourceNotFoundException(__('bagistoapi::app.admin.marketing.template.not-found'));
+        }
+
+        if ($template->campaigns()->count()) {
+            throw new InvalidInputException(
+                __('bagistoapi::app.admin.marketing.template.campaign-associated'),
+                400,
+            );
         }
 
         Event::dispatch('marketing.templates.delete.before', $id);

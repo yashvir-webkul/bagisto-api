@@ -5,6 +5,7 @@ namespace Webkul\BagistoApi\Admin\Models;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
     shortName: 'AdminProductDetailImage',
     operations: [],
     graphQlOperations: [],
-    normalizationContext: ['attributes' => ['id', 'type', 'path', 'url', 'position']],
+    normalizationContext: ['attributes' => ['id', 'type', 'path', 'url', 'position', 'alt_text']],
 )]
 class AdminProductDetailImage extends Model
 {
@@ -22,7 +23,7 @@ class AdminProductDetailImage extends Model
     protected $table = 'product_images';
 
     /** @var array */
-    protected $appends = ['url'];
+    protected $appends = ['url', 'alt_text'];
 
     /** @var array */
     protected $casts = [
@@ -40,5 +41,20 @@ class AdminProductDetailImage extends Model
     public function getUrlAttribute(): ?string
     {
         return $this->path ? Storage::url($this->path) : null;
+    }
+
+    /**
+     * The alt text stored for the current locale.
+     *
+     * Read straight off the translation table rather than through the translatable model,
+     * which the connection's bare Eloquent parent does not carry.
+     */
+    #[ApiProperty(writable: false)]
+    public function getAltTextAttribute(): ?string
+    {
+        return DB::table('product_image_translations')
+            ->where('product_image_id', $this->id)
+            ->where('locale', app()->getLocale())
+            ->value('alt_text');
     }
 }

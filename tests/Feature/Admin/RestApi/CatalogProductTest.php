@@ -7,6 +7,7 @@ use Webkul\BagistoApi\Admin\Models\AdminPersonalAccessToken;
 use Webkul\BagistoApi\Tests\AdminApiTestCase;
 use Webkul\BagistoApi\Tests\Concerns\AdminFixtureFactory;
 use Webkul\Core\Facades\Core;
+use Webkul\Product\Helpers\Indexers\Flat;
 use Webkul\Product\Models\Product;
 use Webkul\User\Models\Admin;
 use Webkul\User\Models\Role;
@@ -125,6 +126,13 @@ class CatalogProductTest extends AdminApiTestCase
             'attribute_family_id' => $attributeFamilyId,
             'visible_individually' => 1,
         ], $overrides));
+
+        $this->refreshFlatDerived((int) $product->id);
+    }
+
+    protected function refreshFlatDerived(int $productId): void
+    {
+        app(Flat::class)->refreshDerivedColumns([$productId]);
     }
 
     public function test_filter_by_product_id(): void
@@ -413,6 +421,8 @@ class CatalogProductTest extends AdminApiTestCase
             ['product_id' => $product->id, 'inventory_source_id' => 2, 'qty' => 7, 'vendor_id' => 0],
         ]);
 
+        $this->refreshFlatDerived((int) $product->id);
+
         $body = $this->adminGet($admin, '/api/admin/catalog/products?product_id='.$product->id)->json();
         $row = collect($body['data'])->firstWhere('id', $product->id);
         $this->assertSame(12, $row['quantity']);
@@ -424,6 +434,8 @@ class CatalogProductTest extends AdminApiTestCase
         $product = $this->createBaseProduct('simple');
         $this->insertProductFlat($product);
         \DB::table('product_images')->where('product_id', $product->id)->delete();
+
+        $this->refreshFlatDerived((int) $product->id);
 
         $body = $this->adminGet($admin, '/api/admin/catalog/products?product_id='.$product->id)->json();
         $row = collect($body['data'])->firstWhere('id', $product->id);
