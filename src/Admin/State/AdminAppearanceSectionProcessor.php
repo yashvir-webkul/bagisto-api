@@ -18,9 +18,6 @@ use Webkul\Theme\Repositories\SectionRepository;
 
 /**
  * Create / update / delete for appearance sections.
- *
- * Mirrors Admin\Http\Controllers\Appearance\SectionController: same validation, the same
- * single footer rule, and the same events, so core listeners keep running.
  */
 class AdminAppearanceSectionProcessor implements ProcessorInterface
 {
@@ -141,28 +138,24 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
 
         $options = $this->requestedOptions($input->options, $args);
 
-        // The repository rewrites the locale's options from the payload, so leaving them
-        // out of an otherwise unrelated edit would erase the section's content. What the
-        // caller did not send is carried over unchanged.
-        $payload[$locale] = [
-            'options' => $options ?? $this->currentOptions($section, $locale),
-        ];
+        $sectionOptions = $options ?? $this->currentOptions($section, $locale);
 
-        // The repository reads the locale off the live request, which a GraphQL call has
-        // no query string to carry.
+        $carriesMedia = in_array($payload['type'], [Section::IMAGE_CAROUSEL, Section::SERVICES_CONTENT], true);
+
+        if (! $carriesMedia) {
+            $payload[$locale] = ['options' => $sectionOptions];
+        }
+
         request()->merge($payload);
 
         Event::dispatch('section.update.before', $section->id);
 
         $updated = $this->sectionRepository->update($payload, $section->id);
 
-        // Image and services options are dropped by the repository, which expects an
-        // upload on the request; over the API the paths are already stored by the media
-        // endpoint, so they are written here instead.
-        if (in_array($payload['type'], [Section::IMAGE_CAROUSEL, Section::SERVICES_CONTENT], true)) {
+        if ($carriesMedia) {
             $translation = $updated->translateOrNew($locale);
 
-            $translation->options = $payload[$locale]['options'];
+            $translation->options = $sectionOptions;
 
             $translation->save();
 
@@ -189,8 +182,6 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
 
         $section = $this->scope->sectionOrFail($id ? (int) basename((string) $id) : null);
 
-        // A delete mutation carries no `graphql_operation_name`, so the operation itself is
-        // what says which transport asked — the snapshot has to be taken before the row goes.
         $snapshot = $operation instanceof Mutation ? $this->toEloquent($section) : null;
 
         Event::dispatch('section.delete.before', $section->id);
@@ -208,12 +199,6 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
         return null;
     }
 
-    /**
-     * The channel a create was aimed at.
-     *
-     * `channel` is not a column on the resource, so the serializer drops it from the
-     * input DTO; it is read back off the request instead.
-     */
     protected function requestedChannelId(?int $fromInput, array $args): ?int
     {
         $channel = $fromInput
@@ -225,8 +210,6 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
 
     /**
      * The options a write carried, or null when it carried none.
-     *
-     * `options` is not a column on the resource either, so the same read-back applies.
      *
      * @return array<string, mixed>|null
      */
@@ -251,10 +234,6 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
         return is_array($options) ? $options : [];
     }
 
-    /**
-     * Refuse a second footer links section for a channel, which the storefront has
-     * nowhere to draw.
-     */
     protected function guardSingleFooter(?string $type, ?string $themeCode, int $channelId, ?int $ignoreId = null): void
     {
         if ($type !== Section::FOOTER_LINKS) {

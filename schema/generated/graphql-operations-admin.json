@@ -580,7 +580,10 @@
     "createAdminAppearanceSectionDiscard": {
         "kind": "mutation",
         "tag": "Admin Appearance: Sections",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionDiscard"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionDiscard",
+        "example": {
+            "channel": 1
+        }
     },
     "createAdminAppearanceSectionDraft": {
         "kind": "mutation",
@@ -595,12 +598,25 @@
     "createAdminAppearanceSectionPublish": {
         "kind": "mutation",
         "tag": "Admin Appearance: Sections",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionPublish"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionPublish",
+        "example": {
+            "channel": 1
+        }
     },
     "createAdminAppearanceSectionReorder": {
         "kind": "mutation",
         "tag": "Admin Appearance: Sections",
-        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionReorder"
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminAppearanceSectionReorder",
+        "example": {
+            "sectionIds": [
+                5,
+                3,
+                2,
+                1,
+                4,
+                6
+            ]
+        }
     },
     "createAdminAppearanceSectionStatus": {
         "kind": "mutation",
@@ -1919,6 +1935,11 @@
         "kind": "mutation",
         "tag": "Admin Catalog: Products",
         "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProductCustomerGroupPrice"
+    },
+    "updateAdminCatalogProductImage": {
+        "kind": "mutation",
+        "tag": "Admin Catalog: Products",
+        "resource": "Webkul\\BagistoApi\\Admin\\Models\\AdminCatalogProductImage"
     },
     "updateAdminCatalogProductInventory": {
         "kind": "mutation",

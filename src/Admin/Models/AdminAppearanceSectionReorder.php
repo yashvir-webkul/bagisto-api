@@ -28,6 +28,7 @@ use Webkul\BagistoApi\Admin\State\AdminAppearanceSectionReorderProcessor;
                 tags: ['Admin Appearance: Sections'],
                 summary: 'Stage a new section order',
                 requestBody: new Model\RequestBody(
+                    description: 'Every section of the theme and channel, in the order they should render. A partial list is rejected, because the sections left out would be renumbered over the ones sent. Read the current set from GET /appearance/themes/{code}/sections first. The footer is pinned last whatever position it is given.',
                     required: true,
                     content: new \ArrayObject([
                         'application/json' => [
@@ -35,9 +36,14 @@ use Webkul\BagistoApi\Admin\State\AdminAppearanceSectionReorderProcessor;
                                 'type' => 'object',
                                 'required' => ['sectionIds'],
                                 'properties' => [
-                                    'sectionIds' => ['type' => 'array', 'items' => ['type' => 'integer'], 'example' => [5, 3, 2]],
+                                    'sectionIds' => [
+                                        'type' => 'array',
+                                        'items' => ['type' => 'integer'],
+                                        'description' => 'Every section id of the theme and channel.',
+                                    ],
                                 ],
                             ],
+                            'example' => ['sectionIds' => [5, 3, 2, 1, 4, 6]],
                         ],
                     ]),
                 ),

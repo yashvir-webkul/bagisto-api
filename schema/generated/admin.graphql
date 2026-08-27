@@ -652,6 +652,7 @@ type Query {
     after: String
 
     file_name: String
+    channel_id: Int
     sort: String
     order: String
   ): AdminMarketingSitemapCursorConnection
@@ -1842,6 +1843,7 @@ type AdminProductDetailImage implements Node {
   productId: String!
   position: Int!
   url: String
+  altText: String
 }
 
 "Information about the current page."
@@ -4780,13 +4782,22 @@ type AdminMarketingSitemap implements Node {
   fileName: String
   path: String
 
+  "Channel ids the sitemap covers. A sitemap generates one index plus its child files per channel."
+  channels: Iterable
+
+  "Public index URL per channel — the link to submit to a search engine."
+  urls: Iterable
+
   "ISO8601 timestamp of the most recent successful generate, or null."
   generatedAt: String
 
-  "Detail-only: path of the generated sitemap index file under the public disk."
+  "Detail-only: what the last generate wrote, one entry per channel — { channelId, channelCode, hostname, index, sitemaps }."
+  generatedFiles: Iterable
+
+  "Detail-only, legacy: index path of a sitemap generated before generation became channel-aware. Null for anything generated since; read generatedFiles instead."
   indexFile: String
 
-  "Detail-only: list of generated child sitemap file paths under the public disk."
+  "Detail-only, legacy: child file paths of a sitemap generated before generation became channel-aware. Empty for anything generated since; read generatedFiles instead."
   generatedSitemaps: Iterable
 
   createdAt: String
@@ -5875,6 +5886,13 @@ type AdminSettingsDataTransferImport implements Node {
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
+
+  "Where a product import reads its images from: url, upload or directory."
+  imageSource: String
+
+  "Name of the images archive uploaded for this import, when its images came from an upload."
+  imagesArchiveName: String
+
   errorFilePath: String
   summary: Iterable
   startedAt: String
@@ -5912,6 +5930,13 @@ type AdminSettingsDataTransferImportStats implements Node {
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
+
+  "Where a product import reads its images from: url, upload or directory."
+  imageSource: String
+
+  "Name of the images archive uploaded for this import, when its images came from an upload."
+  imagesArchiveName: String
+
   errorFilePath: String
   summary: Iterable
   startedAt: String
@@ -6448,6 +6473,9 @@ type Mutation {
 
   "Reorder product images. Becomes reorderAdminCatalogProductImage."
   reorderAdminCatalogProductImage(input: reorderAdminCatalogProductImageInput!): reorderAdminCatalogProductImagePayload
+
+  "Update a product image's alt text and position. Becomes updateAdminCatalogProductImage."
+  updateAdminCatalogProductImage(input: updateAdminCatalogProductImageInput!): updateAdminCatalogProductImagePayload
 
   "Delete a product image. Becomes deleteAdminCatalogProductImage."
   deleteAdminCatalogProductImage(input: deleteAdminCatalogProductImageInput!): deleteAdminCatalogProductImagePayload
@@ -8288,6 +8316,10 @@ type AdminCatalogProductImage implements Node {
   path: String
   position: Int
   url: String
+
+  "Alt text stored for the current locale."
+  altText: String
+
   success: Boolean
   message: String
   images: Iterable
@@ -8303,6 +8335,33 @@ input reorderAdminCatalogProductImageInput {
 
 "Reorder product images. Becomes reorderAdminCatalogProductImage."
 type reorderAdminCatalogProductImagePayload {
+  adminCatalogProductImage: AdminCatalogProductImage
+  clientMutationId: String
+}
+
+"Update a product image's alt text and position. Becomes updateAdminCatalogProductImage."
+input updateAdminCatalogProductImageInput {
+  id: ID!
+
+  "Resource IRI. Used by the GraphQL mutation."
+  _id: String
+
+  "Parent product id."
+  productId: Int
+
+  "Image id."
+  imageId: Int
+
+  "Alt text for the image, written to every locale the request covers. Send an empty string to clear it."
+  altText: String
+
+  "Position among the product's images."
+  position: Int
+  clientMutationId: String
+}
+
+"Update a product image's alt text and position. Becomes updateAdminCatalogProductImage."
+type updateAdminCatalogProductImagePayload {
   adminCatalogProductImage: AdminCatalogProductImage
   clientMutationId: String
 }
@@ -10114,6 +10173,9 @@ input createAdminMarketingSitemapInput {
 
   "Storage directory path; must start and end with / (e.g. /)."
   path: String
+
+  "Channel ids the sitemap covers. At least one is required — a sitemap with no channel generates nothing."
+  channels: Iterable
   clientMutationId: String
 }
 
@@ -10131,6 +10193,9 @@ input updateAdminMarketingSitemapInput {
   _id: String
   fileName: String
   path: String
+
+  "Channel ids the sitemap covers. The supplied list replaces the current one."
+  channels: Iterable
   clientMutationId: String
 }
 
@@ -10170,7 +10235,13 @@ type AdminMarketingSitemapGenerate implements Node {
   _id: Int
   sitemapId: Int
 
-  "Generated sitemap index file path under the public disk."
+  "What the run wrote, one entry per covered channel — { channelId, channelCode, hostname, index, sitemaps }."
+  generatedFiles: Iterable
+
+  "Public index URL per channel — the link to submit to a search engine."
+  urls: Iterable
+
+  "Legacy: index path of a sitemap generated before generation became channel-aware. Null for anything generated since; read generatedFiles instead."
   indexFile: String
 
   "Generated child sitemap file paths."
@@ -11332,6 +11403,13 @@ type AdminSettingsDataTransferImportIndex implements Node {
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
+
+  "Where a product import reads its images from: url, upload or directory."
+  imageSource: String
+
+  "Name of the images archive uploaded for this import, when its images came from an upload."
+  imagesArchiveName: String
+
   errorFilePath: String
   summary: Iterable
   startedAt: String
@@ -11382,6 +11460,13 @@ type AdminSettingsDataTransferImportLink implements Node {
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
+
+  "Where a product import reads its images from: url, upload or directory."
+  imageSource: String
+
+  "Name of the images archive uploaded for this import, when its images came from an upload."
+  imagesArchiveName: String
+
   errorFilePath: String
   summary: Iterable
   startedAt: String
@@ -11433,6 +11518,13 @@ type AdminSettingsDataTransferImportStart implements Node {
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
+
+  "Where a product import reads its images from: url, upload or directory."
+  imageSource: String
+
+  "Name of the images archive uploaded for this import, when its images came from an upload."
+  imagesArchiveName: String
+
   errorFilePath: String
   summary: Iterable
   startedAt: String
@@ -11483,6 +11575,13 @@ type AdminSettingsDataTransferImportValidate implements Node {
   fieldSeparator: String
   filePath: String
   imagesDirectoryPath: String
+
+  "Where a product import reads its images from: url, upload or directory."
+  imageSource: String
+
+  "Name of the images archive uploaded for this import, when its images came from an upload."
+  imagesArchiveName: String
+
   errorFilePath: String
   summary: Iterable
   startedAt: String

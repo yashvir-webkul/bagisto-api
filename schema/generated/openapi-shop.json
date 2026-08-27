@@ -13309,7 +13309,9 @@
                                         "path": "product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp",
                                         "productId": 1,
                                         "position": 1,
-                                        "publicPath": "http://localhost:8000/storage/product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp"
+                                        "publicPath": "http://localhost:8000/storage/product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp",
+                                        "altText": "Blue running shoe, side view",
+                                        "fileName": "zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT"
                                     }
                                 ]
                             }
@@ -13423,7 +13425,9 @@
                                     "path": "product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp",
                                     "productId": 1,
                                     "position": 1,
-                                    "publicPath": "http://localhost:8000/storage/product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp"
+                                    "publicPath": "http://localhost:8000/storage/product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp",
+                                    "altText": "Blue running shoe, side view",
+                                    "fileName": "zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT"
                                 }
                             }
                         }
@@ -15111,7 +15115,9 @@
                                         "path": "product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp",
                                         "productId": 1,
                                         "position": 1,
-                                        "publicPath": "http://localhost:8000/storage/product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp"
+                                        "publicPath": "http://localhost:8000/storage/product/1/zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT.webp",
+                                        "altText": "Blue running shoe, side view",
+                                        "fileName": "zKcWZTLDjcawJmaNg8g1cpARqwVONgEKEflabstT"
                                     }
                                 ]
                             }
@@ -19218,7 +19224,7 @@
             "get": {
                 "operationId": "api_apishopsections_get_collection",
                 "tags": [
-                    "Section"
+                    "Theme"
                 ],
                 "responses": {
                     "200": {
@@ -19362,7 +19368,7 @@
             "get": {
                 "operationId": "api_apishopsections_id_get",
                 "tags": [
-                    "Section"
+                    "Theme"
                 ],
                 "responses": {
                     "200": {
@@ -23429,120 +23435,88 @@
     ],
     "tags": [
         {
-            "name": "Cart",
-            "description": "UpdateCartItem - GraphQL & REST API Resource for Updating Cart Items\n\nProvides mutation for updating cart item quantity without requiring resource ID.\nUses 'create' operation name to bypass API Platform's ID requirement."
+            "name": "Cart"
         },
         {
-            "name": "Attribute",
-            "description": "Attribute option resource"
+            "name": "Attribute"
         },
         {
-            "name": "AttributeTranslation",
-            "description": "Resource 'AttributeTranslation' operations."
+            "name": "AttributeTranslation"
         },
         {
-            "name": "Product",
-            "description": "Resource 'Product' operations."
+            "name": "Product"
         },
         {
-            "name": "Product Types",
-            "description": "Resource 'Product Types' operations."
+            "name": "Product Types"
         },
         {
-            "name": "Customer Order",
-            "description": "Reorder items from a previous customer order"
+            "name": "Customer Order"
         },
         {
-            "name": "Category",
-            "description": "Resource 'Category' operations."
+            "name": "Category"
         },
         {
-            "name": "CategoryTree",
-            "description": "Category Tree REST API Resource\n\nProvides hierarchical category tree structure via REST API\nEndpoint: GET /api/shop/category-trees\n\nQuery Parameters:\n- parentId: Filter by parent category ID\n- depth: Maximum depth to traverse (default: 4)"
+            "name": "CategoryTree"
         },
         {
-            "name": "Channel",
-            "description": "Resource 'Channel' operations."
+            "name": "Channel"
         },
         {
-            "name": "Checkout",
-            "description": "PaymentMethods - GraphQL API Resource for Payment Methods\n\nProvides query for fetching available payment methods during checkout"
+            "name": "Checkout"
         },
         {
-            "name": "CompareItem",
-            "description": "Delete all compare items for the authenticated customer"
+            "name": "CompareItem"
         },
         {
-            "name": "ContactUs",
-            "description": "Resource 'ContactUs' operations."
+            "name": "ContactUs"
         },
         {
-            "name": "Country",
-            "description": "Resource 'Country' operations."
+            "name": "Country"
         },
         {
-            "name": "CountryState",
-            "description": "CountryState - Subresource of Country with REST and GraphQL support\n\nPattern: Like AttributeOption - multiple #[ApiResource] annotations\n- Subresource routes: /countries/{country_id}/states\n- Root routes: /country-states (for GraphQL queries and root REST access)"
+            "name": "CountryState"
         },
         {
-            "name": "Currency",
-            "description": "Resource 'Currency' operations."
+            "name": "Currency"
         },
         {
-            "name": "Customer",
-            "description": "Resource 'Customer' operations."
+            "name": "Customer"
         },
         {
-            "name": "Customer Address",
-            "description": "Resource 'Customer Address' operations."
+            "name": "Customer Address"
         },
         {
-            "name": "Customer Return",
-            "description": "Resource 'Customer Return' operations."
+            "name": "Customer Return"
         },
         {
-            "name": "Customer Review",
-            "description": "Resource 'Customer Review' operations."
+            "name": "Customer Review"
         },
         {
-            "name": "Wishlist",
-            "description": "Wishlist Item API Resource\n\nAllows customers to add and manage products in their wishlist"
+            "name": "Wishlist"
         },
         {
-            "name": "EU Withdrawal",
-            "description": "Resource 'EU Withdrawal' operations."
+            "name": "EU Withdrawal"
         },
         {
-            "name": "GDPR Requests",
-            "description": "Resource 'GDPR Requests' operations."
+            "name": "GDPR Requests"
         },
         {
-            "name": "Locale",
-            "description": "Resource 'Locale' operations."
+            "name": "Locale"
         },
         {
-            "name": "MergeCart",
-            "description": "MergeCart - GraphQL API Resource for Merging Guest Cart to Customer Cart\n\nProvides mutation for merging guest cart items to authenticated customer cart.\nAfter a guest user logs in, their guest cart items are merged into their customer cart.\n\nFeatures:\n- Merges guest cart items into authenticated customer cart\n- Combines duplicate items (same product) by adding quantities\n- Deactivates guest cart after merge\n- Requires authentication token (bearer token)\n\nInput Parameters:\n- token: Guest cart token (guest user identifier)\n\nUsage:\n1. Guest user creates cart and adds items\n2. Guest user logs in (gets bearer token)\n3. Call merge mutation with bearer token to merge guest cart into customer cart"
+            "name": "MergeCart"
         },
         {
-            "name": "Newsletter",
-            "description": "Resource 'Newsletter' operations."
+            "name": "Newsletter"
         },
         {
-            "name": "CMS Page",
-            "description": "Resource 'CMS Page' operations."
+            "name": "CMS Page"
         },
         {
-            "name": "CMS Page Translation",
-            "description": "Resource 'CMS Page Translation' operations."
+            "name": "CMS Page Translation"
         },
         {
-            "name": "Section",
-            "description": "Resource 'Section' operations."
-        },
-        {
-            "name": "Theme",
-            "description": "The theme the current channel runs, and the section types it draws."
+            "name": "Theme"
         }
     ],
     "webhooks": []

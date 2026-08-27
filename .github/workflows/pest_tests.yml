@@ -75,6 +75,10 @@ jobs:
           sed -i "s|^\(DB_DATABASE=\s*\).*$|\1bagisto|" .env
           sed -i "s|^\(DB_USERNAME=\s*\).*$|\1root|" .env
           sed -i "s|^\(DB_PASSWORD=\s*\).*$|\1root|" .env
+          # Laravel 12 reads CACHE_STORE; CACHE_DRIVER alone leaves the app cache on `file`,
+          # which is where API_PLATFORM_CACHE keeps the metadata pool — one flush of the app
+          # cache would then take the metadata of every parallel worker with it.
+          grep -q '^CACHE_STORE=' .env && sed -i "s|^CACHE_STORE=.*|CACHE_STORE=array|" .env || echo "CACHE_STORE=array" >> .env
           grep -q '^CACHE_DRIVER=' .env && sed -i "s|^CACHE_DRIVER=.*|CACHE_DRIVER=array|" .env || echo "CACHE_DRIVER=array" >> .env
           grep -q '^SESSION_DRIVER=' .env && sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=array|" .env || echo "SESSION_DRIVER=array" >> .env
           grep -q '^QUEUE_CONNECTION=' .env && sed -i "s|^QUEUE_CONNECTION=.*|QUEUE_CONNECTION=sync|" .env || echo "QUEUE_CONNECTION=sync" >> .env

@@ -45,6 +45,17 @@ abstract class BagistoApiTestCase extends BagistoApiTest
         ]);
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         $this->storefrontKey = 'pk_test_'.Str::random(32);
+
+        // Bagisto caches a handful of repositories (config/repository.php), and Prettus only
+        // cleans that cache when the write goes through the repository — a test that seeds a
+        // row directly would otherwise keep reading the value cached before it. Turning the
+        // repository cache off is the exact fix; flushing the store instead takes the API
+        // metadata pool with it wherever the two share a store, which leaves every parallel
+        // worker rebuilding half a pool.
+        config([
+            'repository.cache.enabled' => false,
+            'repository.cache.repositories' => [],
+        ]);
     }
 
     protected function tearDown(): void
@@ -55,15 +66,12 @@ abstract class BagistoApiTestCase extends BagistoApiTest
 
     protected function forgetCoreConfigCache(): void
     {
-        $store = Cache::getStore();
-
-        if ($store instanceof TaggableStore) {
+        // The repository cache is off for tests (see setUp), so there is nothing to drop on a
+        // store that cannot be flushed by tag. Never flush the whole store here: the API
+        // metadata pool can live in it, and taking that out mid-run breaks every worker.
+        if (Cache::getStore() instanceof TaggableStore) {
             Cache::tags(CoreConfigRepository::class)->flush();
-
-            return;
         }
-
-        Cache::flush();
     }
 
     protected function storefrontHeaders(): array

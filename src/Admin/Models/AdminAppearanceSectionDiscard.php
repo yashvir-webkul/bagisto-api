@@ -30,6 +30,21 @@ use Webkul\BagistoApi\Admin\State\AdminAppearanceSectionDiscardProcessor;
                     new Model\Parameter('code', 'path', 'Theme code', true, schema: ['type' => 'string', 'example' => 'default']),
                     new Model\Parameter('channel', 'query', 'Channel ID (defaults to the current channel)', false, schema: ['type' => 'integer', 'example' => 1]),
                 ],
+                requestBody: new Model\RequestBody(
+                    description: 'Optional. The channel to act on; the current channel is used when it is omitted.',
+                    required: false,
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'channel' => ['type' => 'integer', 'example' => 1],
+                                ],
+                            ],
+                            'example' => ['channel' => 1],
+                        ],
+                    ]),
+                ),
                 responses: [
                     '200' => new Model\Response(
                         description: 'Staged edits discarded.',

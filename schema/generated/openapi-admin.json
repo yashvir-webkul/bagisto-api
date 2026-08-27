@@ -83,7 +83,7 @@
                 "description": "Stage a new section order",
                 "parameters": [],
                 "requestBody": {
-                    "description": "The new AdminAppearanceSectionReorder resource",
+                    "description": "Every section of the theme and channel, in the order they should render. A partial list is rejected, because the sections left out would be renumbered over the ones sent. Read the current set from GET /appearance/themes/{code}/sections first. The footer is pinned last whatever position it is given.",
                     "content": {
                         "application/json": {
                             "schema": {
@@ -97,13 +97,19 @@
                                         "items": {
                                             "type": "integer"
                                         },
-                                        "example": [
-                                            5,
-                                            3,
-                                            2
-                                        ]
+                                        "description": "Every section id of the theme and channel."
                                     }
                                 }
+                            },
+                            "example": {
+                                "sectionIds": [
+                                    5,
+                                    3,
+                                    2,
+                                    1,
+                                    4,
+                                    6
+                                ]
                             }
                         }
                     },
@@ -473,20 +479,16 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "The new AdminAppearanceSectionDuplicate resource",
+                    "description": "No fields. The section to copy is the one in the path.",
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/AdminAppearanceSectionDuplicate.AdminAppearanceSectionDuplicateInput"
-                            }
-                        },
-                        "text/html": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AdminAppearanceSectionDuplicate.AdminAppearanceSectionDuplicateInput"
+                                "type": "object",
+                                "properties": []
                             }
                         }
                     },
-                    "required": true
+                    "required": false
                 }
             }
         },
@@ -983,20 +985,24 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "The new AdminAppearanceSectionDiscard resource",
+                    "description": "Optional. The channel to act on; the current channel is used when it is omitted.",
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/AdminAppearanceSectionDiscard.AdminAppearanceSectionDiscardInput"
-                            }
-                        },
-                        "text/html": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AdminAppearanceSectionDiscard.AdminAppearanceSectionDiscardInput"
+                                "type": "object",
+                                "properties": {
+                                    "channel": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                }
+                            },
+                            "example": {
+                                "channel": 1
                             }
                         }
                     },
-                    "required": true
+                    "required": false
                 }
             }
         },
@@ -1163,20 +1169,24 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "The new AdminAppearanceSectionPublish resource",
+                    "description": "Optional. The channel to act on; the current channel is used when it is omitted.",
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/AdminAppearanceSectionPublish.AdminAppearanceSectionPublishInput"
-                            }
-                        },
-                        "text/html": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AdminAppearanceSectionPublish.AdminAppearanceSectionPublishInput"
+                                "type": "object",
+                                "properties": {
+                                    "channel": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                }
+                            },
+                            "example": {
+                                "channel": 1
                             }
                         }
                     },
-                    "required": true
+                    "required": false
                 }
             }
         },
@@ -2567,7 +2577,7 @@
                         }
                     },
                     "400": {
-                        "description": "Cannot delete — last family or products attached.",
+                        "description": "Cannot delete — the default family, or products attached.",
                         "content": {
                             "application/json": {
                                 "example": {
@@ -2592,7 +2602,7 @@
                     }
                 },
                 "summary": "Delete an attribute family",
-                "description": "Refuses if this is the last family (HTTP 400) or if any product is using it (HTTP 400).",
+                "description": "Refuses the default family (HTTP 400), which backs every product form, and any family a product is using (HTTP 400).",
                 "parameters": [
                     {
                         "name": "id",
@@ -6674,7 +6684,8 @@
                                     "productId": 12,
                                     "path": "product/12/abc123.webp",
                                     "position": 1,
-                                    "url": "/storage/product/12/abc123.webp"
+                                    "url": "/storage/product/12/abc123.webp",
+                                    "altText": "Blue running shoe, side view"
                                 }
                             }
                         },
@@ -6693,7 +6704,7 @@
                     }
                 },
                 "summary": "Upload a product image",
-                "description": "Uploads a new image for the given product. Send as multipart/form-data with `image` containing the file (allowed mime types: bmp, jpeg, jpg, png, webp).",
+                "description": "Uploads a new image for the given product. Send as multipart/form-data with `image` containing the file (allowed mime types: bmp, jpeg, jpg, png, webp). Optional `alt_text` is stored for every locale the request covers.",
                 "parameters": [
                     {
                         "name": "productId",
@@ -6726,6 +6737,10 @@
                                     "position": {
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "alt_text": {
+                                        "type": "string",
+                                        "example": "Blue running shoe, side view"
                                     }
                                 }
                             }
@@ -6843,6 +6858,92 @@
             }
         },
         "/catalog/products/{productId}/images/{id}": {
+            "put": {
+                "operationId": "api_apiadmincatalogproducts_productIdimages_id_put",
+                "tags": [
+                    "Admin Catalog: Products"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image updated.",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "id": 47,
+                                    "productId": 12,
+                                    "path": "product/12/abc123.webp",
+                                    "position": 2,
+                                    "url": "/storage/product/12/abc123.webp",
+                                    "altText": "Blue running shoe, side view"
+                                }
+                            }
+                        },
+                        "links": []
+                    },
+                    "404": {
+                        "description": "Image (or its parent product) not found."
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "links": []
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "links": []
+                    }
+                },
+                "summary": "Update a product image",
+                "description": "Edits what is stored alongside an uploaded image — its alt text and its position. The file itself is replaced by uploading a new image and deleting this one.",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "Parent product ID.",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Image ID.",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 47
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated AdminCatalogProductImage resource",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "alt_text": {
+                                        "type": "string",
+                                        "example": "Blue running shoe, side view"
+                                    },
+                                    "position": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            },
             "delete": {
                 "operationId": "api_apiadmincatalogproducts_productIdimages_id_delete",
                 "tags": [
@@ -15426,7 +15527,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginated list in the { data, meta } envelope. indexFile / generatedSitemaps are detail-only and null on list rows.",
+                        "description": "Paginated list in the { data, meta } envelope. generatedFiles / indexFile / generatedSitemaps are detail-only and null on list rows.",
                         "content": {
                             "application/json": {
                                 "example": {
@@ -15435,7 +15536,14 @@
                                             "id": 1,
                                             "fileName": "sitemap.xml",
                                             "path": "/",
+                                            "channels": [
+                                                1
+                                            ],
+                                            "urls": [
+                                                "https://example.com/storage/sitemaps/default/sitemap-1-1.xml"
+                                            ],
                                             "generatedAt": null,
+                                            "generatedFiles": null,
                                             "indexFile": null,
                                             "generatedSitemaps": null,
                                             "createdAt": "2026-06-20T10:00:00+05:30",
@@ -15456,7 +15564,7 @@
                     }
                 },
                 "summary": "List sitemaps",
-                "description": "Filters: file_name (LIKE). Sort: id (default desc), file_name.",
+                "description": "Filters: file_name (LIKE), channel_id (exact). Sort: id (default desc), file_name.",
                 "parameters": [
                     {
                         "name": "page",
@@ -15492,6 +15600,18 @@
                         "deprecated": false,
                         "schema": {
                             "type": "string"
+                        },
+                        "style": "form",
+                        "explode": true
+                    },
+                    {
+                        "name": "channel_id",
+                        "in": "query",
+                        "description": "Only sitemaps covering this channel.",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer"
                         },
                         "style": "form",
                         "explode": true
@@ -15544,7 +15664,14 @@
                                     "id": 1,
                                     "fileName": "sitemap.xml",
                                     "path": "/",
+                                    "channels": [
+                                        1
+                                    ],
+                                    "urls": [
+                                        "https://example.com/storage/sitemaps/default/sitemap-1-1.xml"
+                                    ],
                                     "generatedAt": null,
+                                    "generatedFiles": [],
                                     "indexFile": null,
                                     "generatedSitemaps": [],
                                     "createdAt": "2026-06-20T10:00:00+05:30",
@@ -15574,7 +15701,8 @@
                                 "type": "object",
                                 "required": [
                                     "file_name",
-                                    "path"
+                                    "path",
+                                    "channels"
                                 ],
                                 "properties": {
                                     "file_name": {
@@ -15584,6 +15712,15 @@
                                     "path": {
                                         "type": "string",
                                         "example": "/"
+                                    },
+                                    "channels": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1
+                                        ]
                                     }
                                 }
                             }
@@ -15608,12 +15745,26 @@
                                     "id": 1,
                                     "fileName": "sitemap.xml",
                                     "path": "/",
-                                    "generatedAt": "2026-06-23T13:00:00+05:30",
-                                    "indexFile": "/sitemap.xml",
-                                    "generatedSitemaps": [
-                                        "/sitemap-products-1.xml",
-                                        "/sitemap-categories-1.xml"
+                                    "channels": [
+                                        1
                                     ],
+                                    "urls": [
+                                        "https://example.com/storage/sitemaps/default/sitemap-1-1.xml"
+                                    ],
+                                    "generatedAt": "2026-06-23T13:00:00+05:30",
+                                    "generatedFiles": [
+                                        {
+                                            "channelId": 1,
+                                            "channelCode": "default",
+                                            "hostname": "https://example.com",
+                                            "index": "sitemaps/default/sitemap-1-1.xml",
+                                            "sitemaps": [
+                                                "sitemaps/default/sitemap-1-1-1.xml"
+                                            ]
+                                        }
+                                    ],
+                                    "indexFile": null,
+                                    "generatedSitemaps": [],
                                     "createdAt": "2026-06-20T10:00:00+05:30",
                                     "updatedAt": "2026-06-23T13:05:00+05:30"
                                 }
@@ -15655,12 +15806,26 @@
                                     "id": 1,
                                     "fileName": "sitemap.xml",
                                     "path": "/",
-                                    "generatedAt": "2026-06-23T13:00:00+05:30",
-                                    "indexFile": "/sitemap.xml",
-                                    "generatedSitemaps": [
-                                        "/sitemap-products-1.xml",
-                                        "/sitemap-categories-1.xml"
+                                    "channels": [
+                                        1
                                     ],
+                                    "urls": [
+                                        "https://example.com/storage/sitemaps/default/sitemap-1-1.xml"
+                                    ],
+                                    "generatedAt": "2026-06-23T13:00:00+05:30",
+                                    "generatedFiles": [
+                                        {
+                                            "channelId": 1,
+                                            "channelCode": "default",
+                                            "hostname": "https://example.com",
+                                            "index": "sitemaps/default/sitemap-1-1.xml",
+                                            "sitemaps": [
+                                                "sitemaps/default/sitemap-1-1-1.xml"
+                                            ]
+                                        }
+                                    ],
+                                    "indexFile": null,
+                                    "generatedSitemaps": [],
                                     "createdAt": "2026-06-20T10:00:00+05:30",
                                     "updatedAt": "2026-06-23T13:05:00+05:30"
                                 }
@@ -15710,6 +15875,15 @@
                                     "path": {
                                         "type": "string",
                                         "example": "/"
+                                    },
+                                    "channels": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1
+                                        ]
                                     }
                                 }
                             }
@@ -15769,11 +15943,22 @@
                             "application/json": {
                                 "example": {
                                     "sitemapId": 1,
-                                    "indexFile": "/sitemap.xml",
-                                    "generatedSitemaps": [
-                                        "/sitemap-products-1.xml",
-                                        "/sitemap-categories-1.xml"
+                                    "generatedFiles": [
+                                        {
+                                            "channelId": 1,
+                                            "channelCode": "default",
+                                            "hostname": "https://example.com",
+                                            "index": "sitemaps/default/sitemap-1-1.xml",
+                                            "sitemaps": [
+                                                "sitemaps/default/sitemap-1-1-1.xml"
+                                            ]
+                                        }
                                     ],
+                                    "urls": [
+                                        "https://example.com/storage/sitemaps/default/sitemap-1-1.xml"
+                                    ],
+                                    "indexFile": null,
+                                    "generatedSitemaps": [],
                                     "generatedAt": "2026-06-23T13:00:00+05:30",
                                     "message": "Sitemap generated."
                                 }
@@ -25005,6 +25190,20 @@
                                         "type": "string",
                                         "example": ""
                                     },
+                                    "image_source": {
+                                        "type": "string",
+                                        "enum": [
+                                            "url",
+                                            "upload",
+                                            "directory"
+                                        ],
+                                        "example": "directory"
+                                    },
+                                    "upload_images": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "description": "ZIP of images, required when image_source is upload."
+                                    },
                                     "file": {
                                         "type": "string",
                                         "format": "binary"
@@ -29957,26 +30156,6 @@
                     }
                 }
             },
-            "AdminAppearanceSectionDiscard.AdminAppearanceSectionDiscardInput": {
-                "type": "object",
-                "description": "Throws away every staged edit of a theme and channel, leaving the published content.",
-                "properties": {
-                    "code": {
-                        "description": "Theme whose staged edits are being discarded",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "channel": {
-                        "description": "Channel being discarded; defaults to the current channel",
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    }
-                }
-            },
             "AdminAppearanceSectionDiscard.html": {
                 "type": "object",
                 "description": "Throws away every staged edit of a theme and channel, leaving the published content.",
@@ -30106,18 +30285,6 @@
                     }
                 }
             },
-            "AdminAppearanceSectionDuplicate.AdminAppearanceSectionDuplicateInput": {
-                "type": "object",
-                "properties": {
-                    "sectionId": {
-                        "description": "Section being copied",
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    }
-                }
-            },
             "AdminAppearanceSectionDuplicate.html": {
                 "type": "object",
                 "properties": {
@@ -30180,26 +30347,6 @@
                     "message": {
                         "type": [
                             "string",
-                            "null"
-                        ]
-                    }
-                }
-            },
-            "AdminAppearanceSectionPublish.AdminAppearanceSectionPublishInput": {
-                "type": "object",
-                "description": "Promotes every staged edit of a theme and channel to what the storefront draws.",
-                "properties": {
-                    "code": {
-                        "description": "Theme whose staged edits are being published",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "channel": {
-                        "description": "Channel being published; defaults to the current channel",
-                        "type": [
-                            "integer",
                             "null"
                         ]
                     }
@@ -37749,6 +37896,22 @@
                             "null"
                         ]
                     },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "errorFilePath": {
                         "readOnly": true,
                         "type": [
@@ -37964,6 +38127,22 @@
                     "imagesDirectoryPath": {
                         "readOnly": true,
                         "example": "product/images",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
                         "type": [
                             "string",
                             "null"
@@ -38202,6 +38381,22 @@
                             "null"
                         ]
                     },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "errorFilePath": {
                         "readOnly": true,
                         "type": [
@@ -38417,6 +38612,22 @@
                     "imagesDirectoryPath": {
                         "readOnly": true,
                         "example": "product/images",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
                         "type": [
                             "string",
                             "null"
@@ -38642,6 +38853,22 @@
                             "null"
                         ]
                     },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "errorFilePath": {
                         "readOnly": true,
                         "type": [
@@ -38857,6 +39084,22 @@
                     "imagesDirectoryPath": {
                         "readOnly": true,
                         "example": "product/images",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
                         "type": [
                             "string",
                             "null"
@@ -39082,6 +39325,22 @@
                             "null"
                         ]
                     },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "errorFilePath": {
                         "readOnly": true,
                         "type": [
@@ -39297,6 +39556,22 @@
                     "imagesDirectoryPath": {
                         "readOnly": true,
                         "example": "product/images",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
                         "type": [
                             "string",
                             "null"
@@ -39522,6 +39797,22 @@
                             "null"
                         ]
                     },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "errorFilePath": {
                         "readOnly": true,
                         "type": [
@@ -39737,6 +40028,22 @@
                     "imagesDirectoryPath": {
                         "readOnly": true,
                         "example": "product/images",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
                         "type": [
                             "string",
                             "null"
@@ -39962,6 +40269,22 @@
                             "null"
                         ]
                     },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "errorFilePath": {
                         "readOnly": true,
                         "type": [
@@ -40177,6 +40500,22 @@
                     "imagesDirectoryPath": {
                         "readOnly": true,
                         "example": "product/images",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imageSource": {
+                        "readOnly": true,
+                        "description": "Where a product import reads its images from: url, upload or directory.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "imagesArchiveName": {
+                        "readOnly": true,
+                        "description": "Name of the images archive uploaded for this import, when its images came from an upload.",
                         "type": [
                             "string",
                             "null"
@@ -42328,172 +42667,130 @@
     ],
     "tags": [
         {
-            "name": "Admin Appearance: Sections",
-            "description": "Switching a section on or off is staged like any other edit, so the storefront only\nchanges once the theme is published."
+            "name": "Admin Appearance: Sections"
         },
         {
-            "name": "Admin Appearance: Themes",
-            "description": "What switching the named channels over to a theme would leave behind, so a client can\nspell it out before activating."
+            "name": "Admin Appearance: Themes"
         },
         {
-            "name": "Admin Catalog: Attributes",
-            "description": "Sub-resource for attribute options.\n\nREST:\n  POST   /api/admin/catalog/attributes/{attributeId}/options\n  PUT    /api/admin/catalog/attributes/{attributeId}/options/{optionId}\n  DELETE /api/admin/catalog/attributes/{attributeId}/options/{optionId}\n\nGraphQL:\n  createAdminCatalogAttributeOption\n  updateAdminCatalogAttributeOption\n  deleteAdminCatalogAttributeOption\n\nSuccess response shape: same full attribute detail as GET /api/admin/catalog/attributes/{id}\n(AdminAttribute DTO via AdminAttributeItemProvider::mapToDtoPublic).\n\nDelete returns: { \"message\": \"...\" }"
+            "name": "Admin Catalog: Attributes"
         },
         {
-            "name": "Admin Catalog: Attribute Families",
-            "description": "Admin Catalog → Attribute Families endpoints.\n\nPhase 1.5 (read):\n  GET    /api/admin/catalog/families          datagrid-parity listing\n  GET    /api/admin/catalog/families/{id}     detail with attribute groups\n\nPhase 4 (CRUD):\n  POST   /api/admin/catalog/families          create\n  PUT    /api/admin/catalog/families/{id}     update\n  DELETE /api/admin/catalog/families/{id}     delete\n\nGraphQL mutations (Phase 4): createAdminAttributeFamily / updateAdminAttributeFamily / deleteAdminAttributeFamily."
+            "name": "Admin Catalog: Attribute Families"
         },
         {
-            "name": "Admin Sales: Bookings",
-            "description": "Resource 'Admin Sales: Bookings' operations."
+            "name": "Admin Sales: Bookings"
         },
         {
-            "name": "Admin Sales: Orders",
-            "description": "Admin Order detail — connection-shape resource (2026-06-18).\n\nBare Eloquent model on the `orders` table (NOT extending core Order, which\ncarries morphTo/proxy relations that break API Platform serialization —\nsame reason the shop CustomerOrder is bare). Nested data follows the proven\nAdminReview recipe:\n  - to-many (items / invoices / shipments / refunds / comments) → HasMany to\n    Eloquent sub-resources → GraphQL connections (`items { edges { node } }`).\n  - to-one (customer / billingAddress / shippingAddress) → BelongsTo/HasOne\n    to Eloquent sub-resources → typed objects the client sub-selects.\n  - top-level scalars + formatted strings resolve via snake_case columns and\n    accessors through the central output converter (no AcceptsCamelCaseWrites).\n\nREST keeps the historical flat shape via `output: OrderDetailRestDto` (the\nprovider maps it); GraphQL ops carry no `output:` so they return THIS model\nand serve connections. The provider branches on the GraphQL context."
+            "name": "Admin Sales: Orders"
         },
         {
-            "name": "Admin: Customer Order creation",
-            "description": "Resource 'Admin: Customer Order creation' operations."
+            "name": "Admin: Customer Order creation"
         },
         {
-            "name": "Admin Catalog: Products",
-            "description": "Admin Catalog Product videos sub-resource (mirrors AdminCatalogProductImage).\n\n  POST   /api/admin/catalog/products/{productId}/videos       upload (multipart `video`)\n  DELETE /api/admin/catalog/products/{productId}/videos/{id}  remove DB row + file\n\nBinary upload is REST-only; the GraphQL create mutation is a placeholder that\nrejects with 422. GraphQL delete works. Permission: catalog.products.edit."
+            "name": "Admin Catalog: Products"
         },
         {
-            "name": "Admin Catalog: Categories",
-            "description": "Admin Catalog → Categories tree.\n\nREST: GET /api/admin/catalog/categories/tree\n\nReturns the full nested category tree. Each node carries the same scalar\nshape as the flat listing plus `children: [...]` (empty array for leaves).\nNo envelope — the response body is a JSON array of root nodes (typically\none — the system root — but multi-root installs work too).\n\nUses Kalnoy\\Nestedset's `toTree()` for the hierarchy build."
+            "name": "Admin Catalog: Categories"
         },
         {
-            "name": "Admin CMS",
-            "description": "One-operation resource for mass-deleting CMS pages.\n\nREST:\n  POST /api/admin/cms/pages/mass-delete\n    Body: { \"indices\": [12, 18] }\n    200:  { \"deleted\": [12, 18], \"message\": \"...\" }\n\nGraphQL:\n  createAdminCmsPageMassDelete"
+            "name": "Admin CMS"
         },
         {
-            "name": "Admin Configuration",
-            "description": "Admin Configuration values — returns the effective values map for a slug.\n\nREST   : GET /api/admin/configuration?slug=<section>.<group>\nGraphQL: adminConfigurationValues(slug:, channel:, locale:)\n\n`slug` is required (anti-foot-gun — would otherwise dump the whole\ncore_config table). Channel/locale resolution falls back to the current\nrequest's channel/locale per `core()->getConfigData()` semantics."
+            "name": "Admin Configuration"
         },
         {
-            "name": "Admin Customers",
-            "description": "Customer's wishlist — the right-sidebar \"Wishlist Items\" panel on the\nCreate-Order screen. Read-only."
+            "name": "Admin Customers"
         },
         {
-            "name": "Admin Customer GDPR",
-            "description": "Admin Customer GDPR Requests — read / status-update / delete.\n\nREST:\n  GET    /api/admin/customers/gdpr-requests\n  GET    /api/admin/customers/gdpr-requests/{id}\n  PUT    /api/admin/customers/gdpr-requests/{id}\n  DELETE /api/admin/customers/gdpr-requests/{id}\n\nGraphQL: adminCustomerGdprRequests, adminCustomerGdprRequest,\n         updateAdminCustomerGdprRequest, deleteAdminCustomerGdprRequest\n\nMirrors Webkul\\Admin\\Http\\Controllers\\Customers\\GDPRController. The admin\npanel's only writes are status update + delete; the destructive cascade for\ntype=delete requests happens via the separate /process action (see\nAdminCustomerGdprProcess) — matches what the customer-facing side does on\napproval but exposes it as an explicit endpoint for API integrators."
+            "name": "Admin Customer GDPR"
         },
         {
-            "name": "Admin Customer Groups",
-            "description": "Resource 'Admin Customer Groups' operations."
+            "name": "Admin Customer Groups"
         },
         {
-            "name": "Admin Customer Reviews",
-            "description": "Resource 'Admin Customer Reviews' operations."
+            "name": "Admin Customer Reviews"
         },
         {
-            "name": "Admin Dashboard",
-            "description": "Admin dashboard statistics (read-only).\n\nREST   : GET /api/admin/dashboard/stats\nGraphQL: adminDashboardStats query\n\nMirrors `Webkul\\Admin\\Http\\Controllers\\DashboardController::stats()`.\nThe `type` query param selects which named stat group is returned by\nthe `Webkul\\Admin\\Helpers\\Dashboard` helper:\n\n  over-all (default), today, stock-threshold-products, total-sales,\n  total-visitors, top-selling-products, top-customers\n\n`start` / `end` (ISO dates) and `channel` (channel code) narrow the\nwindow; the helper falls back to \"last 30 days\" when omitted."
+            "name": "Admin Dashboard"
         },
         {
-            "name": "Admin Sales: EU Withdrawal",
-            "description": "Resource 'Admin Sales: EU Withdrawal' operations."
+            "name": "Admin Sales: EU Withdrawal"
         },
         {
-            "name": "Admin Sales: Invoices",
-            "description": "Resource 'Admin Sales: Invoices' operations."
+            "name": "Admin Sales: Invoices"
         },
         {
-            "name": "Admin Marketing: Communications",
-            "description": "Admin Marketing → Email Templates endpoints (Block F2a).\n\nMirrors Webkul\\Admin\\Http\\Controllers\\Marketing\\Communications\\TemplateController 1:1.\n\nREST:\n  GET    /api/admin/marketing/templates\n  GET    /api/admin/marketing/templates/{id}\n  POST   /api/admin/marketing/templates\n  PUT    /api/admin/marketing/templates/{id}\n  DELETE /api/admin/marketing/templates/{id}\n\nGraphQL:\n  adminMarketingTemplates           — cursor listing\n  adminMarketingTemplate(id:)       — detail\n  createAdminMarketingTemplate\n  updateAdminMarketingTemplate\n  deleteAdminMarketingTemplate"
+            "name": "Admin Marketing: Communications"
         },
         {
-            "name": "Admin Marketing: Promotions",
-            "description": "One-operation resource for mass-deleting catalog rules.\n\nREST:\n  POST /api/admin/marketing/catalog-rules/mass-delete\n    Body: { \"indices\": [12, 18] }\n    200:  { \"deleted\": [12, 18], \"message\": \"...\" }\n\nGraphQL:\n  createAdminMarketingCatalogRuleMassDelete"
+            "name": "Admin Marketing: Promotions"
         },
         {
-            "name": "Admin Marketing: Search & SEO",
-            "description": "One-operation resource for mass-deleting URL rewrites.\n\nREST:\n  POST /api/admin/marketing/url-rewrites/mass-delete\n    Body: { \"indices\": [12, 18] }\n    200:  { \"deleted\": [12, 18], \"message\": \"...\" }\n\nGraphQL:\n  createAdminMarketingUrlRewriteMassDelete"
+            "name": "Admin Marketing: Search & SEO"
         },
         {
-            "name": "Admin Menu",
-            "description": "Resource 'Admin Menu' operations."
+            "name": "Admin Menu"
         },
         {
-            "name": "Admin Products",
-            "description": "Admin Product search/listing — slim row for the Create-Order \"Add Product\"\nmodal and any other admin product-picker workflow.\n\nREST   : GET /api/admin/products → `{ data: [AdminProduct], meta: {...} }`\n         (envelope applied by AdminCollectionEnvelopeNormalizer).\nGraphQL: adminProducts query → native cursor pagination.\n\nDifferences from the shop /api/shop/products listing:\n  - No automatic status=1 filter — admin sees disabled/draft products too\n    (optional ?status=1 filter still works).\n  - Returns booking products too (so they're visible); the booking guard in\n    AdminCartAddItemProcessor blocks them at add-to-cart time.\n  - Slim shape: id, sku, type, name, status, price, formattedPrice,\n    baseImageUrl, isSaleable. NO heavy variants/bundleOptions/superAttributes\n    relations — the picker just needs to identify the product."
+            "name": "Admin Products"
         },
         {
-            "name": "Admin Authentication",
-            "description": "Read the authenticated admin's own profile."
+            "name": "Admin Authentication"
         },
         {
-            "name": "Admin Sales: Refunds",
-            "description": "Resource 'Admin Sales: Refunds' operations."
+            "name": "Admin Sales: Refunds"
         },
         {
-            "name": "Admin Reporting: Customers",
-            "description": "Admin reporting — customers (read-only).\n\nREST   : GET /api/admin/reporting/customers\nGraphQL: adminReportingCustomers query\n\nMirrors `Reporting/CustomerController::stats()`. `?type=`:\n  total-customers (default), customers-traffic, customers-with-most-sales,\n  customers-with-most-orders, customers-with-most-reviews,\n  top-customer-groups."
+            "name": "Admin Reporting: Customers"
         },
         {
-            "name": "Admin Reporting: Overview",
-            "description": "Admin reporting overview (read-only).\n\nREST   : GET /api/admin/reporting/stats\nGraphQL: adminReportingStats query\n\nMirrors `Webkul\\Admin\\Http\\Controllers\\Reporting\\Controller::stats()`.\nThe `?type=` query param picks one of the overview stat groups:\n  total-sales (default), total-orders, total-customers,\n  top-selling-products-by-revenue.\n\n`start` / `end` (ISO) + `channel` (code) bound the period."
+            "name": "Admin Reporting: Overview"
         },
         {
-            "name": "Admin Reporting: Products",
-            "description": "Admin reporting — products (read-only).\n\nREST   : GET /api/admin/reporting/products\nGraphQL: adminReportingProducts query\n\nMirrors `Reporting/ProductController::stats()`. `?type=`:\n  total-sold-quantities (default), total-products-added-to-wishlist,\n  top-selling-products-by-revenue, top-selling-products-by-quantity,\n  products-with-most-reviews, products-with-most-visits,\n  last-search-terms, top-search-terms."
+            "name": "Admin Reporting: Products"
         },
         {
-            "name": "Admin Reporting: Sales",
-            "description": "Admin reporting — sales (read-only).\n\nREST   : GET /api/admin/reporting/sales\nGraphQL: adminReportingSales query\n\nMirrors `Reporting/SaleController::stats()`. `?type=`:\n  total-sales (default), average-sales, total-orders, purchase-funnel,\n  abandoned-carts, refunds, tax-collected, shipping-collected,\n  top-payment-methods, sales-by-coupon."
+            "name": "Admin Reporting: Sales"
         },
         {
-            "name": "Admin Sales: RMA",
-            "description": "Resource 'Admin Sales: RMA' operations."
+            "name": "Admin Sales: RMA"
         },
         {
-            "name": "Admin Settings: Channels",
-            "description": "Admin Settings → Channels endpoints (Block B Wave 2; objectified 2026-06-22).\n\nBare Eloquent `#[ApiResource]` parent. Nested data is field-selectable:\n  GraphQL → `translations`/`locales`/`currencies`/`inventorySources` Relay\n            connections + `homeSeo` typed object.\n  REST    → the same data as flat arrays of objects (no connections).\n\nREST shape stays flat via `output: AdminSettingsChannelRestDto`; GraphQL ops\ncarry NO output so they return this Eloquent model → connections resolve.\n\nBREAKING (user-approved): the old scalar `localeIds`/`currencyIds`/\n`inventorySourceIds` int arrays are REPLACED by the `locales`/`currencies`/\n`inventorySources` object connections (GraphQL) / object arrays (REST).\n\nREST:\n  GET    /api/admin/settings/channels            — datagrid-parity listing\n  GET    /api/admin/settings/channels/{id}       — detail\n  POST   /api/admin/settings/channels            — create\n  PUT    /api/admin/settings/channels/{id}       — update (translatable via translations map)\n  DELETE /api/admin/settings/channels/{id}       — delete (guards: last channel, app.channel)\n\nGraphQL:\n  adminSettingsChannels / adminSettingsChannel(id:)\n  createAdminSettingsChannel / updateAdminSettingsChannel / deleteAdminSettingsChannel\n\nMirrors Webkul\\Admin\\Http\\Controllers\\Settings\\ChannelController 1:1.\nImage uploads (logo/favicon) deferred — accept storage paths only."
+            "name": "Admin Settings: Channels"
         },
         {
-            "name": "Admin Settings: Currencies",
-            "description": "One-operation resource for mass-deleting currencies.\n\nREST:\n  POST /api/admin/settings/currencies/mass-delete\n    Body: { \"indices\": [2, 3] }\n    200:  { \"deleted\": [2, 3], \"message\": \"...\" }\n    400:  if any ID would leave zero currencies OR is a channel base currency, batch rejected.\n\nGraphQL:\n  createAdminSettingsCurrencyMassDelete"
+            "name": "Admin Settings: Currencies"
         },
         {
-            "name": "Admin Settings: Data Transfer",
-            "description": "POST /api/admin/settings/data-transfer/imports/{id}/validate\n+ validateAdminSettingsDataTransferImportValidate mutation.\n\nRuns the import validator and returns { is_valid, import } (mapped onto the\nAdminSettingsDataTransferImport output). Permission: settings.data_transfer.imports.edit."
+            "name": "Admin Settings: Data Transfer"
         },
         {
-            "name": "Admin Settings: Exchange Rates",
-            "description": "Auto-sync admin settings exchange rates from the configured external provider\n(the admin \"Update Rates\" button — Webkul\\Admin ExchangeRateController::updateRates).\n\nREST:    POST /api/admin/settings/exchange-rates/update-rates\nGraphQL: createAdminSettingsExchangeRateUpdateRates\n\nResolves the provider via services.exchange_api.<default>.class and runs its\nupdateRates(). Provider/network failures surface as HTTP 422 with the\nprovider's own message."
+            "name": "Admin Settings: Exchange Rates"
         },
         {
-            "name": "Admin Settings: Inventory Sources",
-            "description": "Mass-delete admin settings inventory sources.\n\nREST:    POST /api/admin/settings/inventory-sources/mass-delete\nGraphQL: createAdminSettingsInventorySourceMassDelete\n\nGuards: refuses to delete every remaining source (must leave at least 1);\nrefuses any id that is referenced by product_inventories."
+            "name": "Admin Settings: Inventory Sources"
         },
         {
-            "name": "Admin Settings: Locales",
-            "description": "Mass-delete admin settings locales.\n\nREST:    POST /api/admin/settings/locales/mass-delete\nGraphQL: createAdminSettingsLocaleMassDelete\n\nPer-id guards (skip + report or fail row-by-row): would-be-last-locale,\nchannel-default. Non-existent IDs are silently skipped."
+            "name": "Admin Settings: Locales"
         },
         {
-            "name": "Admin Settings: Roles",
-            "description": "Admin Settings → Roles endpoints (Block B Wave 2).\n\nREST:\n  GET    /api/admin/settings/roles\n  GET    /api/admin/settings/roles/{id}\n  POST   /api/admin/settings/roles\n  PUT    /api/admin/settings/roles/{id}\n  DELETE /api/admin/settings/roles/{id}    (guards: in-use, last-role)\n\nGraphQL:\n  adminSettingsRoles / adminSettingsRole\n  createAdminSettingsRole / updateAdminSettingsRole / deleteAdminSettingsRole\n\nMirrors Webkul\\Admin\\Http\\Controllers\\Settings\\RoleController 1:1."
+            "name": "Admin Settings: Roles"
         },
         {
-            "name": "Admin Settings: Tax Categories",
-            "description": "Admin Settings → Tax Categories endpoints (Block B Wave 3).\n\nMirrors Webkul\\Admin\\Http\\Controllers\\Settings\\Tax\\TaxCategoryController 1:1.\n\nREST:\n  GET    /api/admin/settings/tax-categories\n  GET    /api/admin/settings/tax-categories/{id}\n  POST   /api/admin/settings/tax-categories\n  PUT    /api/admin/settings/tax-categories/{id}\n  DELETE /api/admin/settings/tax-categories/{id}\n\nGraphQL:\n  adminSettingsTaxCategories       — cursor listing\n  adminSettingsTaxCategory(id:)    — detail\n  createAdminSettingsTaxCategory\n  updateAdminSettingsTaxCategory\n  deleteAdminSettingsTaxCategory"
+            "name": "Admin Settings: Tax Categories"
         },
         {
-            "name": "Admin Settings: Tax Rates",
-            "description": "Admin Settings → Tax Rates endpoints (Block B Wave 3).\n\nMirrors Webkul\\Admin\\Http\\Controllers\\Settings\\Tax\\TaxRateController.\n\nis_zip conditional validation:\n  - is_zip = false → zip_code required (the specific zip mode)\n  - is_zip = true  → zip_from + zip_to required (the range mode)\n\nNo mass-delete in the monolith admin UI; not exposed."
+            "name": "Admin Settings: Tax Rates"
         },
         {
-            "name": "Admin Settings: Users",
-            "description": "Self-delete the authenticated admin's OWN account, password-confirmed\n(the admin \"delete my account\" flow — Webkul\\Admin UserController::destroySelf).\n\nDistinct from DELETE /api/admin/settings/users/{id}, which deletes ANOTHER\nadmin and refuses self-deletion. This endpoint deletes the caller's own admin\nafter re-confirming their password. It deletes the admin that owns the calling\nintegration token, which invalidates that token.\n\nREST:    POST /api/admin/settings/users/delete-self\nGraphQL: createAdminSettingsUserDeleteSelf"
+            "name": "Admin Settings: Users"
         },
         {
-            "name": "Admin Sales: Shipments",
-            "description": "Resource 'Admin Sales: Shipments' operations."
+            "name": "Admin Sales: Shipments"
         },
         {
-            "name": "Admin Sales: Transactions",
-            "description": "Resource 'Admin Sales: Transactions' operations."
+            "name": "Admin Sales: Transactions"
         }
     ],
     "webhooks": []

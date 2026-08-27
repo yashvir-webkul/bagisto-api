@@ -28,7 +28,7 @@ use Webkul\BagistoApi\Traits\ServesLoadedTranslation;
                 'skip_null_values' => false,
             ],
             openapi: new Operation(
-                tags: ['Section'],
+                tags: ['Theme'],
                 summary: 'Get a storefront section by ID',
                 description: 'Returns one published section (carousel, static content, footer links, etc.) of the current channel\'s active theme, with its current-locale `translation` and all `translations`. The `options` field is a JSON-encoded string. Public endpoint.',
                 responses: [
@@ -84,7 +84,7 @@ use Webkul\BagistoApi\Traits\ServesLoadedTranslation;
                 'skip_null_values' => false,
             ],
             openapi: new Operation(
-                tags: ['Section'],
+                tags: ['Theme'],
                 summary: 'List storefront sections',
                 description: 'Returns the published sections of the current channel\'s active theme, in render order. A channel holds one page worth of sections, so the default page size is 50 — enough to draw the storefront in a single call. Filter by `?type=` (`image_carousel`, `product_carousel`, `category_carousel`, `footer_links`, `static_content`, `services_content`). Public endpoint.',
                 responses: [
@@ -158,10 +158,6 @@ class Section extends \Webkul\Theme\Models\Section
         'draft_sort_order',
     ];
 
-    /**
-     * The storefront draws the published sections of the channel it is serving, so the
-     * API surface is scoped the same way rather than exposing every theme's rows.
-     */
     protected static function booted(): void
     {
         static::addGlobalScope('bagisto_api_storefront', function (Builder $builder) {
@@ -175,27 +171,18 @@ class Section extends \Webkul\Theme\Models\Section
         });
     }
 
-    /**
-     * Get unique section identifier for API
-     */
     #[ApiProperty(identifier: true, writable: false)]
     public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * Get translation for the current locale
-     */
     #[ApiProperty(readable: true, writable: false, readableLink: true, description: 'Current locale translation')]
     public function getTranslation(?string $locale = null, ?bool $withFallback = null): ?Model
     {
         return $this->translation;
     }
 
-    /**
-     * Get all translations
-     */
     #[ApiProperty(readable: true, writable: false, readableLink: true, description: 'All translations')]
     public function getTranslations()
     {

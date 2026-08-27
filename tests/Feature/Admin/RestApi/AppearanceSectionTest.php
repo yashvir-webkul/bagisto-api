@@ -209,6 +209,35 @@ class AppearanceSectionTest extends AdminApiTestCase
         expect((int) $row->sort_order)->toBe(4);
     }
 
+    public function test_update_writes_carousel_options_in_the_shape_they_are_stored(): void
+    {
+        $admin = $this->createAdmin();
+        $section = $this->makeSection(['type' => Section::IMAGE_CAROUSEL]);
+
+        $images = [
+            'images' => [
+                ['image' => 'storage/themes/default/sections/1/banner.webp', 'link' => '/', 'title' => 'Sale'],
+            ],
+        ];
+
+        // Core reads carousel options off the request as a list of rows coming off an upload,
+        // so handing it the stored shape made it read a key that is not there.
+        $response = $this->putJson('/api/admin/appearance/sections/'.$section->id, [
+            'name' => $section->name,
+            'type' => Section::IMAGE_CAROUSEL,
+            'sortOrder' => $section->sort_order,
+            'channelId' => $section->channel_id,
+            'themeCode' => 'default',
+            'status' => true,
+            'options' => $images,
+        ], $this->adminHeaders($admin));
+
+        $response->assertOk();
+
+        // Core normalises the key order of each row, so the comparison is on content.
+        expect($section->refresh()->translate('en')?->options)->toEqual($images);
+    }
+
     public function test_update_writes_the_options_of_the_locale(): void
     {
         $admin = $this->createAdmin();

@@ -737,12 +737,12 @@
     },
     "section": {
         "kind": "query",
-        "tag": "Section",
+        "tag": "Theme",
         "resource": "Webkul\\BagistoApi\\Models\\Section"
     },
     "sections": {
         "kind": "query",
-        "tag": "Section",
+        "tag": "Theme",
         "resource": "Webkul\\BagistoApi\\Models\\Section"
     },
     "theme": {

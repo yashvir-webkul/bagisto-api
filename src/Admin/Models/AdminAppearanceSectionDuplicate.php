@@ -27,6 +27,15 @@ use Webkul\BagistoApi\Admin\State\AdminAppearanceSectionDuplicateProcessor;
                 parameters: [
                     new Model\Parameter('id', 'path', 'Section ID to copy', true, schema: ['type' => 'integer']),
                 ],
+                requestBody: new Model\RequestBody(
+                    description: 'No fields. The section to copy is the one in the path.',
+                    required: false,
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => ['type' => 'object', 'properties' => new \ArrayObject],
+                        ],
+                    ]),
+                ),
                 responses: [
                     '200' => new Model\Response(
                         description: 'Section copied.',

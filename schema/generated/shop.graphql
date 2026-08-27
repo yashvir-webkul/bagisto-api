@@ -1725,6 +1725,8 @@ type ProductImages implements Node {
   productId: String!
   position: String!
   publicPath: String
+  altText: String
+  fileName: String
 }
 
 "Information about the current page."
