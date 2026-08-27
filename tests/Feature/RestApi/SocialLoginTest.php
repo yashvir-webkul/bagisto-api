@@ -32,11 +32,15 @@ class SocialLoginTest extends RestApiTestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $this->forgetCoreConfigCache();
     }
 
     private function disableGoogle(): void
     {
         DB::table('core_config')->where('code', 'customer.settings.social_login.enable_google')->delete();
+
+        $this->forgetCoreConfigCache();
     }
 
     private function fakeGoogle(string $email, array $overrides = []): void

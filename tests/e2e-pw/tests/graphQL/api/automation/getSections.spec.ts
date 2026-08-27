@@ -1,24 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { sendGraphQLRequest } from '../../graphql/helpers/graphqlClient';
-import { GET_THEME_CUSTOMIZATIONS_BASIC, GET_THEME_CUSTOMIZATIONS_FILTERED, GET_THEME_CUSTOMIZATIONS_COMPLETE,
-  GET_THEME_CUSTOMIZATION_BY_ID, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID, GET_THEME_CUSTOMIZATION_BY_ID_COMPLETE_DETAILS
+import { GET_SECTIONS_BASIC, GET_SECTIONS_FILTERED, GET_SECTIONS_COMPLETE,
+  GET_SECTION_BY_ID, GET_SECTION_BY_NUMERIC_ID, GET_SECTION_BY_ID_COMPLETE_DETAILS
  } 
-from '../../graphql/Queries/themecustomizations.queries';
+from '../../graphql/Queries/sections.queries';
 import {
-  assertGetThemeCustomizationsBasicResponse, assertGetThemeCustomizationsFilteredResponse,
-  assertGetThemeCustomizationsCompleteResponse, assertGetThemeCustomizationByIdBasicResponse,
-  assertGetThemeCustomizationByNumericIdResponse, assertTranslationsConnection,
-  assertExtendedThemeCustomization, assertNoGraphQLErrors,
+  assertGetSectionsBasicResponse, assertGetSectionsFilteredResponse,
+  assertGetSectionsCompleteResponse, assertGetSectionByIdBasicResponse,
+  assertGetSectionByNumericIdResponse, assertTranslationsConnection,
+  assertExtendedSection, assertNoGraphQLErrors,
   assertGraphQLError
-} from '../../graphql/assertions/themeCustomizations.assertions';
+} from '../../graphql/assertions/sections.assertions';
 
-test.describe('Theme Customization GraphQL Tests', () => {
-  test('Should fetch theme customizations (basic)', async ({ request }) => {
+test.describe('Section GraphQL Tests', () => {
+  test('Should fetch sections (basic)', async ({ request }) => {
 
-  console.log('\n📤 Sending themeCustomizations query...');
+  console.log('\n📤 Sending sections query...');
   console.log('Variables:', { first: 5 });
 
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATIONS_BASIC,
+  const response = await sendGraphQLRequest( request, GET_SECTIONS_BASIC,
   { first: 5 });
   console.log('\n📥 RESPONSE DETAILS');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -28,7 +28,7 @@ test.describe('Theme Customization GraphQL Tests', () => {
   expect(response.status()).toBe(200);
 
   const body = await response.json();
-  const data = body.data.themeCustomizations;
+  const data = body.data.sections;
 
   console.log('\n📊 RESPONSE SUMMARY');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -51,17 +51,17 @@ test.describe('Theme Customization GraphQL Tests', () => {
     console.log(`   Cursor: ${edge.cursor}`);
     console.log('');
   });
-  console.log('\n✅ Theme Customizations API Test Passed!\n');
-  assertGetThemeCustomizationsBasicResponse(body);
+  console.log('\n✅ Sections API Test Passed!\n');
+  assertGetSectionsBasicResponse(body);
 });
 
 
-test('Should fetch theme customizations filtered by type', async ({ request }) => {
+test('Should fetch sections filtered by type', async ({ request }) => {
     const variables = { type: 'footer_links'};
-    const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATIONS_FILTERED, variables );
+    const response = await sendGraphQLRequest( request, GET_SECTIONS_FILTERED, variables );
     expect(response.status()).toBe(200);
     const body = await response.json();
-    assertGetThemeCustomizationsFilteredResponse( body, variables.type );
+    assertGetSectionsFilteredResponse( body, variables.type );
   });
 
   /* ---------------------------------------------------
@@ -70,11 +70,11 @@ test('Should fetch theme customizations filtered by type', async ({ request }) =
 
   test('Should return empty list for invalid type filter', async ({ request }) => {
     const variables = { type: 'invalid_type_xyz'};
-    const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATIONS_FILTERED, variables );
+    const response = await sendGraphQLRequest( request, GET_SECTIONS_FILTERED, variables );
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.errors).toBeUndefined();
-    const connection = body.data.themeCustomizations;
+    const connection = body.data.sections;
     expect(Array.isArray(connection.edges)).toBeTruthy();
     expect(connection.edges.length).toBe(0);
     expect(typeof connection.totalCount).toBe('number');
@@ -85,46 +85,46 @@ test('Should fetch theme customizations filtered by type', async ({ request }) =
    * WITHOUT FILTER (type = null)
    * --------------------------------------------------- */
 
-  test('Should fetch theme customizations without type filter', async ({ request }) => {
-    const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATIONS_FILTERED,
+  test('Should fetch sections without type filter', async ({ request }) => {
+    const response = await sendGraphQLRequest( request, GET_SECTIONS_FILTERED,
     { type: null });
     expect(response.status()).toBe(200);
     const body = await response.json();
-    assertGetThemeCustomizationsBasicResponse(body);
+    assertGetSectionsBasicResponse(body);
   });
 
-  test('Should fetch complete theme customization details', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATIONS_COMPLETE, { first: 3 });
+  test('Should fetch complete section details', async ({ request }) => {
+  const response = await sendGraphQLRequest( request, GET_SECTIONS_COMPLETE, { first: 3 });
   expect(response.status()).toBe(200);
   const body = await response.json();
-  assertGetThemeCustomizationsCompleteResponse(body);
+  assertGetSectionsCompleteResponse(body);
 });
 
-test('Should fetch theme customization by ID (basic)', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_ID,
+test('Should fetch section by ID (basic)', async ({ request }) => {
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_ID,
   { id: "/api/theme_customizations/1" });
   expect(response.status()).toBe(200);
   const body = await response.json();
-  assertGetThemeCustomizationByIdBasicResponse(body);
+  assertGetSectionByIdBasicResponse(body);
 });
 
-test('Should fetch theme customization by Numeric ID', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID,
+test('Should fetch section by Numeric ID', async ({ request }) => {
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_NUMERIC_ID,
   { id: "/api/theme_customizations/1" });
   expect(response.status()).toBe(200);
   const body = await response.json();
-  assertGetThemeCustomizationByNumericIdResponse(body);
+  assertGetSectionByNumericIdResponse(body);
 });
 
-test('Should fetch theme customization by ID (complete details)', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_ID_COMPLETE_DETAILS,
+test('Should fetch section by ID (complete details)', async ({ request }) => {
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_ID_COMPLETE_DETAILS,
   { id: "1" });
   expect(response.status()).toBe(200);
   const body = await response.json();
   assertNoGraphQLErrors(body);
-  const node = body.data.themeCustomization;
+  const node = body.data.section;
   expect(node).toBeDefined();
-  assertExtendedThemeCustomization(node);
+  assertExtendedSection(node);
   expect(typeof node.channelId).toBe('string');
   expect(typeof node.createdAt).toBe('string');
   expect(typeof node.updatedAt).toBe('string');
@@ -137,7 +137,7 @@ test('Should fetch theme customization by ID (complete details)', async ({ reque
 
 
 test('Should return error when ID variable is missing', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID, {});
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_NUMERIC_ID, {});
   expect(response.status()).toBe(200);
   const body = await response.json();
   assertGraphQLError(body, 'Variable "$id"');
@@ -146,7 +146,7 @@ test('Should return error when ID variable is missing', async ({ request }) => {
 test('Should return error when ID is null', async ({ request }) => {
   const response = await sendGraphQLRequest(
     request,
-    GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID,
+    GET_SECTION_BY_NUMERIC_ID,
     { id: null }
   );
   const body = await response.json();
@@ -154,7 +154,7 @@ test('Should return error when ID is null', async ({ request }) => {
 });
 
 test('Should return error when ID is "null"', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID,
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_NUMERIC_ID,
   { id: "null" });
   const body = await response.json();
   assertGraphQLError(body, 'Invalid ID format');
@@ -163,7 +163,7 @@ test('Should return error when ID is "null"', async ({ request }) => {
 test('Should return error for invalid GraphQL syntax', async ({ request }) => {
   const invalidQuery = `
     query {
-      themeCustomization(id: "1") {
+      section(id: "1") {
         id
         name
   `;
@@ -175,7 +175,7 @@ test('Should return error for invalid GraphQL syntax', async ({ request }) => {
 test('Should return error when querying non-existing field', async ({ request }) => {
   const invalidFieldQuery = `
 query getThemeCustomisation($id: ID!) {
-  themeCustomization(id: $id) {
+  section(id: $id) {
     id
     nonExistingField   # ❌ not in schema
   }
@@ -188,32 +188,32 @@ query getThemeCustomisation($id: ID!) {
 });
 
 test('Should return error for wrong variable type', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID,
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_NUMERIC_ID,
   { id: { value: "1" } });
   const body = await response.json();
   assertGraphQLError(body, 'ID');
 });
 
 test('Should return error for empty ID string', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID,
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_NUMERIC_ID,
   { id: "" });
   const body = await response.json();
   // depending on backend: null or error
   if (body.errors) {
     assertGraphQLError(body);
   } else {
-    expect(body.data.themeCustomization).toBeNull();
+    expect(body.data.section).toBeNull();
   }
 });
 
 test('Should not allow injection-like ID values', async ({ request }) => {
-  const response = await sendGraphQLRequest( request, GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID,
+  const response = await sendGraphQLRequest( request, GET_SECTION_BY_NUMERIC_ID,
   { id: "1 OR 1=1" });
   const body = await response.json();
   if (body.errors) {
     assertGraphQLError(body);
   } else {
-    expect(body.data.themeCustomization).toBeNull();
+    expect(body.data.section).toBeNull();
   }
 });
 });

@@ -434,6 +434,7 @@ class MarketingSitemapTest extends AdminApiTestCase
             ['code' => 'general.sitemap.file_limits.max_url_per_file', 'channel_code' => null, 'locale_code' => null],
             ['value' => '50000']
         );
+        $this->forgetCoreConfigCache();
 
         $admin = $this->createAdmin();
         $id = $this->insertSitemap(['file_name' => 'gen-sm.xml', 'path' => '/']);

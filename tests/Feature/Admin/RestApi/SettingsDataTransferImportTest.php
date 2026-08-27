@@ -8,6 +8,7 @@ use Illuminate\Testing\TestResponse;
 use Webkul\BagistoApi\Tests\AdminApiTestCase;
 use Webkul\User\Models\Admin;
 use Webkul\User\Models\Role;
+use ZipArchive;
 
 /**
  * REST coverage for Admin Settings → Data Transfer Imports (Block B Wave 3).
@@ -298,6 +299,18 @@ class SettingsDataTransferImportTest extends AdminApiTestCase
         );
     }
 
+    protected function sampleImagesArchive(): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'imgs').'.zip';
+
+        $zip = new ZipArchive;
+        $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        $zip->addFromString('shirt.jpg', 'not-really-a-jpeg');
+        $zip->close();
+
+        return new UploadedFile($path, 'images.zip', 'application/zip', null, true);
+    }
+
     protected function createPayload(array $overrides = []): array
     {
         return array_merge([
@@ -306,6 +319,8 @@ class SettingsDataTransferImportTest extends AdminApiTestCase
             'validation_strategy' => 'stop-on-errors',
             'allowed_errors' => 0,
             'field_separator' => ',',
+            'image_source' => 'directory',
+            'images_directory_path' => 'product-images',
         ], $overrides);
     }
 
@@ -355,6 +370,77 @@ class SettingsDataTransferImportTest extends AdminApiTestCase
         $admin = $this->createAdmin();
 
         $response = $this->adminMultipart($admin, 'POST', '/api/admin/settings/data-transfer/imports', $this->createPayload());
+        $response->assertStatus(422);
+    }
+
+    public function test_create_with_a_directory_source_needs_the_directory(): void
+    {
+        Storage::fake('private');
+        $admin = $this->createAdmin();
+
+        $payload = $this->createPayload();
+        unset($payload['images_directory_path']);
+
+        $response = $this->adminMultipart($admin, 'POST', '/api/admin/settings/data-transfer/imports', array_merge(
+            $payload,
+            ['file' => $this->sampleCsv()],
+        ));
+
+        $response->assertStatus(422);
+    }
+
+    public function test_create_with_a_url_source_needs_neither_directory_nor_archive(): void
+    {
+        Storage::fake('private');
+        $admin = $this->createAdmin();
+
+        $payload = $this->createPayload(['image_source' => 'url']);
+        unset($payload['images_directory_path']);
+
+        $response = $this->adminMultipart($admin, 'POST', '/api/admin/settings/data-transfer/imports', array_merge(
+            $payload,
+            ['file' => $this->sampleCsv()],
+        ));
+
+        $response->assertStatus(201);
+        expect($response->json('imageSource'))->toBe('url');
+    }
+
+    public function test_create_with_an_upload_source_unpacks_the_archive(): void
+    {
+        Storage::fake('private');
+        $admin = $this->createAdmin();
+
+        $response = $this->adminMultipart($admin, 'POST', '/api/admin/settings/data-transfer/imports', array_merge(
+            $this->createPayload(['image_source' => 'upload']),
+            [
+                'file' => $this->sampleCsv(),
+                'upload_images' => $this->sampleImagesArchive(),
+            ],
+        ));
+
+        $response->assertStatus(201);
+        expect($response->json('imageSource'))->toBe('upload');
+        expect($response->json('imagesArchiveName'))->toBe('images.zip');
+
+        $id = (int) $response->json('id');
+
+        // `Importer::resolveUploadedImage()` reads exactly this path, so the archive is
+        // unpacked rather than stored: the importer never sees the zip itself.
+        Storage::disk('private')->assertExists('imports/'.$id.'/images/shirt.jpg');
+        Storage::disk('private')->assertMissing('imports/'.$id.'/images/images.zip');
+    }
+
+    public function test_create_with_an_upload_source_needs_the_archive(): void
+    {
+        Storage::fake('private');
+        $admin = $this->createAdmin();
+
+        $response = $this->adminMultipart($admin, 'POST', '/api/admin/settings/data-transfer/imports', array_merge(
+            $this->createPayload(['image_source' => 'upload']),
+            ['file' => $this->sampleCsv()],
+        ));
+
         $response->assertStatus(422);
     }
 

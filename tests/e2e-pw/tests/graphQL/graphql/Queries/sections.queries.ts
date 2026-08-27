@@ -1,6 +1,6 @@
-export const GET_THEME_CUSTOMIZATIONS_BASIC = `
-query themeCustomizations($first: Int, $after: String) {
-  themeCustomizations(first: $first, after: $after) {
+export const GET_SECTIONS_BASIC = `
+query sections($first: Int, $after: String) {
+  sections(first: $first, after: $after) {
     edges {
       node {
         id
@@ -26,9 +26,9 @@ query themeCustomizations($first: Int, $after: String) {
 }
 `;
 
-export const GET_THEME_CUSTOMIZATIONS_FILTERED = `
-query themeCustomizations($type: String) {
-  themeCustomizations(type: $type) {
+export const GET_SECTIONS_FILTERED = `
+query sections($type: String) {
+  sections(type: $type) {
     edges {
       node {
         id
@@ -41,7 +41,7 @@ query themeCustomizations($type: String) {
         translation {
           id
           _id
-          themeCustomizationId
+          sectionId
           locale
           options
         }
@@ -50,7 +50,7 @@ query themeCustomizations($type: String) {
             node {
               id
               _id
-              themeCustomizationId
+              sectionId
               locale
               options
             }
@@ -78,9 +78,9 @@ query themeCustomizations($type: String) {
 }
 `;
 
-export const GET_THEME_CUSTOMIZATIONS_COMPLETE = `
-query themeCustomizations($first: Int, $after: String, $last: Int, $before: String, $type: String) {
-  themeCustomizations(first: $first, after: $after, last: $last, before: $before, type: $type) {
+export const GET_SECTIONS_COMPLETE = `
+query sections($first: Int, $after: String, $last: Int, $before: String, $type: String) {
+  sections(first: $first, after: $after, last: $last, before: $before, type: $type) {
     edges {
       node {
         id
@@ -96,7 +96,7 @@ query themeCustomizations($first: Int, $after: String, $last: Int, $before: Stri
         translation {
           id
           _id
-          themeCustomizationId
+          sectionId
           locale
           options
         }
@@ -106,7 +106,7 @@ query themeCustomizations($first: Int, $after: String, $last: Int, $before: Stri
             node {
               id
               _id
-              themeCustomizationId
+              sectionId
               locale
               options
             }
@@ -133,9 +133,9 @@ query themeCustomizations($first: Int, $after: String, $last: Int, $before: Stri
 }
 `;
 
-export const GET_THEME_CUSTOMIZATION_BY_ID = `
+export const GET_SECTION_BY_ID = `
 query getThemeCustomisation($id: ID!) {
-  themeCustomization(id: $id) {
+  section(id: $id) {
     id
     _id
     type
@@ -150,9 +150,9 @@ query getThemeCustomisation($id: ID!) {
 }
 `;
 
-export const GET_THEME_CUSTOMIZATION_BY_NUMERIC_ID = `
+export const GET_SECTION_BY_NUMERIC_ID = `
 query getThemeCustomisation($id: ID!) {
-  themeCustomization(id: $id) {
+  section(id: $id) {
     id
     _id
     type
@@ -168,9 +168,9 @@ query getThemeCustomisation($id: ID!) {
 }
 `;
 
-export const GET_THEME_CUSTOMIZATION_BY_ID_COMPLETE_DETAILS = `
+export const GET_SECTION_BY_ID_COMPLETE_DETAILS = `
 query getThemeCustomisation($id: ID!) {
-  themeCustomization(id: $id) {
+  section(id: $id) {
     id
     _id
     themeCode
@@ -184,7 +184,7 @@ query getThemeCustomisation($id: ID!) {
     translation {
       id
       _id
-      themeCustomizationId
+      sectionId
       locale
       options
     }
@@ -194,7 +194,7 @@ query getThemeCustomisation($id: ID!) {
         node {
           id
           _id
-          themeCustomizationId
+          sectionId
           locale
           options
         }

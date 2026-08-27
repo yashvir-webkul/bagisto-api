@@ -17,7 +17,8 @@ class EuWithdrawalTest extends RestApiTestCase
             ['code' => 'sales.eu_withdrawal.general.enabled', 'channel_code' => $channel->code, 'locale_code' => null],
             ['value' => 1]
         );
-        core()->getConfigData('sales.eu_withdrawal.general.enabled', $channel->code);
+
+        $this->forgetCoreConfigCache();
     }
 
     private function customerOrder($customer, Channel $channel): Order

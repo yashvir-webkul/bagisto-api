@@ -15,9 +15,9 @@ export function assertNoGraphQLErrors(body: any) {
  * --------------------------------------------------- */
 
 /**
- * Validate theme customization translation (single object)
+ * Validate section translation (single object)
  */
-export function assertThemeCustomizationTranslation(translation: any) {
+export function assertSectionTranslation(translation: any) {
   expect(translation).toBeTruthy();
   expect(typeof translation.locale).toBe('string');
   expect(typeof translation.options).toBe('string');
@@ -28,9 +28,9 @@ export function assertThemeCustomizationTranslation(translation: any) {
 
 
 /**
- * Validate basic theme customization fields
+ * Validate basic section fields
  */
-export function assertBasicThemeCustomization(node: any) {
+export function assertBasicSection(node: any) {
   expect(node).toBeTruthy();
 
   expect(node).toHaveProperty('id');
@@ -41,7 +41,7 @@ export function assertBasicThemeCustomization(node: any) {
   expect(node).toHaveProperty('themeCode');
 
   expect(typeof node.id).toBe('string');
-  expect(node.id).toMatch(/\/api\/shop\/theme-customizations\/\d+/);
+  expect(node.id).toMatch(/\/api\/shop\/sections\/\d+/);
 
   expect(typeof node._id).toBe('number');
   expect(typeof node.type).toBe('string');
@@ -50,7 +50,7 @@ export function assertBasicThemeCustomization(node: any) {
   expect(typeof node.themeCode).toBe('string');
   // ✅ Validate translation ONLY if it exists
   if (node.translation !== undefined && node.translation !== null) {
-    assertThemeCustomizationTranslation(node.translation);
+    assertSectionTranslation(node.translation);
   }
 }
 
@@ -77,7 +77,7 @@ export function assertTranslationsConnection(translations: any) {
 
     expect(typeof node.id).toBe('string');
     expect(typeof node._id).toBe('number');
-    expect(typeof node.themeCustomizationId).toBe('string');
+    expect(typeof node.sectionId).toBe('string');
     expect(typeof node.locale).toBe('string');
     expect(typeof node.options).toBe('string');
 
@@ -87,15 +87,15 @@ export function assertTranslationsConnection(translations: any) {
 
 
 /**
- * Validate GraphQL connection (themeCustomizations)
+ * Validate GraphQL connection (sections)
  */
-export function assertThemeCustomizationsConnection(connection: any) {
+export function assertSectionsConnection(connection: any) {
   expect(connection).toBeDefined();
   expect(Array.isArray(connection.edges)).toBeTruthy();
 
   connection.edges.forEach((edge: any) => {
     expect(edge.node).toBeTruthy();
-    assertBasicThemeCustomization(edge.node);
+    assertBasicSection(edge.node);
   });
 
   if (connection.totalCount !== undefined)
@@ -111,31 +111,31 @@ export function assertThemeCustomizationsConnection(connection: any) {
  * --------------------------------------------------- */
 
 /**
- * For GET_THEME_CUSTOMIZATIONS_BASIC
+ * For GET_SECTIONS_BASIC
  * (No filter, no enforced translations connection)
  */
-export function assertGetThemeCustomizationsBasicResponse(body: any) {
+export function assertGetSectionsBasicResponse(body: any) {
   assertNoGraphQLErrors(body);
 
-  const connection = body.data.themeCustomizations;
+  const connection = body.data.sections;
 
-  assertThemeCustomizationsConnection(connection);
+  assertSectionsConnection(connection);
 }
 
 
 /**
- * For GET_THEME_CUSTOMIZATIONS_FILTERED (type filter)
+ * For GET_SECTIONS_FILTERED (type filter)
  * Must enforce filter + translations connection
  */
-export function assertGetThemeCustomizationsFilteredResponse(
+export function assertGetSectionsFilteredResponse(
   body: any,
   expectedType: string
 ) {
   assertNoGraphQLErrors(body);
 
-  const connection = body.data.themeCustomizations;
+  const connection = body.data.sections;
 
-  assertThemeCustomizationsConnection(connection);
+  assertSectionsConnection(connection);
 
   connection.edges.forEach((edge: any) => {
     const node = edge.node;
@@ -149,13 +149,13 @@ export function assertGetThemeCustomizationsFilteredResponse(
 }
 
 /**
- * For GET_THEME_CUSTOMIZATIONS_COMPLETE_DETAILS
+ * For GET_SECTIONS_COMPLETE_DETAILS
  * Must enforce all fields + translations connection + pagination
  */
-export function assertGetThemeCustomizationsCompleteResponse(body: any) {
+export function assertGetSectionsCompleteResponse(body: any) {
   assertNoGraphQLErrors(body);
 
-  const connection = body.data.themeCustomizations;
+  const connection = body.data.sections;
 
   // Connection-level validations
   expect(connection).toBeDefined();
@@ -174,7 +174,7 @@ export function assertGetThemeCustomizationsCompleteResponse(body: any) {
     const node = edge.node;
 
     // Reuse basic validation
-    assertBasicThemeCustomization(node);
+    assertBasicSection(node);
 
     // 🔥 Enforce extra fields required for complete details
     expect(typeof node.channelId).toBe('string');
@@ -187,7 +187,7 @@ export function assertGetThemeCustomizationsCompleteResponse(body: any) {
 
     // Enforce translation object (must exist in complete query)
     expect(node.translation).toBeDefined();
-    assertThemeCustomizationTranslation(node.translation);
+    assertSectionTranslation(node.translation);
 
     // Enforce translations connection (must exist)
     assertTranslationsConnection(node.translations);
@@ -195,22 +195,22 @@ export function assertGetThemeCustomizationsCompleteResponse(body: any) {
 }
 
 /**
- * For GET_THEME_CUSTOMIZATION_BY_ID_BASIC
+ * For GET_SECTION_BY_ID_BASIC
  * Single object response (no connection)
  */
-export function assertGetThemeCustomizationByIdBasicResponse(body: any) {
+export function assertGetSectionByIdBasicResponse(body: any) {
   assertNoGraphQLErrors(body);
 
-  const node = body.data.themeCustomization;
+  const node = body.data.section;
 
   expect(node).toBeDefined();
 
   // Use BASE only (not extended)
-  assertBasicThemeCustomization(node);
+  assertBasicSection(node);
 
   // Translation must exist in this query
   expect(node.translation).toBeDefined();
-  assertThemeCustomizationTranslation(node.translation);
+  assertSectionTranslation(node.translation);
 
   // Ensure fields NOT requested do not exist
   expect(node.sortOrder).toBeUndefined();
@@ -224,8 +224,8 @@ export function assertGetThemeCustomizationByIdBasicResponse(body: any) {
 /**
  * Validate extended fields (used in list + complete queries)
  */
-export function assertExtendedThemeCustomization(node: any) {
-  assertBasicThemeCustomization(node);
+export function assertExtendedSection(node: any) {
+  assertBasicSection(node);
 
   expect(typeof node.sortOrder).toBe('number');
 
@@ -239,25 +239,25 @@ export function assertExtendedThemeCustomization(node: any) {
     expect(typeof node.updatedAt).toBe('string');
 
   if (node.translation)
-    assertThemeCustomizationTranslation(node.translation);
+    assertSectionTranslation(node.translation);
 }
 
-export function assertGetThemeCustomizationByNumericIdResponse(body: any) {
+export function assertGetSectionByNumericIdResponse(body: any) {
   assertNoGraphQLErrors(body);
 
-  const node = body.data.themeCustomization;
+  const node = body.data.section;
 
   expect(node).toBeDefined();
 
   // Base fields
-  assertBasicThemeCustomization(node);
+  assertBasicSection(node);
 
   // sortOrder is REQUIRED in this query
   expect(typeof node.sortOrder).toBe('number');
 
   // Translation (single object)
   expect(node.translation).toBeDefined();
-  assertThemeCustomizationTranslation(node.translation);
+  assertSectionTranslation(node.translation);
 
   // Fields NOT requested must be undefined
   expect(node.channelId).toBeUndefined();

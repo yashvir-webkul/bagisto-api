@@ -49,6 +49,8 @@ class SocialLoginTest extends GraphQLTestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $this->forgetCoreConfigCache();
     }
 
     private function fakeGoogle(string $email): void

@@ -20,11 +20,15 @@ class GdprRequestTest extends GraphQLTestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $this->forgetCoreConfigCache();
     }
 
     private function disableGdpr(): void
     {
         DB::table('core_config')->where('code', 'general.gdpr.settings.enabled')->delete();
+
+        $this->forgetCoreConfigCache();
     }
 
     private function seedRequest(Customer $customer, array $overrides = []): int

@@ -38,7 +38,7 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
             $operation instanceof Delete
             || ($operation instanceof Mutation && $operation->getName() === 'delete')
         ) {
-            return $this->handleDelete($data, $uriVariables, $context);
+            return $this->handleDelete($data, $operation, $uriVariables, $context);
         }
 
         if ($data instanceof AdminAppearanceSectionUpdateInput) {
@@ -178,7 +178,7 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
         );
     }
 
-    protected function handleDelete(mixed $data, array $uriVariables, array $context): mixed
+    protected function handleDelete(mixed $data, Operation $operation, array $uriVariables, array $context): mixed
     {
         $this->authorizedAdmin('appearance.sections.delete', 'bagistoapi::app.admin.appearance.no-permission');
 
@@ -189,7 +189,9 @@ class AdminAppearanceSectionProcessor implements ProcessorInterface
 
         $section = $this->scope->sectionOrFail($id ? (int) basename((string) $id) : null);
 
-        $snapshot = $this->isGraphQL($context) ? $this->toEloquent($section) : null;
+        // A delete mutation carries no `graphql_operation_name`, so the operation itself is
+        // what says which transport asked — the snapshot has to be taken before the row goes.
+        $snapshot = $operation instanceof Mutation ? $this->toEloquent($section) : null;
 
         Event::dispatch('section.delete.before', $section->id);
 

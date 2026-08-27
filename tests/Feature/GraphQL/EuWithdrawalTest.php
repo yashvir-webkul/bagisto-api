@@ -16,6 +16,8 @@ class EuWithdrawalTest extends GraphQLTestCase
             ['code' => 'sales.eu_withdrawal.general.enabled', 'channel_code' => $channel->code, 'locale_code' => null],
             ['value' => 1]
         );
+
+        $this->forgetCoreConfigCache();
     }
 
     public function test_customer_create_and_list(): void

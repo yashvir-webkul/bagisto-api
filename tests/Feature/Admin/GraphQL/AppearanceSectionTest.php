@@ -220,6 +220,9 @@ class AppearanceSectionTest extends AdminApiTestCase
               deleteAdminAppearanceSection(input: $input) {
                 adminAppearanceSection {
                   id
+                  _id
+                  name
+                  message
                 }
               }
             }
@@ -232,6 +235,15 @@ class AppearanceSectionTest extends AdminApiTestCase
         $response->assertOk();
 
         expect($response->json('errors'))->toBeNull();
+
+        // The snapshot is the whole point of the delete payload: asserting only that the
+        // row is gone passes just as well when the payload comes back null.
+        $node = $response->json('data.deleteAdminAppearanceSection.adminAppearanceSection');
+
+        expect($node)->not->toBeNull();
+        expect($node['_id'])->toBe($section->id);
+        expect($node['name'])->toBe($section->name);
+        expect($node['message'])->toBe(trans('bagistoapi::app.admin.appearance.section.deleted'));
 
         $this->assertDatabaseMissing('theme_sections', ['id' => $section->id]);
     }
