@@ -44,7 +44,7 @@ jobs:
 
       - name: Install Bagisto
         run: |
-          composer create-project bagisto/bagisto:2.4.7 bagisto
+          composer create-project bagisto/bagisto:2.4.10 bagisto
           cd bagisto
           cp .env.example .env
           sed -i "s|^APP_DEBUG=.*|APP_DEBUG=false|" .env

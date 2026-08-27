@@ -12,16 +12,15 @@ concurrency:
 jobs:
   pest_tests:
     runs-on: ubuntu-22.04
-    continue-on-error: true
 
     strategy:
       matrix:
         php-versions: ['8.3']
 
-    name: PHP ${{ matrix.php-versions }} | pest against Bagisto v2.4.7
+    name: PHP ${{ matrix.php-versions }} | pest against Bagisto v2.4.10
 
     env:
-      BAGISTO_VERSION: v2.4.7
+      BAGISTO_VERSION: v2.4.10
 
     services:
       mysql:
@@ -144,3 +143,11 @@ jobs:
           echo "REST:           ${{ steps.rest_tests.outcome }}"
           echo "Admin GraphQL:  ${{ steps.admin_graphql_tests.outcome }}"
           echo "Admin REST:     ${{ steps.admin_rest_tests.outcome }}"
+
+          if [ "${{ steps.graphql_tests.outcome }}" != "success" ] \
+            || [ "${{ steps.rest_tests.outcome }}" != "success" ] \
+            || [ "${{ steps.admin_graphql_tests.outcome }}" != "success" ] \
+            || [ "${{ steps.admin_rest_tests.outcome }}" != "success" ]; then
+            echo "::error::One or more Pest suites failed."
+            exit 1
+          fi
