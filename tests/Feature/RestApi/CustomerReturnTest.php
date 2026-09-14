@@ -2,11 +2,14 @@
 
 namespace Webkul\BagistoApi\Tests\Feature\RestApi;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Webkul\BagistoApi\Tests\RestApiTestCase;
 use Webkul\Core\Models\Channel;
 use Webkul\Product\Models\Product;
 use Webkul\RMA\Models\RMA;
+use Webkul\RMA\Models\RMACustomField;
+use Webkul\RMA\Models\RMACustomFieldOption;
 use Webkul\RMA\Models\RMAItem;
 use Webkul\RMA\Models\RMAStatus;
 use Webkul\Sales\Models\Order;
@@ -297,6 +300,29 @@ class CustomerReturnTest extends RestApiTestCase
         expect($list->json('0.message'))->toBe('Any update?');
     }
 
+    public function test_send_message_accepts_multipart_with_an_attachment(): void
+    {
+        $this->seedRequiredData();
+        $customer = $this->createCustomer();
+        $data = $this->createReturn($customer);
+
+        $response = $this->authenticatedPost($customer, '/api/shop/return-messages', [
+            'return_id' => $data['rma']->id,
+            'message' => 'Photo of the damaged zipper attached.',
+            'file' => UploadedFile::fake()->image('zipper.png'),
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 201]);
+        expect($response->json('message'))->toBe('Photo of the damaged zipper attached.');
+        expect($response->json('attachment'))->toBe('zipper.png');
+        expect($response->json('attachmentUrl'))->not->toBeNull();
+
+        $this->assertDatabaseHas('rma_messages', [
+            'rma_id' => $data['rma']->id,
+            'attachment' => 'zipper.png',
+        ]);
+    }
+
     public function test_messages_of_another_customer_blocked(): void
     {
         $this->seedRequiredData();
@@ -307,5 +333,186 @@ class CustomerReturnTest extends RestApiTestCase
         $response = $this->authenticatedGet($other, '/api/shop/return-messages?return_id='.$data['rma']->id);
 
         expect($response->getStatusCode())->toBeIn([403, 404]);
+    }
+
+    private function seedCustomFields(): array
+    {
+        $text = RMACustomField::create([
+            'status' => 1,
+            'code' => 'invoice_number_'.uniqid(),
+            'label' => 'Invoice number',
+            'type' => 'text',
+            'is_required' => 1,
+            'position' => 1,
+        ]);
+
+        $select = RMACustomField::create([
+            'status' => 1,
+            'code' => 'pickup_slot_'.uniqid(),
+            'label' => 'Preferred pickup slot',
+            'type' => 'select',
+            'is_required' => 0,
+            'position' => 2,
+        ]);
+
+        RMACustomFieldOption::create([
+            'rma_custom_field_id' => $select->id,
+            'name' => 'Morning',
+            'value' => 'morning',
+        ]);
+
+        return compact('text', 'select');
+    }
+
+    public function test_return_custom_fields(): void
+    {
+        $this->seedRequiredData();
+        $customer = $this->createCustomer();
+        $fields = $this->seedCustomFields();
+
+        $response = $this->authenticatedGet($customer, '/api/shop/return-custom-fields');
+
+        $response->assertOk();
+        $rows = collect($response->json());
+        expect($rows->firstWhere('id', $fields['text']->id)['isRequired'])->toBeTrue();
+        expect($rows->firstWhere('id', $fields['select']->id)['options'][0]['value'])->toBe('morning');
+    }
+
+    public function test_create_accepts_multipart_with_images(): void
+    {
+        $this->seedRequiredData();
+        RMAStatus::firstOrCreate(['id' => 1], ['title' => 'Pending', 'status' => 1, 'default' => 1]);
+        $customer = $this->createCustomer();
+        $seed = $this->seedEligibleOrderItem($customer);
+        $fields = $this->seedCustomFields();
+
+        $response = $this->authenticatedPost($customer, '/api/shop/returns', [
+            'order_id' => $seed['order']->id,
+            'order_item_id' => $seed['orderItem']->id,
+            'rma_qty' => 1,
+            'resolution_type' => 'return',
+            'rma_reason_id' => 1,
+            'package_condition' => 'packed',
+            'agreement' => true,
+            'custom_attributes' => [$fields['text']->id => 'INV-9921'],
+            'images' => [UploadedFile::fake()->image('evidence.png')],
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([200, 201]);
+        expect($response->json('packageCondition'))->toBe('packed');
+        expect(count($response->json('images')))->toBe(1);
+        expect($response->json('customAttributes.0.value'))->toBe('INV-9921');
+        $this->assertDatabaseHas('rma_additional_fields', ['value' => 'INV-9921']);
+    }
+
+    public function test_create_rejects_an_unsupported_image_type(): void
+    {
+        $this->seedRequiredData();
+        RMAStatus::firstOrCreate(['id' => 1], ['title' => 'Pending', 'status' => 1, 'default' => 1]);
+        $customer = $this->createCustomer();
+        $seed = $this->seedEligibleOrderItem($customer);
+
+        $response = $this->authenticatedPost($customer, '/api/shop/returns', [
+            'order_id' => $seed['order']->id,
+            'order_item_id' => $seed['orderItem']->id,
+            'rma_qty' => 1,
+            'resolution_type' => 'return',
+            'rma_reason_id' => 1,
+            'agreement' => true,
+            'images' => [UploadedFile::fake()->create('notes.pdf', 10, 'application/pdf')],
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([400, 422]);
+        $this->assertDatabaseMissing('rma', ['order_id' => $seed['order']->id]);
+    }
+
+    public function test_create_rejects_an_unknown_package_condition(): void
+    {
+        $this->seedRequiredData();
+        RMAStatus::firstOrCreate(['id' => 1], ['title' => 'Pending', 'status' => 1, 'default' => 1]);
+        $customer = $this->createCustomer();
+        $seed = $this->seedEligibleOrderItem($customer);
+
+        $response = $this->authenticatedPost($customer, '/api/shop/returns', [
+            'order_id' => $seed['order']->id,
+            'order_item_id' => $seed['orderItem']->id,
+            'rma_qty' => 1,
+            'resolution_type' => 'return',
+            'rma_reason_id' => 1,
+            'package_condition' => 'opened',
+            'agreement' => true,
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([400, 422]);
+        $this->assertDatabaseMissing('rma', ['order_id' => $seed['order']->id]);
+    }
+
+    public function test_create_requires_required_custom_fields(): void
+    {
+        $this->seedRequiredData();
+        RMAStatus::firstOrCreate(['id' => 1], ['title' => 'Pending', 'status' => 1, 'default' => 1]);
+        $customer = $this->createCustomer();
+        $seed = $this->seedEligibleOrderItem($customer);
+        $this->seedCustomFields();
+
+        $response = $this->authenticatedPost($customer, '/api/shop/returns', [
+            'order_id' => $seed['order']->id,
+            'order_item_id' => $seed['orderItem']->id,
+            'rma_qty' => 1,
+            'resolution_type' => 'return',
+            'rma_reason_id' => 1,
+            'agreement' => true,
+        ]);
+
+        expect($response->getStatusCode())->toBeIn([400, 422]);
+        $this->assertDatabaseMissing('rma', ['order_id' => $seed['order']->id]);
+    }
+
+    public function test_a_canceled_return_releases_the_item_quantity(): void
+    {
+        $this->seedRequiredData();
+        RMAStatus::firstOrCreate(['id' => 1], ['title' => 'Pending', 'status' => 1, 'default' => 1]);
+        $customer = $this->createCustomer();
+        $seed = $this->seedEligibleOrderItem($customer);
+
+        $rma = RMA::create([
+            'order_id' => $seed['order']->id,
+            'rma_status_id' => 1,
+        ]);
+
+        RMAItem::create([
+            'rma_id' => $rma->id,
+            'order_item_id' => $seed['orderItem']->id,
+            'quantity' => 2,
+            'resolution' => 'return',
+        ]);
+
+        $url = '/api/shop/returnable-items?order_id='.$seed['order']->id;
+
+        $held = $this->authenticatedGet($customer, $url);
+        expect((int) $held->json('0.currentQuantity'))->toBe(0);
+
+        $rma->update(['rma_status_id' => 9]);
+
+        $released = $this->authenticatedGet($customer, $url);
+        expect((int) $released->json('0.currentQuantity'))->toBe(2);
+        expect((int) $released->json('0.rmaQuantity'))->toBe(0);
+    }
+
+    public function test_list_carries_the_action_flags(): void
+    {
+        $this->seedRequiredData();
+        $customer = $this->createCustomer();
+        $this->createReturn($customer);
+
+        $response = $this->authenticatedGet($customer, '/api/shop/returns');
+
+        $response->assertOk();
+        $row = $response->json('0');
+        expect($row['canClose'])->not->toBeNull();
+        expect($row['canReopen'])->not->toBeNull();
+        expect($row['isExpired'])->not->toBeNull();
+        expect($row['images'])->toBeArray();
+        expect($row['customAttributes'])->toBeArray();
     }
 }

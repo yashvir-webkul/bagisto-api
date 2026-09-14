@@ -5,6 +5,118 @@ All notable changes to `bagisto/bagisto-api` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.4] - 2026-09-14
+
+### Added
+
+- One package now serves Bagisto 2.4.10 and the releases before it. The theme surface follows the store it is installed on: a 2.4.10 store gets the Appearance API, an older store keeps the theme customization endpoints it already had. Nothing else in the API changes shape between them.
+- `GET /api/shop/features` and the `storefrontFeature` query — which optional features this channel has switched on, so a storefront can decide what to render before calling something that might refuse. Covers GDPR data requests and the EU right of withdrawal.
+- `GET /api/shop/returnable-orders` and the `returnableOrders` query — the customer's orders a return can still be raised against, which is the list the New Request flow opens with. Filter by order number or status; sort by date, order number or total.
+- Appearance API for Bagisto 2.4.10: theme gallery, impact report, activation per channel, and section management for the theme a channel runs.
+- Section draft workflow: stage content per locale, stage status and order, then publish or discard in one call.
+- Section preview endpoint, rendering a theme with its staged edits applied.
+- Section fields endpoint, returning the field schema for a section's type plus its current values.
+- Section media upload (REST only) and section copy.
+- `GET /api/shop/theme` and the `theme` query — the theme the current channel runs and the section types it holds.
+- Sitemap channels: a sitemap now carries `channels`, returns the index URL per channel, and reports `generatedFiles`.
+- Product image `alt_text`, settable on upload and editable via `PUT /api/admin/catalog/products/{productId}/images/{id}`.
+- Product import image sources — `image_source` of `url`, `upload` or `directory`, with `upload_images` for a ZIP.
+- `manageStock` on the product listing.
+
+### Fixed
+
+- Section update dropped `options` and `locale`, so content could not be published through it.
+- Section update erased a locale's content when `options` were omitted.
+- Section create ignored the `channel` it named.
+- Copying a footer links section produced a second one; it is refused, as in the admin.
+- Section media upload of an unsupported type failed with a server error; it is refused with the admin's types and 50 MB limit.
+- Reordering a subset of sections reshuffled the published order; a reorder must carry every section of one theme and channel.
+- Storefront sections returned only ten per page; the default is now 50.
+- Exported GraphQL schemas dropped every array-valued field.
+- Creating or updating a sitemap failed outright, and a channel-less sitemap generated nothing.
+- Product listing worked out image, quantity, category and family on the fly; they are read as the admin reads them.
+- Storefront product images came back in arbitrary order; they are in gallery order.
+- Deleting an email template or marketing event still used by a campaign is refused.
+- An attribute `regex` the storefront cannot compile is refused.
+- Customer email is unique per channel, not per store.
+- Customer registration demanded `status`, `isVerified`, `isSuspended` and `subscribedToNewsLetter`, none of which a registering customer should send. They are optional now, and the account's state is decided by the store as it is on the storefront: a new account is active and unsuspended, and starts verified only when email verification is switched off. A value sent for any of them is accepted and ignored, so existing clients keep working.
+- Installing the package added an autoload entry for a `Webkul\GraphQL` package that does not exist and that nothing in the API refers to. It is no longer added. A store installed before this release still carries the entry; delete that line from `composer.json` and run `composer dump-autoload` to clear it.
+- Attaching a file to a return message was impossible: the endpoint documented a `file` upload but rejected the multipart request it needed. `POST /api/shop/return-messages` now accepts `multipart/form-data` and stores the attachment.
+- A customer registered with a `status` of `"active"` was created inactive, because the value was written to the account's active flag as-is. The flag is no longer taken from the request at all — a new account is always active.
+- A new account was created unverified unless the request said otherwise, so a customer who sent nothing could not sign in afterwards. Verification now follows the store's email verification setting, as the storefront sign-up does: verified while that setting is off, awaiting confirmation while it is on.
+- A customer registered through the API never received a working verification link, because the account was created without the token the verification email carries.
+
+### Changed
+
+- On a Bagisto 2.4.10 store, storefront theme customizations are sections: `/api/shop/theme-customizations[/{id}]` and `themeCustomization(s)` become `/api/shop/sections[/{id}]` and `section`/`sections`, and translations carry `sectionId`. On an older store the previous endpoints stay exactly as they were — upgrading the store is what moves them.
+- On a Bagisto 2.4.10 store, storefront sections return only the published sections of the channel's active theme.
+- On a Bagisto 2.4.10 store, admin theme customizations move out of Settings: `/api/admin/settings/themes` and `adminSettingsTheme*` become `/api/admin/appearance/themes` and `/api/admin/appearance/sections`, under `appearance.*` permissions, and bulk status becomes the staged status plus publish rather than mass-update-status. On an older store the Settings endpoints and their `settings.themes.*` permissions are unchanged.
+- On a Bagisto 2.4.10 store, deleting an attribute family is refused for the default family; on an older store it is refused for the last remaining one, as before.
+- CI runs against Bagisto v2.4.10, and a failing Pest suite now fails the build.
+
+## [2.4.3] - 2026-08-26
+
+### Added
+
+- Add social login — sign in or sign up with a Google, Facebook or LinkedIn token the app or web already holds (no redirect), returning a Bearer token. `POST /api/shop/customers/social-login` and the `createSocialLogin` mutation.
+
+- Add a GraphQL operation map to the export (`graphql-operations-shop.json` / `-admin.json`) mapping each root field to its resource tag, so tooling can group GraphQL the way REST is grouped.
+- Add a re-seed tool that rebuilds the collections from the exported schemas.
+- Add **View** permissions for Integration and API Change History, so read access to those screens can be granted or withheld separately from creating, editing and deleting.
+
+### Fixed
+
+- Fix a fatal error at boot after installing on a newer Symfony release.
+- Fix an inactive customer being able to log in; inactive accounts are now rejected.
+- Fix a suspended customer being blocked at login; they can now log in and browse, and are stopped only at checkout.
+- Fix a customer logging in without verifying their email when email verification is required.
+- Honour permissions on the Integration and API Change History screens.
+- Scope each exported schema to its own surface.
+- Restore tag descriptions in the exported schemas and the interactive docs (the tag list and folders were unlabelled).
+- Write a placeholder storefront key into the exported storefront schema instead of the configured key (it resolves from the Postman environment).
+- Include two missing storefront endpoints in the export: the invoice PDF and the downloadable-product download.
+- Make the exported schemas import cleanly into Postman — they now carry a title and a configurable server URL.
+
+### Changed
+
+- `bagisto-api-platform:export-schema` now writes to `schema/generated/` instead of `schema/`, leaving the hand-maintained collections and environments untouched; `--path` is unchanged.
+- The export now refuses to write a schema that leaks another surface, references a missing definition, carries an unused definition, or contains a storefront key.
+
+## [2.4.2] - 2026-08-17
+
+### Added
+
+- Add `POST /api/admin/marketing/search-terms` (and `createAdminMarketingSearchTerm`) to create a search term.
+- Add `bagisto-api-platform:export-schema`, which writes the REST (OpenAPI JSON) and GraphQL (SDL) schemas to files for Postman and code generators. Defaults to the package's `schema/` folder; override with `--path`.
+
+### Changed
+
+- Update the bundled translations across all supported locales.
+- Group the admin draft-cart and place-order endpoints under `Admin: Customer Order creation` in the Swagger docs.
+- Speed up every request by splitting the service provider and deferring state bindings, so a request only loads what it uses.
+
+### Fixed
+
+- Fix newsletter subscription rejecting guests with `Unauthenticated`; a visitor can subscribe with the storefront key alone, as on the storefront.
+- Fix deleting a customer account (`POST /api/shop/customer-profile-deletes/{id}`) doing nothing over REST, and drop the `password` field the docs wrongly marked required.
+- Fix product 404s returning the raw text `bagistoapi::app.graphql.product.not-found` instead of "Product not found", on both transports.
+- Fix `adminProfile` returning `roleId` and `roleName` as null over GraphQL.
+- Fix the admin product copy mutation returning `sourceId` as null over GraphQL.
+- Fix `adminCatalogProduct`'s `superAttributes { options }` returning null, and its `relatedProducts` / `upSells` / `crossSells` returning storefront-shaped nodes.
+- Fix `createAdminCatalogProduct` / `updateAdminCatalogProduct` returning an unusable `id` and connections listing unrelated products.
+- Fix the invoice PDF endpoint (`GET /api/admin/invoices/{id}/print`) returning a 500 (`View [sales.invoices.pdf] not found`) on Bagisto 2.4.
+- Fix `PUT /api/admin/settings/data-transfer/imports/{id}` as `multipart/form-data` failing with "The type field is required"; multipart fields are now read on PUT/PATCH as on POST, and the file stays optional.
+- Fix `POST /api/admin/eu-withdrawals/{id}/resend-confirmation` returning 422 when a body was sent; it is now a true empty-body action.
+- Fix `DELETE /api/admin/rma/custom-fields/{id}` returning 204 with no confirmation; it now returns 200 with a message and the deleted record.
+- Fix customer registration not setting the channel and default customer group, which left `channelId` and `customerGroupId` null and blocked storefront sign-in.
+- Fix the order-comments endpoints documenting a required `id` path parameter that the URL does not contain.
+- Fix malformed JSON returning a terse "Syntax error" (and a 500 with debug on); it is now a `400` with "The request body contains invalid JSON."
+- Fix a duplicate attribute-group name returning a 500 that leaked a database error; it is now a `422`.
+- Fix cursor-paginated GraphQL collections erroring on `first: 0`; they now return an empty connection.
+- Fix `PUT /api/admin/carts/{id}/items` returning `200` without applying a rejected quantity; it now returns `422` with the reason.
+- Fix REST error responses that returned no message on customer profile and address endpoints.
+- Fix admin and shop pages hanging (sometimes a 500) for 30+ seconds right after caches are cleared.
+
 ## [2.4.1] - 2026-07-22
 
 ### Added
@@ -414,6 +526,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swagger / OpenAPI documentation at `/api/docs` and GraphQL playground at `/graphiql`.
 - Initial documentation and demo links in the README.
 
+[2.4.3]: https://github.com/bagisto/bagisto-api/compare/v2.4.2...v2.4.3
+[2.4.2]: https://github.com/bagisto/bagisto-api/compare/v2.4.1...v2.4.2
 [2.4.1]: https://github.com/bagisto/bagisto-api/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/bagisto/bagisto-api/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/bagisto/bagisto-api/compare/v2.3.0...v2.3.1

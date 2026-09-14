@@ -29,14 +29,15 @@ return [
 
     'routes' => [
         'domain' => null,
-        
         'middleware' => [
+            'Webkul\BagistoApi\Http\Middleware\ParseMultipartFormData',
             'Webkul\BagistoApi\Http\Middleware\NormalizeEmptyJsonBody',
             'Webkul\BagistoApi\Http\Middleware\HandleInvalidInputException',
             'Webkul\BagistoApi\Http\Middleware\SecurityHeaders',
             'Webkul\BagistoApi\Http\Middleware\LogApiRequests',
             'Webkul\BagistoApi\Http\Middleware\VerifyStorefrontKey',
             'Webkul\BagistoApi\Http\Middleware\EnforceAdminApiAuth',
+            'Webkul\BagistoApi\Http\Middleware\ThrottleAdminApi',
             'Webkul\BagistoApi\Http\Middleware\SetAdminApiAuditContext',
             'Webkul\BagistoApi\Http\Middleware\SetLocaleChannel',
             'Webkul\BagistoApi\Http\Middleware\BagistoApiDocumentationMiddleware',
@@ -145,11 +146,11 @@ return [
         'datetime_format' => 'Y-m-d\TH:i:sP',
     ],
 
-    'cache' => env('CACHE_STORE', 'file'),
+    'cache' => env('API_PLATFORM_CACHE', env('CACHE_STORE', 'file')),
 
     'schema_cache' => [
         'enabled' => true,
-        'store' => env('CACHE_STORE', 'file'),
+        'store' => env('API_PLATFORM_CACHE', env('CACHE_STORE', 'file')),
     ],
 
     'security' => [

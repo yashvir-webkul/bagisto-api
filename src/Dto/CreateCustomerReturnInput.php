@@ -31,9 +31,16 @@ class CreateCustomerReturnInput
     #[Groups(['mutation'])]
     public ?string $information = null;
 
-    #[ApiProperty(description: 'Condition of the package')]
+    #[ApiProperty(description: 'Condition of the package: open | packed')]
     #[Groups(['mutation'])]
     public ?string $package_condition = null;
+
+    /**
+     * @var array<int|string,mixed>|null
+     */
+    #[ApiProperty(description: 'Custom field answers keyed by field id (see /return-custom-fields)')]
+    #[Groups(['mutation'])]
+    public ?array $custom_attributes = null;
 
     #[ApiProperty(description: 'Variant product id for configurable products')]
     #[Groups(['mutation'])]
@@ -111,6 +118,16 @@ class CreateCustomerReturnInput
     public function setPackage_condition(?string $v): void
     {
         $this->package_condition = $v;
+    }
+
+    public function getCustom_attributes(): ?array
+    {
+        return $this->custom_attributes;
+    }
+
+    public function setCustom_attributes(?array $v): void
+    {
+        $this->custom_attributes = $v;
     }
 
     public function getVariant(): ?int

@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'Продукт не знайдено',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Недійсна електронна пошта або пароль',
             'account-suspended' => 'Ваш обліковий запис призупинено',
+            'account-inactive' => 'Ваш активний запит очікує схвалення адміністратора',
+            'email-not-verified' => 'Спершу перевірте свою електронну пошту.',
             'successful' => 'Ви успішно увійшли в систему',
             'invalid-request' => 'Недійсний запит на вхід',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Вхід виконано успішно.',
+            'token-required' => 'Потрібен токен соціального входу.',
+            'invalid-token' => 'Токен соціального входу недійсний або прострочений. Спробуйте ще раз.',
+            'wrong-audience' => 'Цей токен було видано для іншого застосунку.',
+            'email-required' => 'Постачальник не надав адресу електронної пошти. Зареєструйтеся за допомогою електронної пошти.',
+            'account-inactive' => 'Ваш активний запит очікує схвалення адміністратора',
+            'provider-not-supported' => 'Цей постачальник соціального входу не підтримується.',
+            'provider-disabled' => 'Цей постачальник соціального входу не ввімкнено.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Історія змін API',
+                'view' => 'Перегляд',
                 'delete' => 'Видалити історію',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Інтеграція',
+            'view' => 'Перегляд',
             'create' => 'Створити інтеграцію',
             'edit' => 'Редагувати інтеграцію',
             'delete' => 'Відкликати маркер інтеграції',

@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'המוצר לא נמצא',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'אימייל או סיסמה שגויים',
             'account-suspended' => 'חשבונך הושעה',
+            'account-inactive' => 'הפעלת החשבון שלך מחכה לאישור מנהל',
+            'email-not-verified' => 'אנא אמת את חשבון האימייל שלך תחילה.',
             'successful' => 'התחברת בהצלחה',
             'invalid-request' => 'בקשת התחברות לא חוקית',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'ההתחברות בוצעה בהצלחה.',
+            'token-required' => 'נדרש אסימון התחברות חברתית.',
+            'invalid-token' => 'אסימון ההתחברות החברתית אינו תקין או שפג תוקפו. אנא נסה שוב.',
+            'wrong-audience' => 'אסימון זה הונפק עבור אפליקציה אחרת.',
+            'email-required' => 'הספק לא שיתף כתובת דוא״ל. אנא הירשם באמצעות דוא״ל.',
+            'account-inactive' => 'הפעלת החשבון שלך מחכה לאישור מנהל',
+            'provider-not-supported' => 'ספק ההתחברות החברתית הזה אינו נתמך.',
+            'provider-disabled' => 'ספק ההתחברות החברתית הזה אינו מופעל.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'היסטוריית שינויים ב-API',
+                'view' => 'הצג',
                 'delete' => 'מחק היסטוריה',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'אינטגרציה',
+            'view' => 'הצג',
             'create' => 'צור אינטגרציה',
             'edit' => 'ערוך אינטגרציה',
             'delete' => 'בטל אסימון אינטגרציה',

@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'Prodotto non trovato',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Email o password non validi',
             'account-suspended' => 'Il tuo account è stato sospeso',
+            'account-inactive' => 'La tua attivazione richiede l’approvazione dell’amministratore',
+            'email-not-verified' => 'Verifica prima il tuo account email.',
             'successful' => 'Accesso effettuato con successo',
             'invalid-request' => 'Richiesta di accesso non valida',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Accesso effettuato con successo.',
+            'token-required' => 'È richiesto un token di accesso social.',
+            'invalid-token' => 'Il token di accesso social non è valido o è scaduto. Riprova.',
+            'wrong-audience' => 'Questo token è stato emesso per un’altra app.',
+            'email-required' => 'Il provider non ha condiviso un indirizzo email. Registrati con l’email.',
+            'account-inactive' => 'La tua attivazione richiede l’approvazione dell’amministratore',
+            'provider-not-supported' => 'Questo provider di accesso social non è supportato.',
+            'provider-disabled' => 'Questo provider di accesso social non è abilitato.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Cronologia modifiche API',
+                'view' => 'Visualizza',
                 'delete' => 'Elimina cronologia',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integrazione',
+            'view' => 'Visualizza',
             'create' => 'Crea integrazione',
             'edit' => 'Modifica integrazione',
             'delete' => 'Revoca token di integrazione',

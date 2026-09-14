@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'Producte no trobat',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Correu electrònic o contrasenya no vàlids',
             'account-suspended' => 'El vostre compte ha estat suspès',
+            'account-inactive' => 'La teva activació requereix l’aprovació de l’administrador.',
+            'email-not-verified' => 'Verifica primer el teu compte de correu electrònic.',
             'successful' => 'Heu iniciat la sessió correctament',
             'invalid-request' => 'Sol·licitud d\'inici de sessió no vàlida',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Sessió iniciada correctament.',
+            'token-required' => 'Cal un testimoni d’inici de sessió social.',
+            'invalid-token' => 'El testimoni d’inici de sessió social no és vàlid o ha caducat. Torneu-ho a provar.',
+            'wrong-audience' => 'Aquest testimoni es va emetre per a una altra aplicació.',
+            'email-required' => 'El proveïdor no ha compartit cap adreça de correu electrònic. Registreu-vos amb correu electrònic.',
+            'account-inactive' => 'La teva activació requereix l’aprovació de l’administrador.',
+            'provider-not-supported' => 'Aquest proveïdor d’inici de sessió social no és compatible.',
+            'provider-disabled' => 'Aquest proveïdor d’inici de sessió social no està activat.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Historial de canvis de l\'API',
+                'view' => 'Veure',
                 'delete' => 'Suprimeix l\'historial',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integració',
+            'view' => 'Veure',
             'create' => 'Crea integració',
             'edit' => 'Edita la integració',
             'delete' => 'Revoca el testimoni d\'integració',

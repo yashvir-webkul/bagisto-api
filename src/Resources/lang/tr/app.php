@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'Ürün bulunamadı',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Geçersiz e-posta veya parola',
             'account-suspended' => 'Hesabınız askıya alındı',
+            'account-inactive' => 'Hesabınızın aktif edilmesi için yönetici onayı gerekiyor.',
+            'email-not-verified' => 'Lütfen önce e-posta adresinizi doğrulayın.',
             'successful' => 'Başarıyla giriş yaptınız',
             'invalid-request' => 'Geçersiz giriş isteği',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Başarıyla giriş yapıldı.',
+            'token-required' => 'Sosyal giriş belirteci gerekli.',
+            'invalid-token' => 'Sosyal giriş belirteci geçersiz veya süresi dolmuş. Lütfen tekrar deneyin.',
+            'wrong-audience' => 'Bu belirteç başka bir uygulama için verildi.',
+            'email-required' => 'Sağlayıcı bir e-posta adresi paylaşmadı. Lütfen e-posta ile kaydolun.',
+            'account-inactive' => 'Hesabınızın aktif edilmesi için yönetici onayı gerekiyor.',
+            'provider-not-supported' => 'Bu sosyal giriş sağlayıcısı desteklenmiyor.',
+            'provider-disabled' => 'Bu sosyal giriş sağlayıcısı etkin değil.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'API Değişiklik Geçmişi',
+                'view' => 'Görüntüle',
                 'delete' => 'Geçmişi Sil',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Entegrasyon',
+            'view' => 'Görüntüle',
             'create' => 'Entegrasyon Oluştur',
             'edit' => 'Entegrasyonu Düzenle',
             'delete' => 'Entegrasyon Simgesini İptal Et',

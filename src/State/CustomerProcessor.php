@@ -12,14 +12,26 @@ use Webkul\BagistoApi\Exception\AuthenticationException;
 use Webkul\BagistoApi\Exception\InvalidInputException;
 use Webkul\BagistoApi\Models\Customer;
 use Webkul\BagistoApi\Validators\CustomerValidator;
+use Webkul\Customer\Repositories\CustomerGroupRepository;
 use Webkul\Customer\Repositories\CustomerRepository;
 
 class CustomerProcessor implements ProcessorInterface
 {
     public function __construct(
         protected CustomerRepository $customerRepository,
-        protected CustomerValidator $validator
+        protected CustomerValidator $validator,
+        protected CustomerGroupRepository $customerGroupRepository
     ) {}
+
+    /**
+     * Resolve the default customer group id the storefront assigns at registration.
+     */
+    private function defaultCustomerGroupId(): ?int
+    {
+        $code = core()->getConfigData('customer.settings.create_new_account_options.default_group') ?: 'general';
+
+        return $this->customerGroupRepository->findOneWhere(['code' => $code])?->id;
+    }
 
     /**
      * Process the customer creation or update operation.
@@ -59,11 +71,14 @@ class CustomerProcessor implements ProcessorInterface
                     'phone' => $data->phone,
                     'gender' => $data->gender,
                     'date_of_birth' => $data->date_of_birth,
-                    'status' => $data->status ?? 1,
-                    'is_verified' => $data->is_verified ?? 0,
-                    'is_suspended' => $data->is_suspended ?? 0,
+                    'status' => 1,
+                    'is_verified' => ! core()->getConfigData('customer.settings.email.verification'),
+                    'is_suspended' => 0,
                     'subscribed_to_news_letter' => $data->subscribed_to_news_letter ?? false,
                     'api_token' => Str::random(80),
+                    'token' => md5(uniqid(rand(), true)),
+                    'channel_id' => core()->getCurrentChannel()->id,
+                    'customer_group_id' => $this->defaultCustomerGroupId(),
                 ];
 
                 Event::dispatch('customer.registration.before');
@@ -86,8 +101,7 @@ class CustomerProcessor implements ProcessorInterface
                 $freshCustomer = Customer::findOrFail($customer->id);
 
                 /** Generate a Sanctum token so the customer can use it immediately after registration */
-                $sanctumToken = $freshCustomer->createToken('customer-registration')->plainTextToken;
-                $freshCustomer->token = $sanctumToken;
+                $freshCustomer->token = $freshCustomer->createToken('customer-registration')->plainTextToken;
 
                 return $freshCustomer;
             } elseif ($operation->getName() === 'update') {

@@ -13,9 +13,6 @@ use Webkul\Theme\Models\ThemeCustomization;
 
 /**
  * Theme detail — GET /api/admin/settings/themes/{id} + adminSettingsTheme query.
- *
- * Branches: GraphQL → the AdminSettingsTheme Eloquent model (translations
- * resolves as a connection); REST → the flat AdminSettingsThemeRestDto.
  */
 class AdminSettingsThemeItemProvider implements ProviderInterface
 {

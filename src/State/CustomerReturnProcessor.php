@@ -5,6 +5,7 @@ namespace Webkul\BagistoApi\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
@@ -15,9 +16,13 @@ use Webkul\BagistoApi\Exception\InvalidInputException;
 use Webkul\BagistoApi\Exception\ResourceNotFoundException;
 use Webkul\BagistoApi\Models\CustomerReturn;
 use Webkul\BagistoApi\State\Concerns\BuildsCustomerReturn;
+use Webkul\BagistoApi\State\Concerns\ResolvesReturnableItems;
+use Webkul\BagistoApi\State\Concerns\ResolvesReturnCustomFields;
 use Webkul\RMA\Enums\DefaultRMAResolution;
 use Webkul\RMA\Enums\DefaultRMAStatusEnum;
 use Webkul\RMA\Helpers\Helper as RMAHelper;
+use Webkul\RMA\Repositories\RMAAdditionalFieldRepository;
+use Webkul\RMA\Repositories\RMACustomFieldRepository;
 use Webkul\RMA\Repositories\RMAImageRepository;
 use Webkul\RMA\Repositories\RMAItemRepository;
 use Webkul\RMA\Repositories\RMAMessageRepository;
@@ -28,6 +33,13 @@ use Webkul\Shop\Mail\Customer\RMA\CustomerRMARequestNotification;
 class CustomerReturnProcessor implements ProcessorInterface
 {
     use BuildsCustomerReturn;
+    use ResolvesReturnableItems;
+    use ResolvesReturnCustomFields;
+
+    /**
+     * Package conditions the storefront form offers.
+     */
+    public const PACKAGE_CONDITIONS = ['open', 'packed'];
 
     public function __construct(
         private readonly ProcessorInterface $persistProcessor,
@@ -37,6 +49,8 @@ class CustomerReturnProcessor implements ProcessorInterface
         private readonly RMAMessageRepository $rmaMessageRepository,
         private readonly RMAHelper $rmaHelper,
         private readonly OrderRepository $orderRepository,
+        private readonly RMACustomFieldRepository $rmaCustomFieldRepository,
+        private readonly RMAAdditionalFieldRepository $rmaAdditionalFieldRepository,
     ) {}
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
@@ -49,30 +63,80 @@ class CustomerReturnProcessor implements ProcessorInterface
             return $this->handleAction($operation->getName(), self::basename($data->id));
         }
 
-        if ($data instanceof CustomerReturn && $operation instanceof Post) {
+        if ($operation instanceof Post) {
             $action = $this->actionFromTemplate($operation->getUriTemplate());
 
             if ($action !== null) {
                 return $this->handleAction($action, $uriVariables['id'] ?? null);
             }
 
-            $input = new CreateCustomerReturnInput;
-            $input->order_id = self::intOrNull(request()->input('order_id'));
-            $input->order_item_id = self::intOrNull(request()->input('order_item_id'));
-            $input->rma_qty = self::intOrNull(request()->input('rma_qty'));
-            $input->resolution_type = request()->input('resolution_type');
-            $input->rma_reason_id = self::intOrNull(request()->input('rma_reason_id'));
-            $input->information = request()->input('information');
-            $input->package_condition = request()->input('package_condition');
-            $input->variant = self::intOrNull(request()->input('variant'));
-            $input->agreement = filter_var(request()->input('agreement'), FILTER_VALIDATE_BOOLEAN);
-
-            $images = request()->hasFile('images') ? request()->file('images') : [];
-
-            return $this->handleCreate($input, $images);
+            /**
+             * The create operation is not deserialized, so that the same route
+             * accepts JSON and the multipart body carrying `images[]`.
+             */
+            return $this->handleCreate($this->inputFromRequest(), $this->imagesFromRequest());
         }
 
         return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
+    }
+
+    /**
+     * Build the create input from a REST request body (JSON or multipart).
+     */
+    private function inputFromRequest(): CreateCustomerReturnInput
+    {
+        $input = new CreateCustomerReturnInput;
+        $input->order_id = self::intOrNull(request()->input('order_id'));
+        $input->order_item_id = self::intOrNull(request()->input('order_item_id'));
+        $input->rma_qty = self::intOrNull(request()->input('rma_qty'));
+        $input->resolution_type = request()->input('resolution_type');
+        $input->rma_reason_id = self::intOrNull(request()->input('rma_reason_id'));
+        $input->information = request()->input('information');
+        $input->package_condition = request()->input('package_condition');
+        $input->variant = self::intOrNull(request()->input('variant'));
+        $input->agreement = filter_var(request()->input('agreement'), FILTER_VALIDATE_BOOLEAN);
+
+        $customAttributes = request()->input('custom_attributes', request()->input('customAttributes'));
+
+        if (is_string($customAttributes)) {
+            $customAttributes = json_decode($customAttributes, true);
+        }
+
+        $input->custom_attributes = is_array($customAttributes) ? $customAttributes : null;
+
+        return $input;
+    }
+
+    /**
+     * Uploaded evidence images, checked against the configured mime types.
+     *
+     * @return array<int,UploadedFile>
+     */
+    private function imagesFromRequest(): array
+    {
+        if (! request()->hasFile('images')) {
+            return [];
+        }
+
+        $images = request()->file('images');
+
+        $images = is_array($images) ? $images : [$images];
+
+        $allowed = array_filter(array_map(
+            'trim',
+            explode(',', (string) core()->getConfigData('sales.rma.setting.allowed_file_extension'))
+        ));
+
+        foreach ($images as $image) {
+            if (
+                ! empty($allowed)
+                && ! in_array($image->getMimeType(), $allowed, true)
+            ) {
+                throw new InvalidInputException(__('bagistoapi::app.graphql.return.invalid-image'));
+            }
+        }
+
+        return array_values($images);
     }
 
     private function handleCreate(CreateCustomerReturnInput $input, array $images): CustomerReturn
@@ -99,6 +163,18 @@ class CustomerReturnProcessor implements ProcessorInterface
             throw new InvalidInputException(__('bagistoapi::app.graphql.return.invalid-input'));
         }
 
+        if (
+            ! empty($input->package_condition)
+            && ! in_array($input->package_condition, self::PACKAGE_CONDITIONS, true)
+        ) {
+            throw new InvalidInputException(__('bagistoapi::app.graphql.return.invalid-package-condition'));
+        }
+
+        $customAttributes = $this->validateReturnCustomAttributes(
+            $input->custom_attributes ?? [],
+            $this->rmaCustomFieldRepository
+        );
+
         $order = $this->orderRepository->findOneWhere([
             'id' => $input->order_id,
             'customer_id' => $customer->id,
@@ -108,7 +184,7 @@ class CustomerReturnProcessor implements ProcessorInterface
             throw new InvalidInputException(__('bagistoapi::app.graphql.return.invalid-order'));
         }
 
-        $eligibleItem = $this->rmaHelper->getOrderItems($order->id)
+        $eligibleItem = $this->resolveReturnableItems($this->rmaHelper, $this->rmaItemRepository, (int) $order->id)
             ->firstWhere('order_item_id', (int) $input->order_item_id);
 
         if (! $eligibleItem) {
@@ -134,6 +210,7 @@ class CustomerReturnProcessor implements ProcessorInterface
             'information' => $input->information,
             'package_condition' => $input->package_condition,
             'variant' => $input->variant,
+            'customAttributes' => $customAttributes,
         ];
 
         Event::dispatch('customer.rma.request.create.before', $payload);
@@ -162,6 +239,10 @@ class CustomerReturnProcessor implements ProcessorInterface
 
         if (! empty($images)) {
             $this->rmaImageRepository->manageImages($images, $rma);
+        }
+
+        if (! empty($customAttributes)) {
+            $this->rmaAdditionalFieldRepository->createManyForRma($rma->id, $customAttributes);
         }
 
         Event::dispatch('customer.rma.request.create.after', $rma);

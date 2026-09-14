@@ -32,8 +32,8 @@ class CustomerReturnMessageProcessor implements ProcessorInterface
             return $this->handleSend($data->return_id, $data->message, null);
         }
 
-        if ($data instanceof CustomerReturnMessage && $operation instanceof Post) {
-            $returnId = request()->input('return_id');
+        if ($operation instanceof Post) {
+            $returnId = request()->input('return_id', request()->input('returnId'));
             $message = request()->input('message');
             $file = request()->hasFile('file') ? request()->file('file') : null;
 

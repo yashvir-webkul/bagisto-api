@@ -67,14 +67,30 @@ use Webkul\BagistoApi\State\CustomerReturnMessageProvider;
         ),
         new Post(
             uriTemplate: '/return-messages',
+            inputFormats: [
+                'json' => ['application/json'],
+                'multipart' => ['multipart/form-data'],
+            ],
+            deserialize: false,
             processor: CustomerReturnMessageProcessor::class,
             openapi: new Operation(
                 tags: ['Customer Return'],
                 summary: 'Send a message on a return request',
-                description: 'Adds a customer message to the RMA conversation. Body `{ return_id, message }`; an optional file can be attached via multipart `file` (REST only). Returns the created message.',
+                description: 'Sends a message on a return. Attach a file in `file`.',
                 requestBody: new RequestBody(
                     required: true,
                     content: new \ArrayObject([
+                        'multipart/form-data' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'required' => ['return_id', 'message'],
+                                'properties' => [
+                                    'return_id' => ['type' => 'integer', 'example' => 12],
+                                    'message' => ['type' => 'string', 'example' => 'Photo of the damaged zipper attached.'],
+                                    'file' => ['type' => 'string', 'format' => 'binary', 'description' => 'Attachment for this message.'],
+                                ],
+                            ],
+                        ],
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',

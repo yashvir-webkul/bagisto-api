@@ -8,7 +8,7 @@ use Webkul\RMA\Repositories\RMARepository;
 
 trait BuildsCustomerReturn
 {
-    public const RETURN_RELATIONS = ['status', 'item.orderItem', 'item.reason', 'images', 'order'];
+    public const RETURN_RELATIONS = ['status', 'item.orderItem', 'item.reason', 'images', 'order', 'additionalFields.customField'];
 
     protected function buildCustomerReturn($rma, bool $detail, RMARepository $rmaRepository): CustomerReturn
     {
@@ -24,6 +24,7 @@ trait BuildsCustomerReturn
         $r->information = $rma->information;
         $r->messages_count = (int) $rma->messages()->count();
         $r->item = $this->buildReturnItem($rma->item);
+        $r->custom_attributes = $this->buildReturnCustomAttributes($rma);
         $r->created_at = $rma->created_at?->toIso8601String();
         $r->updated_at = $rma->updated_at?->toIso8601String();
 
@@ -39,6 +40,22 @@ trait BuildsCustomerReturn
         }
 
         return $r;
+    }
+
+    /**
+     * Answers to the return form's custom fields, as the storefront view shows them.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    protected function buildReturnCustomAttributes($rma): array
+    {
+        return $rma->additionalFields->map(fn ($field) => [
+            'field_id' => $field->rma_custom_field_id !== null ? (int) $field->rma_custom_field_id : null,
+            'code' => $field->customField?->code,
+            'label' => $field->customField?->label,
+            'type' => $field->customField?->type,
+            'value' => $field->value,
+        ])->values()->all();
     }
 
     protected function buildReturnItem($item): ?array

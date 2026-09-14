@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'Product niet gevonden',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Ongeldig e-mailadres of wachtwoord',
             'account-suspended' => 'Uw account is opgeschort',
+            'account-inactive' => 'Uw activering wacht op goedkeuring van de beheerder',
+            'email-not-verified' => 'Verifieer eerst uw e-mailaccount.',
             'successful' => 'U bent succesvol ingelogd',
             'invalid-request' => 'Ongeldig inlogverzoek',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Succesvol aangemeld.',
+            'token-required' => 'Een social login-token is vereist.',
+            'invalid-token' => 'Het social login-token is ongeldig of verlopen. Probeer het opnieuw.',
+            'wrong-audience' => 'Dit token is uitgegeven voor een andere app.',
+            'email-required' => 'De provider heeft geen e-mailadres gedeeld. Registreer u met een e-mailadres.',
+            'account-inactive' => 'Uw activering wacht op goedkeuring van de beheerder',
+            'provider-not-supported' => 'Deze social login-provider wordt niet ondersteund.',
+            'provider-disabled' => 'Deze social login-provider is niet ingeschakeld.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'Geschiedenis van API-wijzigingen',
+                'view' => 'Bekijken',
                 'delete' => 'Geschiedenis verwijderen',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Integratie',
+            'view' => 'Bekijken',
             'create' => 'Integratie creëren',
             'edit' => 'Integratie bewerken',
             'delete' => 'Integratietoken intrekken',

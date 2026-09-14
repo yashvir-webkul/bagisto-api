@@ -102,6 +102,7 @@ return [
         ],
 
         'product' => [
+            'not-found' => 'Продукт не найден',
             'not-found-with-sku' => 'No product found with SKU',
             'not-found-with-url-key' => 'No product found with URL key',
             'parameters-required' => 'At least one of the following parameters must be provided: "sku", "id", "urlKey"',
@@ -130,8 +131,21 @@ return [
         'login' => [
             'invalid-credentials' => 'Недействительный адрес электронной почты или пароль',
             'account-suspended' => 'Ваша учетная запись приостановлена',
+            'account-inactive' => 'Ваш аккаунт ожидает одобрения администратора',
+            'email-not-verified' => 'Сначала подтвердите свой адрес электронной почты.',
             'successful' => 'Вы успешно вошли в систему',
             'invalid-request' => 'Недействительный запрос на вход',
+        ],
+
+        'social-login' => [
+            'signed-in' => 'Вход выполнен успешно.',
+            'token-required' => 'Требуется токен социального входа.',
+            'invalid-token' => 'Токен социального входа недействителен или истёк. Пожалуйста, попробуйте снова.',
+            'wrong-audience' => 'Этот токен был выдан для другого приложения.',
+            'email-required' => 'Провайдер не предоставил адрес электронной почты. Зарегистрируйтесь по электронной почте.',
+            'account-inactive' => 'Ваш аккаунт ожидает одобрения администратора',
+            'provider-not-supported' => 'Этот провайдер социального входа не поддерживается.',
+            'provider-disabled' => 'Этот провайдер социального входа не включён.',
         ],
 
         'checkout' => [
@@ -229,6 +243,7 @@ return [
 
             'acl' => [
                 'title' => 'История изменений API',
+                'view' => 'Просмотр',
                 'delete' => 'Удалить историю',
             ],
 
@@ -289,6 +304,7 @@ return [
 
         'acl' => [
             'title' => 'Интеграция',
+            'view' => 'Просмотр',
             'create' => 'Создать интеграцию',
             'edit' => 'Редактировать интеграцию',
             'delete' => 'Отозвать токен интеграции',
